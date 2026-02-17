@@ -1,0 +1,62 @@
+object MainForm_GUI: TMainForm_GUI
+  Left = 350
+  Height = 500
+  Top = 200
+  Width = 600
+  Caption = 'IRConvolverPro - GUI Edition'
+  ClientHeight = 500
+  ClientWidth = 600
+  LCLVersion = '2.2.0.4'
+  object EdSrc: TFileNameEdit
+    Left = 20
+    Height = 23
+    Top = 40
+    Width = 560
+    Filter = 'WAV Files|*.wav'
+    Caption = 'Select Source File'
+  end
+  object EdIR: TFileNameEdit
+    Left = 20
+    Height = 23
+    Top = 90
+    Width = 560
+    Filter = 'WAV Files|*.wav'
+    Caption = 'Select Impulse Response (Optional)'
+  end
+  object MemoLog: TMemo
+    Left = 20
+    Height = 200
+    Top = 280
+    Width = 560
+    ReadOnly = True
+    ScrollBars = ssAutoVertical
+  end
+  object BtnRun: TButton
+    Left = 450
+    Height = 40
+    Top = 220
+    Width = 130
+    Caption = 'PROCESS IR'
+    OnClick = BtnRunClick
+  end
+  object SpinLen: TSpinEdit
+    Left = 20
+    Height = 23
+    Top = 220
+    Width = 100
+    MaxValue = 65536
+  end
+  object ComboBits: TComboBox
+    Left = 140
+    Height = 23
+    Top = 220
+    Width = 100
+    ItemHeight = 15
+    Items.Strings = (
+      '16'
+      '24'
+      '32'
+    )
+    Text = '24'
+  end
+end

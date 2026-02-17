@@ -1,0 +1,41 @@
+IRConvolverPro v1.0 - Quick Start Guide
+IRConvolverPro is a high-performance command-line utility for processing and creating professional Impulse Responses (IRs). It combines industry-standard algorithms with a mastering-grade DSP engine.
+1. Installation
+
+    Extract the ZIP archive to a folder of your choice.
+    Ensure libpffft.dll and r8bsrc.dll are in the same folder as IRConvolverPro.exe.
+    Optional: Place finalcd.exe in the folder for ultra-high-end resampling.
+
+2. Basic Usage (Single File)
+To convolve an audio file (e.g., a room recording) with a cabinet IR:
+bash
+
+IRConvolverPro.exe -i1 "my_recording.wav" -i2 "cab_ir.wav" -o "output.wav" -b 24
+
+Verwende Code mit Vorsicht.
+3. Batch Processing (Entire Folders)
+To process a whole directory of IRs with a master cabinet IR:
+bash
+
+IRConvolverPro.exe -i1 ".\Raw_IRs\" -i2 "master_cab.wav" -o ".\Processed_IRs\" -b 24
+
+Verwende Code mit Vorsicht.
+4. Professional Mastering Options
+
+    --min: Minimum Phase Transform. Aligns the impulse to Sample 0 (perfect for time-aligning multiple IRs).
+    --fi 2 / --fo 10: Applies a 2ms Fade-In and 10ms Fade-Out to prevent clicks.
+    -t -90: Trim Silence below -90 dB to optimize file length.
+    -g -0.5: Applies a Gain adjustment of -0.5 dB for safety headroom.
+    --filter gentle: Uses a Gentle SRC filter (optimized for impulse response integrity).
+
+5. Configuration
+You can set your default Artist name and Studio comments in the IRConvolverPro.ini file. These values will be embedded as metadata in every exported WAV file.
+6. Technical Specifications
+
+    FFT Engine: PFFFT (SIMD Accelerated)
+    Resampling: r8brain-free-src (High-End Sinc Interpolation)
+    Dither: 2nd-Order Psychoacoustic Noise Shaping (Mastering Grade)
+    Precision: Internal 32-bit Floating Point
+
+License: Licensed under the BSD 3-Clause License.
+Credits: Includes PFFFT by Julien Pommier and r8brain-free-src by Aleksey Vaneev.

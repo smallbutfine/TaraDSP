@@ -1,0 +1,43 @@
+Project Manifesto: IRConvolverPro (High-Performance IR Toolkit)
+1. Project Overview
+IRConvolverPro is a professional-grade, command-line driven audio utility specifically designed for the creation, processing, and management of Impulse Responses (IRs). Developed in Free Pascal, it bridges the gap between simple convolution scripts and high-end audio engineering software.
+2. Core Architecture & Performance
+
+    Engine: Powered by the PFFFT (Pretty Fast FFT) library, ensuring
+    complexity for convolutions.
+    Precision: All internal processing is performed in the 32-bit IEEE Float domain to maintain maximum dynamic range and prevent rounding errors.
+    SIMD Optimization: Supports SSE/AVX2 instruction sets (via compiler flags) for lightning-fast batch processing of large IR libraries.
+
+3. Professional Audio Features
+3.1 Advanced DSP Suite
+
+    Zero-Latency Alignment: Includes a Minimum Phase Transform (via Real Cepstrum) to align various IRs to Sample 0 while preserving frequency response.
+    Surgical Shaping: Integrated Biquad Filters (High-Pass & Low-Pass) with Butterworth characteristics (12dB/octave).
+    Dynamic Control: Automatic Peak Normalization, RMS-based Auto-Gain Compensation (AGC), and manual Gain adjustment in dB.
+    Polarity & Time: Supports Phase Inversion (-p) and Time Inversion (Reverse Reverb effects).
+
+3.2 Signal Integrity
+
+    Dithering: High-quality TPDF (Triangular Probability Density Function) dither to eliminate quantization distortion.
+    Noise Shaping: First-order High-Pass Error Diffusion to shift quantization noise into less audible frequency ranges when downsampling to 16-bit.
+    Fading & Trimming: Sample-accurate Silence Trimming with a dB-threshold and adjustable Linear Fade-In/Out to prevent digital clicks.
+
+4. Hardware & Software Compatibility
+
+    Clean RIFF Export: Implements WAVE-Chunk-Stripping to produce "lean" files, ensuring 100% compatibility with hardware modelers (Helix, Kemper, Quad Cortex, etc.).
+    Sampler Integration: Support for Loop-Point Tagging (smpl chunk) and MIDI Unity Note embedding.
+    Metadata Branding: Professional branding via LIST INFO chunks (Title, Artist, Comment) for DAW and OS integration.
+    Format Suite: Seamless conversion between 16-bit PCM, 24-bit PCM, and 32-bit IEEE Float.
+
+5. Workflow & Automation
+
+    Batch Processing: Automatically process entire directories with a single command.
+    Configuration: Persistent settings via INI-file support, allowing for studio-wide default configurations (Author, Bit-Depth, etc.).
+    Diagnostics: Detailed WAVE-Header Analysis and ASCII-Art Waveform Preview for instant visual feedback in the terminal.
+    Logging: High-resolution performance monitoring via TStopwatch to track throughput and processing times.
+
+6. Licensing & Legal
+
+    License: Distributed under the BSD 3-Clause License.
+    Compliance: Fully compatible with the PFFFT (BSD-like) license.
+    Transparency: No hidden telemetry or proprietary dependencies; 100% open-source Pascal code.
