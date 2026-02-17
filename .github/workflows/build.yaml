@@ -1,1 +1,89 @@
-{\rtf1}
+name: Multi-Platform Build IRConvolverPro
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        # Wir bauen für alle drei großen Betriebssysteme
+        os: [windows-latest, ubuntu-latest, macos-latest]
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Lazarus
+      uses: gcarreno/setup-lazarus@v3
+      with:
+        lazarus-version: 'stable'
+
+    - name: Install Build Essentials (Linux/macOS)
+      if: runner.os != 'Windows'
+      run: |
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          sudo apt-get update
+          sudo apt-get install -y build-essential libgtk2.0-dev libsoxr-dev
+        fi
+      shell: bash
+
+    - name: Compile Static C-Backend (PFFFT)
+      # Erzeugt .obj auf Windows und .o auf Unix
+      run: |
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          gcc -O3 -c pffft.c -o pffft.obj -msse -mfpmath=sse
+        else
+          gcc -O3 -fPIC -c pffft.c -o pffft.o -msse -mfpmath=sse
+        fi
+      shell: bash
+
+    - name: Build CLI & GUI Editions
+      # lazbuild erkennt automatisch das OS und linkt die passende .obj/.o
+      run: |
+        lazbuild --build-mode=Release IRConvolverPro-CLI.lpi
+        lazbuild --build-mode=Release IRConvolverPro-GUI.lpi
+
+    - name: Prepare Artifacts
+      shell: bash
+      run: |
+        mkdir dist
+        # Kopiere Binaries (mit/ohne .exe Endung)
+        cp IRConvolverPro-CLI* dist/ 2>/dev/null || true
+        cp IRConvolverPro-GUI* dist/ 2>/dev/null || true
+        cp settings.ini dist/ 2>/dev/null || true
+        cp LICENSE dist/ 2>/dev/null || true
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: IRConvolverPro-${{ runner.os }}
+        path: dist/
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Package and Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: artifacts/**/*
+          name: IRConvolverPro Release ${{ github.ref_name }}
+          body: "Multi-platform binaries for Windows, Linux, and macOS."
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
