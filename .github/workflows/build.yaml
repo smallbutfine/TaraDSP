@@ -35,7 +35,7 @@ jobs:
       shell: bash
 
     - name: Install GCC
-      uses: egor-tensin/setup-gcc@v2
+      uses: egor-tensin/setup-mingw
 
     - name: Compile Static C-Backend (PFFFT)
       # Erzeugt .obj auf Windows und .o auf Unix
