@@ -34,9 +34,11 @@ jobs:
         fi
       shell: bash
 
-    - name: Install GCC
-      uses: egor-tensin/setup-mingw
-
+    - name: Set up MinGW
+      uses: egor-tensin/setup-mingw@v3
+      with:
+      platform: x64
+      
     - name: Compile Static C-Backend (PFFFT)
       # Erzeugt .obj auf Windows und .o auf Unix
       run: |
