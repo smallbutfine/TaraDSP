@@ -21,6 +21,8 @@ jobs:
           - os: macos-latest
             flags: "-O3  -fPIC"
             binary_name: "pffft.o"
+    runs-on: ${{ matrix.os }}
+
 
     steps:
     - name: Checkout Repository
