@@ -51,8 +51,8 @@ jobs:
 
     - name: Build CLI & GUI Editions
       if: ${{ matrix.os == 'windows-latest' }}
-      run: lazbuild -B --bm=Release "/IRConvolverPro-CLI.lpi"
-           lazbuild -B --bm=Release "/IRConvolverPro-GUI.lpi"
+      run: lazbuild -B --bm=Release "IRConvolverPro-CLI.lpi"
+           lazbuild -B --bm=Release "IRConvolverPro-GUI.lpi"
       
     - name: Prepare Artifacts
       shell: bash
