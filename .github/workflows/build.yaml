@@ -50,7 +50,7 @@ jobs:
       shell: bash
 
     - name: Build CLI & GUI Editions
-      if: ${{ matrix.operating-system == 'windows-latest' }}
+      if: ${{ matrix.os == 'windows-latest' }}
       run: lazbuild -B --bm=Release "src/IRConvolverPro-CLI.lpi"
            lazbuild -B --bm=Release "src/IRConvolverPro-GUI.lpi"
       
