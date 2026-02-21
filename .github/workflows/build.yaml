@@ -9,20 +9,12 @@ on:
 
 jobs:
   build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        include:
-          - os: ubuntu-latest
-            flags: "-O3  -fPIC  -msse -mfpmath=sse"
-            binary_name: "pffft.o"
-          - os: windows-latest
-            flags: "-O3  -msse -mfpmath=sse"
-            binary_name: "pffft.obj"
-          - os: macos-latest
-            flags: "-O3  -fPIC"
-            binary_name: "pffft.o"
-    runs-on: ${{ matrix.os }}
-
+        # Wir bauen für alle drei großen Betriebssysteme
+        os: [windows-latest, ubuntu-latest, macos-latest]
 
     steps:
     - name: Checkout Repository
@@ -42,19 +34,24 @@ jobs:
         fi
       shell: bash
     - name: Set up MinGW
-      if: matrix.os == 'windows-latest'
       uses: egor-tensin/setup-mingw@v3
       with:
         platform: x64
-        
+      
     - name: Compile Static C-Backend (PFFFT)
       # Erzeugt .obj auf Windows und .o auf Unix
-      run: gcc ${{ matrix.flags }} pffft.c -o ${{ matrix.binary_name }}
+      run: |
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          gcc -O3 -c pffft.c -o pffft.obj -msse -mfpmath=sse
+        else
+          gcc -O3 -fPIC -c pffft.c -o pffft.o
+        fi
+      shell: bash
 
     - name: Build CLI & GUI Editions
       if: ${{ matrix.operating-system == 'windows-latest' }}
       run: lazbuild -B --bm=Release "src/IRConvolverPro-CLI.lpi"
-           lazbuild -B --bm=Release "src/IRConvolverPro-GUI.lpi"
+      run: lazbuild -B --bm=Release "src/IRConvolverPro-GUI.lpi"
       
     - name: Prepare Artifacts
       shell: bash
