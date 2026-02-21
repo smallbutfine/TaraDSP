@@ -44,9 +44,11 @@ jobs:
       run: |
         if [ "$RUNNER_OS" == "Windows" ]; then
           gcc -O3 -c pffft.c -o pffft.obj -msse -mfpmath=sse
-        else
+        elseif [ "$RUNNER_OS" == "Linux" ]; then
           gcc -O3 -fPIC -c pffft.c -o pffft.o -msse -mfpmath=sse
-        fi
+        else
+           gcc -O3 -fPIC -c pffft.c -o pffft.o 
+       fi
       shell: bash
 
     - name: Build CLI & GUI Editions
