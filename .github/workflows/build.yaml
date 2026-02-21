@@ -34,7 +34,7 @@ jobs:
         fi
       shell: bash
     - name: Set up MinGW
-      if: runner.os != 'Windows'
+      if: runner.os == 'Windows'
       uses: egor-tensin/setup-mingw@v3
       with:
         platform: x64
