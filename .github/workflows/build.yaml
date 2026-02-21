@@ -33,11 +33,10 @@ jobs:
           sudo apt-get install -y build-essential libgtk2.0-dev libsoxr-dev
         fi
       shell: bash
-
     - name: Set up MinGW
       uses: egor-tensin/setup-mingw@v3
       with:
-      platform: x64
+        platform: x64
       
     - name: Compile Static C-Backend (PFFFT)
       # Erzeugt .obj auf Windows und .o auf Unix
