@@ -49,11 +49,10 @@ jobs:
       shell: bash
 
     - name: Build CLI & GUI Editions
-      # lazbuild erkennt automatisch das OS und linkt die passende .obj/.o
-      run: |
-        lazbuild --build-mode=Release IRConvolverPro-CLI.lpi
-        lazbuild --build-mode=Release IRConvolverPro-GUI.lpi
-
+      if: ${{ matrix.operating-system == 'windows-latest' }}
+      run: lazbuild -B --bm=Release "src/IRConvolverPro-CLI.lpi"
+      run: lazbuild -B --bm=Release "src/IRConvolverPro-GUI.lpi"
+      
     - name: Prepare Artifacts
       shell: bash
       run: |
