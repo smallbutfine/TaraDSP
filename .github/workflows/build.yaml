@@ -56,10 +56,13 @@ jobs:
     - name: Build Application (Linux & macOS)
       if: matrix.os != 'windows-latest'
       run: |
-        # Verrucht dem Script zwingend Ausführungsrechte (Behebt den Browser-Git-Bug)
+        # Entfernt versteckte Windows-Zeilenumbrüche (\r), falls im Browser editiert wurde
+        sed -i 's/\r$//' build.sh
+        
+        # Gibt dem Skript Ausführungsrechte
         chmod +x build.sh
         
-        # Führt das Script nun sicher aus
+        # Führt das Skript aus
         ./build.sh
       shell: bash
            
