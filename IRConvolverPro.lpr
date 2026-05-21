@@ -1,61 +1,5 @@
 
-{$MODE OBJFPC}{$H+}
-
-uses
-  {$IFDEF UNIX}cthreads,{$ENDIF}
-  SysUtils, Classes, Math, CustApp, Diagnostics, pffft, In{
-  IRConvolverPro - Mastering-Grade FFT Impulse Response Toolkit
-  Copyright (c) 2024, [Your Name/Organization]
-  Licensed under the BSD 3-Clause License.
-
-  DEPENDENCIES (64-bit DLLs in app folder):
-  - libpffft.dll (FFT Engine)
-  - libsoxr.dll  (High-End Resampling Engine)
-  - r8bsrc.dll   (Alternative Resampling Engine)
-}
-
-program IRConvolverPro;
-iFiles;
-
-const
-  LIB_SOXR = 'libsoxr.dll';
-  R8B_DLL  = 'r8bsrc.dll';
-
-type
-  TFloatBuffer  = array of Single;
-  TAudioData    = array of TFloatBuffer;
-  TErrorHistory = array[0..1] of Single; 
-  TFilterMode   = (fmBrickwall, fmGentle);
-
-  TWavHeader = packed record
-    RIFFID: array[0..3] of Char; Size: LongInt; WavID: array[0..3] of Char;
-    FmtID: array[0..3] of Char; FmtSize: LongInt; FormatTag: Word;
-    Channels: Word; SampleRate: LongInt; BytesPerSec: LongInt;
-    BlockAlign: Word; BitsPerSample: Word; DataID: array[0..3] of Char;
-    DataSize: LongInt;
-  end;
-
-  TIRConvolverApp = class(TCustomApplication)
-  private
-    FErrorMem: array of TErrorHistory;
-    procedure LoadConfig;
-    
-    { I/O }
-    function  LoadWav(const FileName: string; out SR: Integer): TAudioData;
-    procedure SaveWav(const FileName: string; const Data: TAudioData; SR, Bits: Integer; ForceMono: Boolean);
-    
-    { Mastering Engine }
-    procedure ResetMasteringEngine(Channels: Integer);
-    function  ApplyMasteringDither(Sample: Single; Chan: Integer; Amount: Single): Single;
-    
-    { DSP Core }
-    function  ConvolveFFT(const Sig, Ker: TFloatBuffer): TFloatBuffer;
-    function  ResampleSoxr(const Data: TAudioData; InSR, OutSR: Integer): TAudioData;
-    function  ConvertToMinimumPhase(const Data: TFloatBuffer): TFloatBuffer;
-    procedure Normalize(var Data: TAudioData);
-    procedure ApplyFades(var Data: TAudioData; SR: Integer; InMS, OutMS: Single);
-    procedure TrimSilence(var Data: TAudioData; ThresholdDB: Single);
-    {
+{
   IRConvolverPro - Mastering-Grade FFT Impulse Response Toolkit
   Copyright (c) 2024, [Your Name/Organization]
   Licensed under the BSD 3-Clause License.
@@ -67,17 +11,17 @@ program IRConvolverPro;
 
 uses
   {$IFDEF UNIX}cthreads,{$ENDIF}
-  SysUtils, Classes, Math, CustApp, Diagnostics, pffft, IniFiles;
+  SysUtils, Classes, Math, CustApp, Diagnostics, libpffft, IniFiles;
 
 const
-  // Plattformunabhängige Bibliotheksnamen für den Linker
+  // Plattformunabhängige Bibliotheksnamen für den Linker (Resampling)
   {$IFDEF WINDOWS}
   LIB_SOXR = 'libsoxr.dll';
   {$ELSE}
     {$IFDEF DARWIN}
     LIB_SOXR = 'libsoxr.dylib';
     {$ELSE}
-    LIB_SOXR = 'libsoxr.so.0'; // Standard-Target unter Ubuntu/Debian
+    LIB_SOXR = 'libsoxr.so.0'; // Standard unter Ubuntu/Debian
     {$ENDIF}
   {$ENDIF}
 
@@ -126,13 +70,13 @@ type
     constructor Create(AOwner: TComponent); override;
   end;
 
-{ --- External Library Bindings --- }
+{ --- Externe Bibliothekseinbindung (libsoxr) --- }
 
 function soxr_create(in_rate, out_rate: Double; num_chans: Cardinal; error: PInteger; io_spec, q_spec, runtime_spec: Pointer): Pointer; cdecl; external LIB_SOXR;
 function soxr_process(resampler: Pointer; in_buf: PSingle; in_len: Cardinal; done_in: PCardinal; out_buf: PSingle; out_len: Cardinal; done_out: PCardinal): Integer; cdecl; external LIB_SOXR;
 procedure soxr_delete(resampler: Pointer); cdecl; external LIB_SOXR;
 
-{ --- Implementation --- }
+{ --- Implementierung --- }
 
 constructor TIRConvolverApp.Create(AOwner: TComponent);
 begin
@@ -187,9 +131,11 @@ var
   InLen, OutLen, DoneIn, DoneOut: Cardinal;
 begin
   if InSR = OutSR then begin
-    Result := Data; // Fix für uninitialisiertes Result
+    Result := Data; 
     Exit;
   end;
+  if Length(Data) = 0 then Exit(nil);
+  
   SetLength(Result, Length(Data));
   InLen := Length(Data[0]);
   OutLen := Round(InLen * (OutSR / InSR)) + 1000;
@@ -241,12 +187,8 @@ end;
 
 function TIRConvolverApp.LoadWav(const FileName: string; out SR: Integer): TAudioData;
 var 
-  FS: TFileStream; 
-  H: TWavHeader; 
-  i, c, Samples: Integer; 
-  s16: SmallInt; 
-  b24: array[0..2] of Byte; 
-  s32: LongInt;
+  FS: TFileStream; H: TWavHeader; i, c, Samples: Integer; s16: SmallInt; 
+  b24: array[0..2] of Byte; s32: LongInt;
 begin
   FS := TFileStream.Create(FileName, fmOpenRead or fmShareDenyWrite);
   try
@@ -265,24 +207,19 @@ begin
           Result[c][i] := s16 / 32768.0; 
         end
         else begin 
-          // Korrektes 24-Bit Vorzeichen-Handling (Sign Extension)
           FS.Read(b24, 3); 
+          // 24-Bit Shift mit Sign Extension für korrekte Vorzeichen im Pascal-LongInt
           s32 := (b24[0] shl 8) or (b24[1] shl 16) or (b24[2] shl 24);
           Result[c][i] := s32 / 2147483648.0; 
         end;
       end;
-  finally 
-    FS.Free; 
-  end;
+  finally FS.Free; end;
 end;
+
 procedure TIRConvolverApp.SaveWav(const FileName: string; const Data: TAudioData; SR, Bits: Integer; ForceMono: Boolean);
 var 
-  FS: TFileStream; 
-  H: TWavHeader; 
-  i, c, OutChans: Integer; 
-  s16: SmallInt; 
-  s32: LongInt; 
-  b24: array[0..2] of Byte;
+  FS: TFileStream; H: TWavHeader; i, c, OutChans: Integer; s16: SmallInt; 
+  s32: LongInt; b24: array[0..2] of Byte;
 begin
   if (Length(Data) = 0) or (Length(Data[0]) = 0) then Exit;
 
@@ -304,7 +241,6 @@ begin
           s16 := Round(ApplyMasteringDither(Data[c][i], c, 1.0) * 32767); 
           FS.Write(s16, 2);
         end else begin
-          // Korrekte Zuweisung in das b24 Byte-Array
           s32 := Round(EnsureRange(Data[c][i], -1.0, 1.0) * 8388607);
           b24[0] := s32 and $FF; 
           b24[1] := (s32 shr 8) and $FF; 
@@ -313,9 +249,7 @@ begin
         end;
       end;
     if GetOptionValue('artist') <> '' then WriteInfoChunk(FS, 'IART', GetOptionValue('artist'));
-  finally 
-    FS.Free; 
-  end;
+  finally FS.Free; end;
 end;
 
 { --- Helpers & DSP Utility --- }
@@ -324,7 +258,7 @@ procedure TIRConvolverApp.WriteInfoChunk(Stream: TStream; const ID: string; cons
 var Len: LongInt; Zero: Char = #0;
 begin
   if Length(Value) = 0 then Exit;
-  Stream.Write(ID[1], 4); Len := Length(Value) + 1; Stream.Write(Len, 4);
+  Stream.Write(ID, 4); Len := Length(Value) + 1; Stream.Write(Len, 4);
   Stream.Write(Value[1], Length(Value)); Stream.Write(Zero, 1);
   if (Len mod 2 <> 0) then Stream.Write(Zero, 1);
 end;
@@ -338,21 +272,18 @@ end;
 
 function TIRConvolverApp.ConvertToMinimumPhase(const Data: TFloatBuffer): TFloatBuffer;
 begin
-  { Platzhalter-Logik beibehalten }
   Result := Data;
 end;
 
 procedure TIRConvolverApp.ApplyFades(var Data: TAudioData; SR: Integer; InMS, OutMS: Single);
 begin
-  { Notwendiger Stub für die Klassendeklaration }
 end;
 
 procedure TIRConvolverApp.TrimSilence(var Data: TAudioData; ThresholdDB: Single);
 begin
-  { Notwendiger Stub für die Klassendeklaration }
 end;
 
-{ --- Main Execution --- }
+{ --- Hauptprogramm ausführen --- }
 
 procedure TIRConvolverApp.DoRun;
 var SW: TStopwatch; f1, f2, fOut: string; A1, A2, Res: TAudioData; SR1, SR2, bOut, c, TargetSR: Integer;
@@ -371,7 +302,7 @@ begin
     if (A1 = nil) or (A2 = nil) then 
       raise Exception.Create('Fehler beim Laden der WAV-Dateien oder ungültiges Format.');
 
-    { Korrigierte Resampling-Aufruflogik }
+    { Resampling Logic }
     if (TargetSR > 0) then begin
       if SR1 <> TargetSR then A1 := ResampleSoxr(A1, SR1, TargetSR);
       if SR2 <> TargetSR then A2 := ResampleSoxr(A2, SR2, TargetSR);
@@ -410,4 +341,3 @@ end;
 begin
   with TIRConvolverApp.Create(nil) do try Run; finally Free; end;
 end.
-
