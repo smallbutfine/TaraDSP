@@ -1,4 +1,9 @@
-{
+
+{$MODE OBJFPC}{$H+}
+
+uses
+  {$IFDEF UNIX}cthreads,{$ENDIF}
+  SysUtils, Classes, Math, CustApp, Diagnostics, pffft, In{
   IRConvolverPro - Mastering-Grade FFT Impulse Response Toolkit
   Copyright (c) 2024, [Your Name/Organization]
   Licensed under the BSD 3-Clause License.
@@ -10,6 +15,53 @@
 }
 
 program IRConvolverPro;
+iFiles;
+
+const
+  LIB_SOXR = 'libsoxr.dll';
+  R8B_DLL  = 'r8bsrc.dll';
+
+type
+  TFloatBuffer  = array of Single;
+  TAudioData    = array of TFloatBuffer;
+  TErrorHistory = array[0..1] of Single; 
+  TFilterMode   = (fmBrickwall, fmGentle);
+
+  TWavHeader = packed record
+    RIFFID: array[0..3] of Char; Size: LongInt; WavID: array[0..3] of Char;
+    FmtID: array[0..3] of Char; FmtSize: LongInt; FormatTag: Word;
+    Channels: Word; SampleRate: LongInt; BytesPerSec: LongInt;
+    BlockAlign: Word; BitsPerSample: Word; DataID: array[0..3] of Char;
+    DataSize: LongInt;
+  end;
+
+  TIRConvolverApp = class(TCustomApplication)
+  private
+    FErrorMem: array of TErrorHistory;
+    procedure LoadConfig;
+    
+    { I/O }
+    function  LoadWav(const FileName: string; out SR: Integer): TAudioData;
+    procedure SaveWav(const FileName: string; const Data: TAudioData; SR, Bits: Integer; ForceMono: Boolean);
+    
+    { Mastering Engine }
+    procedure ResetMasteringEngine(Channels: Integer);
+    function  ApplyMasteringDither(Sample: Single; Chan: Integer; Amount: Single): Single;
+    
+    { DSP Core }
+    function  ConvolveFFT(const Sig, Ker: TFloatBuffer): TFloatBuffer;
+    function  ResampleSoxr(const Data: TAudioData; InSR, OutSR: Integer): TAudioData;
+    function  ConvertToMinimumPhase(const Data: TFloatBuffer): TFloatBuffer;
+    procedure Normalize(var Data: TAudioData);
+    procedure ApplyFades(var Data: TAudioData; SR: Integer; InMS, OutMS: Single);
+    procedure TrimSilence(var Data: TAudioData; ThresholdDB: Single);
+    {
+  IRConvolverPro - Mastering-Grade FFT Impulse Response Toolkit
+  Copyright (c) 2024, [Your Name/Organization]
+  Licensed under the BSD 3-Clause License.
+}
+
+program IRConvolverPro;
 
 {$MODE OBJFPC}{$H+}
 
@@ -18,8 +70,16 @@ uses
   SysUtils, Classes, Math, CustApp, Diagnostics, pffft, IniFiles;
 
 const
+  // Plattformunabhängige Bibliotheksnamen für den Linker
+  {$IFDEF WINDOWS}
   LIB_SOXR = 'libsoxr.dll';
-  R8B_DLL  = 'r8bsrc.dll';
+  {$ELSE}
+    {$IFDEF DARWIN}
+    LIB_SOXR = 'libsoxr.dylib';
+    {$ELSE}
+    LIB_SOXR = 'libsoxr.so.0'; // Standard-Target unter Ubuntu/Debian
+    {$ENDIF}
+  {$ENDIF}
 
 type
   TFloatBuffer  = array of Single;
@@ -66,7 +126,7 @@ type
     constructor Create(AOwner: TComponent); override;
   end;
 
-{ --- External Library Bindings (64-bit) --- }
+{ --- External Library Bindings --- }
 
 function soxr_create(in_rate, out_rate: Double; num_chans: Cardinal; error: PInteger; io_spec, q_spec, runtime_spec: Pointer): Pointer; cdecl; external LIB_SOXR;
 function soxr_process(resampler: Pointer; in_buf: PSingle; in_len: Cardinal; done_in: PCardinal; out_buf: PSingle; out_len: Cardinal; done_out: PCardinal): Integer; cdecl; external LIB_SOXR;
@@ -105,10 +165,9 @@ function TIRConvolverApp.ApplyMasteringDither(Sample: Single; Chan: Integer; Amo
 var Dither, ResVal, Error, LSB: Single;
 begin
   LSB := 1.0 / 32767.0;
-  Dither := ((Random - 0.5) + (Random - 0.5)) * LSB * Amount; // Uncorrelated per channel
-  if Abs(Sample) < (LSB * 2) then Dither := Dither * 0.7; // Dynamic scaling
+  Dither := ((Random - 0.5) + (Random - 0.5)) * LSB * Amount;
+  if Abs(Sample) < (LSB * 2) then Dither := Dither * 0.7;
   
-  { 2nd-Order Psychoacoustic Noise Shaper }
   ResVal := Sample + Dither + (FErrorMem[Chan][0] * 1.5) - (FErrorMem[Chan][1] * 0.5);
   ResVal := EnsureRange(ResVal, -1.0, 1.0);
   ResVal := Round(ResVal * 32767) / 32767.0;
@@ -127,7 +186,10 @@ var
   c: Integer;
   InLen, OutLen, DoneIn, DoneOut: Cardinal;
 begin
-  if InSR = OutSR then Exit(Data);
+  if InSR = OutSR then begin
+    Result := Data; // Fix für uninitialisiertes Result
+    Exit;
+  end;
   SetLength(Result, Length(Data));
   InLen := Length(Data[0]);
   OutLen := Round(InLen * (OutSR / InSR)) + 1000;
@@ -160,7 +222,8 @@ begin
   fRes := pffft_aligned_malloc(n * 4); work := pffft_aligned_malloc(n * 4);
   try
     FillChar(in1^, n * 4, 0); FillChar(in2^, n * 4, 0);
-    Move(Sig[0], in1^, L1 * 4); Move(Ker[0], in2^, L2 * 4);
+    if L1 > 0 then Move(Sig[0], in1^, L1 * 4);
+    if L2 > 0 then Move(Ker[0], in2^, L2 * 4);
     pffft_transform_ordered(setup, in1, f1, work, PFFFT_FORWARD);
     pffft_transform_ordered(setup, in2, f2, work, PFFFT_FORWARD);
     pffft_zconvolve_accumulate(setup, f1, f2, fRes, 1.0);
@@ -177,25 +240,52 @@ end;
 { --- Audio I/O --- }
 
 function TIRConvolverApp.LoadWav(const FileName: string; out SR: Integer): TAudioData;
-var FS: TFileStream; H: TWavHeader; i, c, Samples: Integer; s16: SmallInt; b24: array[0..2] of Byte; s32: LongInt;
+var 
+  FS: TFileStream; 
+  H: TWavHeader; 
+  i, c, Samples: Integer; 
+  s16: SmallInt; 
+  b24: array[0..2] of Byte; 
+  s32: LongInt;
 begin
   FS := TFileStream.Create(FileName, fmOpenRead or fmShareDenyWrite);
   try
-    FS.Read(H, SizeOf(H)); SR := H.SampleRate;
+    FS.Read(H, SizeOf(H)); 
+    SR := H.SampleRate;
+    if (H.Channels = 0) or (H.BitsPerSample = 0) then Exit(nil);
+    
     Samples := H.DataSize div (H.Channels * (H.BitsPerSample div 8));
     SetLength(Result, H.Channels);
     for c := 0 to H.Channels - 1 do SetLength(Result[c], Samples);
+    
     for i := 0 to Samples - 1 do
       for c := 0 to H.Channels - 1 do begin
-        if H.BitsPerSample = 16 then begin FS.Read(s16, 2); Result[c][i] := s16 / 32768.0; end
-        else begin FS.Read(b24, 3); s32 := (b24 shl 8) or (b24 shl 16) or (b24 shl 24); Result[c][i] := s32 / 2147483648.0; end;
+        if H.BitsPerSample = 16 then begin 
+          FS.Read(s16, 2); 
+          Result[c][i] := s16 / 32768.0; 
+        end
+        else begin 
+          // Korrektes 24-Bit Vorzeichen-Handling (Sign Extension)
+          FS.Read(b24, 3); 
+          s32 := (b24[0] shl 8) or (b24[1] shl 16) or (b24[2] shl 24);
+          Result[c][i] := s32 / 2147483648.0; 
+        end;
       end;
-  finally FS.Free; end;
+  finally 
+    FS.Free; 
+  end;
 end;
-
 procedure TIRConvolverApp.SaveWav(const FileName: string; const Data: TAudioData; SR, Bits: Integer; ForceMono: Boolean);
-var FS: TFileStream; H: TWavHeader; i, c, OutChans: Integer; s16: SmallInt; s32: LongInt; b24: array[0..2] of Byte;
+var 
+  FS: TFileStream; 
+  H: TWavHeader; 
+  i, c, OutChans: Integer; 
+  s16: SmallInt; 
+  s32: LongInt; 
+  b24: array[0..2] of Byte;
 begin
+  if (Length(Data) = 0) or (Length(Data[0]) = 0) then Exit;
+
   OutChans := IfThen(ForceMono, 1, Length(Data));
   FillChar(H, SizeOf(H), 0);
   H.RIFFID := 'RIFF'; H.WavID := 'WAVE'; H.FmtID := 'fmt '; H.FmtSize := 16;
@@ -211,14 +301,21 @@ begin
     for i := 0 to High(Data[0]) do
       for c := 0 to OutChans - 1 do begin
         if Bits = 16 then begin
-          s16 := Round(ApplyMasteringDither(Data[c][i], c, 1.0) * 32767); FS.Write(s16, 2);
+          s16 := Round(ApplyMasteringDither(Data[c][i], c, 1.0) * 32767); 
+          FS.Write(s16, 2);
         end else begin
+          // Korrekte Zuweisung in das b24 Byte-Array
           s32 := Round(EnsureRange(Data[c][i], -1.0, 1.0) * 8388607);
-          b24 := s32 and $FF; b24 := (s32 shr 8) and $FF; b24 := (s32 shr 16) and $FF; FS.Write(b24, 3);
+          b24[0] := s32 and $FF; 
+          b24[1] := (s32 shr 8) and $FF; 
+          b24[2] := (s32 shr 16) and $FF; 
+          FS.Write(b24, 3);
         end;
       end;
     if GetOptionValue('artist') <> '' then WriteInfoChunk(FS, 'IART', GetOptionValue('artist'));
-  finally FS.Free; end;
+  finally 
+    FS.Free; 
+  end;
 end;
 
 { --- Helpers & DSP Utility --- }
@@ -226,7 +323,8 @@ end;
 procedure TIRConvolverApp.WriteInfoChunk(Stream: TStream; const ID: string; const Value: string);
 var Len: LongInt; Zero: Char = #0;
 begin
-  Stream.Write(ID, 4); Len := Length(Value) + 1; Stream.Write(Len, 4);
+  if Length(Value) = 0 then Exit;
+  Stream.Write(ID[1], 4); Len := Length(Value) + 1; Stream.Write(Len, 4);
   Stream.Write(Value[1], Length(Value)); Stream.Write(Zero, 1);
   if (Len mod 2 <> 0) then Stream.Write(Zero, 1);
 end;
@@ -240,8 +338,18 @@ end;
 
 function TIRConvolverApp.ConvertToMinimumPhase(const Data: TFloatBuffer): TFloatBuffer;
 begin
-  { Implementation as discussed via PFFFT Cepstrum }
-  Result := Data; // Placeholder for briefness, actual logic integrated in full builds
+  { Platzhalter-Logik beibehalten }
+  Result := Data;
+end;
+
+procedure TIRConvolverApp.ApplyFades(var Data: TAudioData; SR: Integer; InMS, OutMS: Single);
+begin
+  { Notwendiger Stub für die Klassendeklaration }
+end;
+
+procedure TIRConvolverApp.TrimSilence(var Data: TAudioData; ThresholdDB: Single);
+begin
+  { Notwendiger Stub für die Klassendeklaration }
 end;
 
 { --- Main Execution --- }
@@ -260,10 +368,13 @@ begin
   try
     A1 := LoadWav(f1, SR1); A2 := LoadWav(f2, SR2);
 
-    { Resampling Logic }
+    if (A1 = nil) or (A2 = nil) then 
+      raise Exception.Create('Fehler beim Laden der WAV-Dateien oder ungültiges Format.');
+
+    { Korrigierte Resampling-Aufruflogik }
     if (TargetSR > 0) then begin
       if SR1 <> TargetSR then A1 := ResampleSoxr(A1, SR1, TargetSR);
-      if SR2 <> TargetSR then A2 := ResampleSoxr(SR2, SR2, TargetSR);
+      if SR2 <> TargetSR then A2 := ResampleSoxr(A2, SR2, TargetSR);
       SR1 := TargetSR;
     end else if SR1 <> SR2 then begin
       A2 := ResampleSoxr(A2, SR2, SR1);
@@ -299,3 +410,4 @@ end;
 begin
   with TIRConvolverApp.Create(nil) do try Run; finally Free; end;
 end.
+
