@@ -11,7 +11,7 @@ program IRConvolverPro;
 
 uses
   {$IFDEF UNIX}cthreads,{$ENDIF}
-  SysUtils, Classes, Math, CustApp, Diagnostics, libpffft, IniFiles;
+  SysUtils, Classes, Math, CustApp, fptimer, libpffft, IniFiles;
 
 const
   // Plattformunabhängige Bibliotheksnamen für den Linker (Resampling)
@@ -286,7 +286,11 @@ end;
 { --- Hauptprogramm ausführen --- }
 
 procedure TIRConvolverApp.DoRun;
-var SW: TStopwatch; f1, f2, fOut: string; A1, A2, Res: TAudioData; SR1, SR2, bOut, c, TargetSR: Integer;
+var 
+  StartTime: Int64; // Ersetzt SW: TStopwatch
+  f1, f2, fOut: string; 
+  A1, A2, Res: TAudioData; 
+  SR1, SR2, bOut, c, TargetSR: Integer;
 begin
   LoadConfig;
   if HasOption('h', 'help') or (ParamCount < 3) then begin ShowUsage; Terminate; Exit; end;
@@ -295,7 +299,7 @@ begin
   bOut := StrToIntDef(GetOptionValue('b', 'bits'), 24);
   TargetSR := StrToIntDef(GetOptionValue('r', 'rate'), 0);
 
-  SW := TStopwatch.StartNew;
+  StartTime := GetTickCount64; // Startet die Zeitmessung plattformunabhängig
   try
     A1 := LoadWav(f1, SR1); A2 := LoadWav(f2, SR2);
 
@@ -322,10 +326,12 @@ begin
     Normalize(Res);
     SaveWav(fOut, Res, SR1, bOut, HasOption('m', 'mono'));
     
-    WriteLn(Format('Success! Processing Time: %d ms', [SW.ElapsedMilliseconds]));
+    // Berechnet die Differenz in Millisekunden
+    WriteLn(Format('Success! Processing Time: %d ms', [GetTickCount64 - StartTime]));
     Terminate(0);
   except on E: Exception do begin WriteLn(StdErr, 'Error: ', E.Message); Terminate(1); end; end;
 end;
+
 
 procedure TIRConvolverApp.ShowUsage;
 begin
