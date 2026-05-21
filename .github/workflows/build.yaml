@@ -51,7 +51,7 @@ jobs:
 
     - name: Build CLI & GUI Editions
       if: ${{ matrix.os == 'windows-latest' }}
-      run: build.bat
+      run: ./build.bat
            
     - name: Prepare Artifacts
       shell: bash
