@@ -52,6 +52,16 @@ jobs:
     - name: Build CLI & GUI Editions
       if: ${{ matrix.os == 'windows-latest' }}
       run: ./build.bat
+      
+    - name: Build Application (Linux & macOS)
+      if: matrix.os != 'windows-latest'
+      run: |
+        # Verrucht dem Script zwingend Ausführungsrechte (Behebt den Browser-Git-Bug)
+        chmod +x build.sh
+        
+        # Führt das Script nun sicher aus
+        ./build.sh
+      shell: bash
            
     - name: Prepare Artifacts
       shell: bash
