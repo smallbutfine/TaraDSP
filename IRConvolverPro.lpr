@@ -42,6 +42,7 @@ type
   TIRConvolverApp = class(TCustomApplication)
   private
     FErrorMem: array of TErrorHistory;
+    FArtist: string; 
     procedure LoadConfig;
     
     { I/O }
@@ -87,14 +88,21 @@ end;
 procedure TIRConvolverApp.LoadConfig;
 var Ini: TIniFile; Fn: string;
 begin
-  Fn := ChangeFileExt(ExeName, '.ini');
-  if FileExists(Fn) then begin
-    Ini := TIniFile.Create(Fn);
-    try
-      if GetOptionValue('artist') = '' then SetOptionValue('artist', Ini.ReadString('Metadata', 'Artist', ''));
-    finally Ini.Free; end;
+  // Erst den Standard-Wert von der Kommandozeile holen
+  FArtist := GetOptionValue('artist');
+  
+  // Wenn auf der Kommandozeile nichts übergeben wurde, aus der INI lesen
+  if FArtist = '' then begin
+    Fn := ChangeFileExt(ExeName, '.ini');
+    if FileExists(Fn) then begin
+      Ini := TIniFile.Create(Fn);
+      try
+        FArtist := Ini.ReadString('Metadata', 'Artist', '');
+      finally Ini.Free; end;
+    end;
   end;
 end;
+
 
 { --- Mastering Dither Engine (2nd Order Noise Shaping) --- }
 
@@ -248,7 +256,7 @@ begin
           FS.Write(b24, 3);
         end;
       end;
-    if GetOptionValue('artist') <> '' then WriteInfoChunk(FS, 'IART', GetOptionValue('artist'));
+    if FArtist <> '' then WriteInfoChunk(FS, 'IART', FArtist);
   finally FS.Free; end;
 end;
 
