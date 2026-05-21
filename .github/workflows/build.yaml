@@ -56,12 +56,23 @@ jobs:
     - name: Prepare Artifacts
       shell: bash
       run: |
-        mkdir dist
-        # Kopiere Binaries (mit/ohne .exe Endung)
+        mkdir -p dist
+        
+        echo "=== Inhalt des Arbeitsverzeichnisses vor dem Kopieren ==="
+        ls -la
+        
+        # Kopiere die kompilierten Binaries (fängt alle denkbaren Namensmuster ab)
+        cp IRConvolverPro.exe dist/ 2>/dev/null || true
+        cp IRConvolverPro dist/ 2>/dev/null || true
         cp IRConvolverPro-CLI* dist/ 2>/dev/null || true
         cp IRConvolverPro-GUI* dist/ 2>/dev/null || true
-        cp settings.ini dist/ 2>/dev/null || true
-        cp LICENSE dist/ 2>/dev/null || true
+        
+        # Einstellungen und Lizenz sichern
+        [ -f settings.ini ] && cp settings.ini dist/ || true
+        [ -f LICENSE ] && cp LICENSE dist/ || true
+        
+        echo "=== Inhalt des dist/ Ordners ==="
+        ls -la dist/
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
