@@ -61,17 +61,21 @@
     <RunParams>
       <FormatVersion Value="2"/>
     </RunParams>
-    <Units>
-      <Unit>
+    <Units Count="3">
+      <Unit0>
         <Filename Value="TaraDSP.lpr"/>
         <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="taradsp_core.pas"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="dspengine.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit>
+      </Unit1>
+      <Unit2>
+        <Filename Value="resampleengine.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit2>
     </Units>
-  </ProjectOptions>
+ </ProjectOptions>
   <CompilerOptions>
     <Version Value="11"/>
     <Target>
