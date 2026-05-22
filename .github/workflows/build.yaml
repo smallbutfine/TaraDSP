@@ -192,12 +192,6 @@ jobs:
         
         rm -rf min_dll installer_out 2>/dev/null || true
 
-        # 6. Zusatzdateien sichern
-        [ -f libpffft.dylib ] && cp libpffft.dylib dist/ || true
-        [ -f settings.ini ] && cp settings.ini dist/ || true
-        [ -f LICENSE ] && cp LICENSE dist/ || true
-        
-        rm -rf min_dll installer_out 2>/dev/null || true
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
