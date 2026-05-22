@@ -1,4 +1,4 @@
-name: Multi-Platform Build IRConvolverPro
+name: Multi-Platform Build TaraDSP
 
 on:
   push:
@@ -83,8 +83,8 @@ jobs:
         mkdir -p dist
         
         # Kopiere Binaries
-        cp IRConvolverPro.exe dist/ 2>/dev/null || true
-        cp IRConvolverPro dist/ 2>/dev/null || true
+        cp TaraDSP.exe dist/ 2>/dev/null || true
+        cp TaraDSP dist/ 2>/dev/null || true
         
         # Kopiere die universelle Mac-Dylib mit in den dist-Ordner
         [ -f libpffft.dylib ] && cp libpffft.dylib dist/ || true
@@ -96,7 +96,7 @@ jobs:
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: IRConvolverPro-${{ runner.os }}
+        name: TaraDSP-${{ runner.os }}
         path: dist/
 
   release:
@@ -116,7 +116,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: artifacts/**/*
-          name: IRConvolverPro Release ${{ github.ref_name }}
+          name: TaraDSP Release ${{ github.ref_name }}
           body: "Multi-platform binaries for Windows, Linux, and macOS."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
