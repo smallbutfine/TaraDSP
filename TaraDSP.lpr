@@ -92,7 +92,7 @@ begin
     _soxr_delete := GetProcAddress(SHandle, 'soxr_delete');
   end else begin
     _soxr_create := @MockSoxrCreate; 
-    _soxr_process := @MockMockSoxrProcess; 
+    _soxr_process := @MockSoxrProcess; 
     _soxr_delete := @MockSoxrDelete;
   end;
   
