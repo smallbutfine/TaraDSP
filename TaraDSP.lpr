@@ -281,27 +281,53 @@ begin
   end;
 end;
 function TTaraDSPApp.ConvolveFFT(const Sig, Ker: TFloatBuffer): TFloatBuffer;
-var setup: Pointer; n, i, L1, L2: Integer; in1, in2, f1, f2, fRes, work: PSingle;
+var 
+  setup: Pointer; 
+  n, i, L1, L2: Integer; 
+  in1, in2, f1, f2, fRes, work: PSingle;
 begin
-  L1 := Length(Sig); L2 := Length(Ker); n := 1; while n < (L1 + L2 - 1) do n := n shl 1;
-  setup := _pffft_new_setup(n, 0); in1 := _pffft_aligned_malloc(n * 4); in2 := _pffft_aligned_malloc(n * 4);
-  f1 := _pffft_aligned_malloc(n * 4); f2 := _pffft_aligned_malloc(n * 4); fRes := _pffft_aligned_malloc(n * 4); work := _pffft_aligned_malloc(n * 4);
+  L1 := Length(Sig); 
+  L2 := Length(Ker); 
+  n := 1; 
+  while n < (L1 + L2 - 1) do n := n shl 1;
+  
+  setup := _pffft_new_setup(n, 0); 
+  in1 := _pffft_aligned_malloc(n * SizeOf(Single)); 
+  in2 := _pffft_aligned_malloc(n * SizeOf(Single));
+  f1 := _pffft_aligned_malloc(n * SizeOf(Single)); 
+  f2 := _pffft_aligned_malloc(n * SizeOf(Single)); 
+  fRes := _pffft_aligned_malloc(n * SizeOf(Single)); 
+  work := _pffft_aligned_malloc(n * SizeOf(Single));
+  
   try
-    FillChar(in1^, n * 4, 0); FillChar(in2^, n * 4, 0); 
-    if L1 > 0 then Move(Sig, in1^, L1 * 4); 
-    if L2 > 0 then Move(Ker, in2^, L2 * 4);
+    FillChar(in1^, n * SizeOf(Single), 0); 
+    FillChar(in2^, n * SizeOf(Single), 0); 
+    
+    // REPARIERT: Elementweises, absolut crash-sicheres Kopieren in den aligned PFFFT-Speicher
+    if L1 > 0 then 
+      for i := 0 to L1 - 1 do (in1 + i)^ := Sig[i];
+      
+    if L2 > 0 then 
+      for i := 0 to L2 - 1 do (in2 + i)^ := Ker[i];
+    
     _pffft_transform_ordered(setup, in1, f1, work, PFFFT_FORWARD); 
     _pffft_transform_ordered(setup, in2, f2, work, PFFFT_FORWARD);
+    
     _pffft_zconvolve_accumulate(setup, f1, f2, fRes, 1.0); 
     _pffft_transform_ordered(setup, fRes, in1, work, PFFFT_BACKWARD);
+    
     SetLength(Result, L1 + L2 - 1); 
     for i := 0 to High(Result) do 
     begin
-      Result[i] := in1[i] / n;
+      Result[i] := (in1 + i)^ / n;
     end;
   finally 
-    _pffft_aligned_free(in1); _pffft_aligned_free(in2); _pffft_aligned_free(f1);
-    _pffft_aligned_free(f2); _pffft_aligned_free(fRes); _pffft_aligned_free(work); 
+    _pffft_aligned_free(in1); 
+    _pffft_aligned_free(in2); 
+    _pffft_aligned_free(f1);
+    _pffft_aligned_free(f2); 
+    _pffft_aligned_free(fRes); 
+    _pffft_aligned_free(work); 
     _pffft_destroy_setup(setup); 
   end;
 end;
