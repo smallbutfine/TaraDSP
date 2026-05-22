@@ -120,8 +120,18 @@ begin
 end;
 
 
-constructor TTaraDSPApp.Create(AOwner: TComponent);
-begin inherited Create(AOwner); Randomize; InitDynamicLibraries; end;
+cconstructor TTaraDSPApp.Create(AOwner: TComponent);
+begin 
+  inherited Create(AOwner); 
+  Randomize; 
+  
+  // FIX: Maskiert alle FPU-Ausnahmen unter Windows, damit die MinGW-DLLs nicht abstürzen!
+  {$IFDEF WINDOWS}
+  SetExceptionMask(MCW_EM);
+  {$ENDIF}
+  
+  InitDynamicLibraries; 
+end;
 
 procedure TTaraDSPApp.LoadConfig;
 begin FArtist := GetOptionValue('x', 'in1'); end;
