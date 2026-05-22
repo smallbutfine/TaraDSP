@@ -136,24 +136,57 @@ jobs:
       run: |
         mkdir -p dist
         
-        # 1. Haupt-Binaries kopieren (Läuft auf allen Plattformen)
+        # 1. Haupt-Binaries kopieren
         cp TaraDSP.exe dist/ 2>/dev/null || true
         cp TaraDSP dist/ 2>/dev/null || true
         cp TaraDSP-noAVX2* dist/ 2>/dev/null || true
         
-        # 2. Windows-DLLs kopieren (NUR auf dem Windows-Runner ausführen!)
+        # 2. Windows-DLLs kopieren (NUR auf dem Windows-Runner)
         if [ "${{ matrix.os }}" = "windows-latest" ]; then
           cp *.dll dist/ 2>/dev/null || true
           cp min_dll/*.dll dist/ 2>/dev/null || true
+          
+          echo "=== Erstelle Windows Installer (Inno Setup) ==="
+          "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+          
+          # Kopiere den fertigen Installer in den dist-Ordner für das Release
+          cp installer_out/TaraDSP_Setup.exe dist/
         fi
         
-        # 3. macOS- und Zusatzdateien sichern
+        # 3. Linux Debian-Paket erstellen (.deb)
+        if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
+          echo "=== Erstelle Linux .deb Paket ==="
+          mkdir -p debian/DEBIAN debian/usr/bin
+          
+          # Erstelle die Control-Datei für den Paketmanager
+          cat <<EOF > debian/DEBIAN/control
+Package: taradsp
+Version: 1.0.0
+Section: sound
+Priority: optional
+Architecture: amd64
+Depends: libsoxr0
+Maintainer: Your Name <your.email@example.com>
+Description: Mastering-Grade FFT Impulse Response Toolkit
+EOF
+          
+          # Kopiere die Linux-Binaries in das Paket-Dateisystem
+          cp dist/TaraDSP debian/usr/bin/taradsp
+          cp dist/TaraDSP-noAVX2 debian/usr/bin/taradsp-noAVX2
+          chmod +x debian/usr/bin/taradsp*
+          
+          # Paket packen und in den dist-Ordner legen
+          dpkg-deb --build debian dist/taradsp_1.0.0_amd64.deb
+          rm -rf debian
+        fi
+        
+        # 4. macOS- und Zusatzdateien sichern
         [ -f libpffft.dylib ] && cp libpffft.dylib dist/ || true
         [ -f settings.ini ] && cp settings.ini dist/ || true
         [ -f LICENSE ] && cp LICENSE dist/ || true
         
         # Aufräumen
-        rm -rf min_dll 2>/dev/null || true
+        rm -rf min_dll installer_out 2>/dev/null || true
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
