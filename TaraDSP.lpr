@@ -126,11 +126,13 @@ begin
   Randomize; 
   
   {$IFDEF WINDOWS}
-  SetExceptionMask($0008001F);
+  // REPARIERT: Expliziter Aufruf über die Unit Math, um den Compiler-Abbruch zu verhindern
+  Math.SetExceptionMask(Math.GetExceptionMask + [exOverflow, exInvalidOp, exZeroDivide]);
   {$ENDIF}
   
   InitDynamicLibraries; 
 end;
+
 procedure TTaraDSPApp.LoadConfig;
 begin FArtist := GetOptionValue('x', 'in1'); end;
 
