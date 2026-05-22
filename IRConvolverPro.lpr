@@ -161,6 +161,10 @@ end;
 {$ENDIF}
 
 {$IFDEF LINUX}
+  {$LINKLIB c} // Zwingend erforderlich für C-Standardfunktionen (malloc/free)
+  {$LINKLIB m} // Zwingend erforderlich für C-Mathematikfunktionen (sin/cos für FFT)
+  {$L pffft.o} // Bindet das in GitHub Actions kompilierte C-Objekt ein
+  
   function pffft_new_setup(N: Integer; transform: TPFFFT_Transform): PPFFFT_Setup; cdecl; external;
   procedure pffft_destroy_setup(setup: PPFFFT_Setup); cdecl; external;
   procedure pffft_transform_ordered(setup: PPFFFT_Setup; const input: PSingle; output: PSingle; work: PSingle; direction: Integer); cdecl; external;
