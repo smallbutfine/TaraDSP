@@ -76,7 +76,20 @@ jobs:
         # Zwingt lazbuild mit -B alles absolut frisch zu übersetzen
         lazbuild -B --build-mode=Release TaraDSP.lpi
       shell: bash
-      
+    
+    - name: Build Application (Windows)
+      if: matrix.os == 'windows-latest'
+      run: ./build.bat
+      shell: cmd
+
+    - name: Run TaraDSP Test Suite (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        # Falls du deine Test-WAVs (source.wav, cab_ir.wav) im Repo unter .\Test_Data\ hast,
+        # läuft das Skript jetzt vollautomatisch im PowerShell-Modus des Windows-Runners:
+        ./tests.ps1
+      shell: powershell
+   
     - name: Prepare Artifacts
       shell: bash
       run: |
