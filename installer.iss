@@ -14,8 +14,10 @@ ArchitecturesInstallIn64BitMode=x64
 Source: "dist\TaraDSP.exe"; DestDir: "{app}"; DestName: "TaraDSP.exe"; Flags: ignoreversion
 Source: "dist\TaraDSP-noAVX2.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "dist\*.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "dist\settings.ini"; DestDir: "{app}"; Flags: ignoreversion
-Source: "dist\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
+
+; FEHLER BEHOBEN: Wir holen diese Dateien direkt aus dem Hauptverzeichnis (ohne "dist\")
+Source: "settings.ini"; DestDir: "{app}"; Flags: ignoreversion
+Source: "LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\TaraDSP (AVX2)"; Filename: "{app}\TaraDSP.exe"
