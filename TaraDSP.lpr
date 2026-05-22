@@ -50,7 +50,7 @@ type
     FErrorMem: array of TErrorHistory;
     FArtist: string;
     procedure LoadConfig;
-    
+    function LogExtract(Value: Single): Single; inline;
     { I/O }
     function  LoadWav(const FileName: string; out SR: Integer): TAudioData;
     procedure SaveWav(const FileName: string; const Data: TAudioData; SR, Bits: Integer; ForceMono: Boolean);
