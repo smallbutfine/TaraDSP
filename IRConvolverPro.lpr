@@ -12,7 +12,7 @@ program IRConvolverPro;
 uses
   {$IFDEF UNIX}cthreads,{$ENDIF}
   {$IFDEF DARWIN}dynlibs,{$ENDIF} // Hierher verschoben! [1]
-  SysUtils, Classes, Math, CustApp, fptimer, libpffft, IniFiles;
+  SysUtils, Classes, Math, CustApp, fptimer, IniFiles;
 
 const
   // Plattformunabhängige Bibliotheksnamen für den Linker (Resampling)
@@ -104,6 +104,48 @@ end;
 function soxr_create(in_rate, out_rate: Double; num_chans: Cardinal; error: PInteger; io_spec, q_spec, runtime_spec: Pointer): Pointer; cdecl; external LIB_SOXR;
 function soxr_process(resampler: Pointer; in_buf: PSingle; in_len: Cardinal; done_in: PCardinal; out_buf: PSingle; out_len: Cardinal; done_out: PCardinal): Integer; cdecl; external LIB_SOXR;
 procedure soxr_delete(resampler: Pointer); cdecl; external LIB_SOXR;
+{$ENDIF}
+
+{ --- Externe Bibliothekseinbindung (PFFFT FFT Engine) --- }
+
+const
+  PFFFT_FORWARD  = 0;
+  PFFFT_BACKWARD = 1;
+
+type
+  PPFFFT_Setup = Pointer;
+  TPFFFT_Transform = (PFFFT_REAL = 0, PFFFT_COMPLEX = 1);
+
+{$IFDEF WINDOWS}
+  const LIB_PFFFT = 'libpffft.dll';
+  function pffft_new_setup(N: Integer; transform: TPFFFT_Transform): PPFFFT_Setup; cdecl; external LIB_PFFFT;
+  procedure pffft_destroy_setup(setup: PPFFFT_Setup); cdecl; external LIB_PFFFT;
+  procedure pffft_transform_ordered(setup: PPFFFT_Setup; const input: PSingle; output: PSingle; work: PSingle; direction: Integer); cdecl; external LIB_PFFFT;
+  procedure pffft_zconvolve_accumulate(setup: Pointer; const dft_a, dft_b: PSingle; dft_ab: PSingle; scaling: Single); cdecl; external LIB_PFFFT;
+  function pffft_aligned_malloc(nb_bytes: NativeUInt): Pointer; cdecl; external LIB_PFFFT;
+  procedure pffft_aligned_free(p: Pointer); cdecl; external LIB_PFFFT;
+{$ENDIF}
+
+{$IFDEF DARWIN}
+  const LIB_PFFFT = 'libpffft.dylib';
+  function pffft_new_setup(N: Integer; transform: TPFFFT_Transform): PPFFFT_Setup; cdecl; external LIB_PFFFT;
+  procedure pffft_destroy_setup(setup: PPFFFT_Setup); cdecl; external LIB_PFFFT;
+  procedure pffft_transform_ordered(setup: PPFFFT_Setup; const input: PSingle; output: PSingle; work: PSingle; direction: Integer); cdecl; external LIB_PFFFT;
+  procedure pffft_zconvolve_accumulate(setup: Pointer; const dft_a, dft_b: PSingle; dft_ab: PSingle; scaling: Single); cdecl; external LIB_PFFFT;
+  function pffft_aligned_malloc(nb_bytes: NativeUInt): Pointer; cdecl; external LIB_PFFFT;
+  procedure pffft_aligned_free(p: Pointer); cdecl; external LIB_PFFFT;
+{$ENDIF}
+
+{$IFDEF LINUX}
+  {$LINKLIB c}
+  {$LINKLIB m}
+  {$L pffft.o}
+  function pffft_new_setup(N: Integer; transform: TPFFFT_Transform): PPFFFT_Setup; cdecl; external;
+  procedure pffft_destroy_setup(setup: PPFFFT_Setup); cdecl; external;
+  procedure pffft_transform_ordered(setup: PPFFFT_Setup; const input: PSingle; output: PSingle; work: PSingle; direction: Integer); cdecl; external;
+  procedure pffft_zconvolve_accumulate(setup: Pointer; const dft_a, dft_b: PSingle; dft_ab: PSingle; scaling: Single); cdecl; external;
+  function pffft_aligned_malloc(nb_bytes: NativeUInt): Pointer; cdecl; external;
+  procedure pffft_aligned_free(p: Pointer); cdecl; external;
 {$ENDIF}
 
 { --- Implementierung --- }
