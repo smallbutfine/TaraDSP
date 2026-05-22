@@ -405,50 +405,21 @@ end;
 
 procedure TIRConvolverApp.DoRun;
 var 
-  StartTime: Int64; // Ersetzt SW: TStopwatch
-  f1, f2, fOut: string; 
+  StartTime: Int64;
+  f1, f2, fOut, Msg: string; 
   A1, A2, Res: TAudioData; 
   SR1, SR2, bOut, c, TargetSR: Integer;
 begin
   LoadConfig;
-  if HasOption('h', 'help') or (ParamCount < 3) then begin ShowUsage; Terminate; Exit; end;
   
-  f1 := GetOptionValue('i1'); f2 := GetOptionValue('i2'); fOut := GetOptionValue('o');
-  bOut := StrToIntDef(GetOptionValue('b', 'bits'), 24);
-  TargetSR := StrToIntDef(GetOptionValue('r', 'rate'), 0);
-
-  StartTime := GetTickCount64; // Startet die Zeitmessung plattformunabhängig
-  try
-    A1 := LoadWav(f1, SR1); A2 := LoadWav(f2, SR2);
-
-    if (A1 = nil) or (A2 = nil) then 
-      raise Exception.Create('Fehler beim Laden der WAV-Dateien oder ungültiges Format.');
-
-    { Resampling Logic }
-    if (TargetSR > 0) then begin
-      if SR1 <> TargetSR then A1 := ResampleSoxr(A1, SR1, TargetSR);
-      if SR2 <> TargetSR then A2 := ResampleSoxr(A2, SR2, TargetSR);
-      SR1 := TargetSR;
-    end else if SR1 <> SR2 then begin
-      A2 := ResampleSoxr(A2, SR2, SR1);
-    end;
-
-    SetLength(Res, Min(Length(A1), Length(A2)));
-    for c := 0 to High(Res) do begin
-      WriteLn('Convolving Channel ', c+1, '...');
-      Res[c] := ConvolveFFT(A1[c], A2[c]);
-    end;
-
-    if HasOption('min') then for c := 0 to High(Res) do Res[c] := ConvertToMinimumPhase(Res[c]);
-    
-    Normalize(Res);
-    SaveWav(fOut, Res, SR1, bOut, HasOption('m', 'mono'));
-    
-    // Berechnet die Differenz in Millisekunden
-    WriteLn(Format('Success! Processing Time: %d ms', [GetTickCount64 - StartTime]));
-    Terminate(0);
-  except on E: Exception do begin WriteLn(StdErr, 'Error: ', E.Message); Terminate(1); end; end;
-end;
+  { Registriert die erlaubten Parameter, damit TCustomApplication sie versteht }
+  Msg := CheckOptions('i1:i2:o:b:r:l:h:m', 'help:mono:min');
+  if (Msg <> '') or HasOption('h', 'help') or (ParamCount < 2) then begin 
+    if Msg <> '' then WriteLn(StdErr, 'Parameter-Fehler: ', Msg);
+    ShowUsage; 
+    Terminate(1); // Setzt den Exit-Code auf 1 für die Actions
+    Exit; 
+  end;
 
 
 procedure TIRConvolverApp.ShowUsage;
