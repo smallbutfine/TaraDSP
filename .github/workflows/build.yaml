@@ -65,32 +65,32 @@ jobs:
       if: matrix.os != 'windows-latest'
       run: |
         if [ "${{ matrix.os }}" = "macos-latest" ]; then
+          # Übergibt das Mac-Target plattformübergreifend an die Umgebung
           export FPCOPT="-WM11.0"
           
           echo "=== Baue macOS Intel (x86_64) Binary ==="
           cp pffft_x86.o pffft.o
-          lazbuild --build-mode=Release --target-cpu=x86_64 IRConvolverPro.lpi
+          lazbuild --build-mode=Release --cpu=x86_64 --os=darwin IRConvolverPro.lpi
           mv IRConvolverPro IRConvolverPro_x86
           
           echo "=== Baue macOS Apple Silicon (ARM64) Binary ==="
           cp pffft_arm.o pffft.o
-          lazbuild --build-mode=Release --target-cpu=aarch64 IRConvolverPro.lpi
+          lazbuild --build-mode=Release --cpu=aarch64 --os=darwin IRConvolverPro.lpi
           mv IRConvolverPro IRConvolverPro_arm
           
           echo "=== Verschmelze Architekturen zu Universal Binary ==="
           lipo -create IRConvolverPro_x86 IRConvolverPro_arm -output IRConvolverPro
           
-          # Prüft das Ergebnis im Log zur Sicherheit
+          # Zeigt im Actions-Log die erfolgreiche Universal-Struktur
           file IRConvolverPro
           
-          # Temporäre Zwischen-Binaries aufräumen
+          # Bereinigt temporäre Build-Dateien
           rm IRConvolverPro_x86 IRConvolverPro_arm pffft.o
         else
-          # Linux Standard-Build
+          # Standard-Build für Linux
           lazbuild --build-mode=Release IRConvolverPro.lpi
         fi
       shell: bash
-
 
     - name: Build CLI & GUI Editions
       if: ${{ matrix.os == 'windows-latest' }}
