@@ -408,18 +408,96 @@ var
   StartTime: Int64;
   f1, f2, fOut, Msg: string; 
   A1, A2, Res: TAudioData; 
-  SR1, SR2, bOut, c, TargetSR: Integer;
+  SR1, SR2, bOut, c, TargetSR, TruncLen: Integer;
 begin
   LoadConfig;
   
-  { Registriert die erlaubten Parameter, damit TCustomApplication sie versteht }
+  { 1. Registriert die erlaubten Parameter, damit TCustomApplication sie versteht.
+       Ein Doppelpunkt (:) bedeutet, dass nach dem Parameter ein Wert folgen muss. }
   Msg := CheckOptions('i1:i2:o:b:r:l:h:m', 'help:mono:min');
   if (Msg <> '') or HasOption('h', 'help') or (ParamCount < 2) then begin 
     if Msg <> '' then WriteLn(StdErr, 'Parameter-Fehler: ', Msg);
     ShowUsage; 
-    Terminate(1); // Setzt den Exit-Code auf 1 für die Actions
+    Terminate(1); // Setzt den Exit-Code auf 1 für fehlerhafte GitHub Actions
     Exit; 
   end;
+  
+  { 2. Werte von der Kommandozeile auslesen }
+  f1 := GetOptionValue('i1'); 
+  f2 := GetOptionValue('i2'); 
+  fOut := GetOptionValue('o');
+  bOut := StrToIntDef(GetOptionValue('b', 'bits'), 24);
+  TargetSR := StrToIntDef(GetOptionValue('r', 'rate'), 0);
+  TruncLen := StrToIntDef(GetOptionValue('l'), 0); // Liest das Limit aus Test 2 aus
+
+  StartTime := GetTickCount64; // Startet die Zeitmessung plattformunabhängig
+  try
+    { 3. Erste WAV-Datei (Source) laden }
+    A1 := LoadWav(f1, SR1); 
+    if A1 = nil then 
+      raise Exception.Create('Fehler beim Laden der Quell-WAV-Datei oder ungültiges Format.');
+
+    { 4. Zweite WAV-Datei (Impulsantwort) laden mit Mastering-Fallback }
+    if f2 <> '' then begin
+      A2 := LoadWav(f2, SR2);
+      if A2 = nil then 
+        raise Exception.Create('Fehler beim Laden der Impulsantwort-WAV-Datei.');
+    end 
+    else begin
+      { TEST 3 Fallback: Wenn -i2 fehlt, arbeiten wir im reinen Mastering-Modus.
+        Wir erzeugen einen Identitäts-Impuls (Wert 1.0), damit das Signal unverändert bleibt. }
+      SetLength(A2, Length(A1));
+      for c := 0 to High(A2) do begin
+        SetLength(A2[c], 1);
+        A2[c][0] := 1.0; 
+      end;
+      SR2 := SR1;
+    end;
+
+    { 5. Resampling-Logik ausführen, falls Sampleraten sich unterscheiden }
+    if (TargetSR > 0) then begin
+      if SR1 <> TargetSR then A1 := ResampleSoxr(A1, SR1, TargetSR);
+      if SR2 <> TargetSR then A2 := ResampleSoxr(A2, SR2, TargetSR);
+      SR1 := TargetSR;
+    end else if SR1 <> SR2 then begin
+      A2 := ResampleSoxr(A2, SR2, SR1);
+    end;
+
+    { 6. Hardware-Kürzung (Truncation) anwenden, falls über -l gefordert (Test 2) }
+    if (TruncLen > 0) then begin
+      for c := 0 to High(A1) do begin
+        if Length(A1[c]) > TruncLen then SetLength(A1[c], TruncLen);
+      end;
+      for c := 0 to High(A2) do begin
+        if Length(A2[c]) > TruncLen then SetLength(A2[c], TruncLen);
+      end;
+    end;
+
+    { 7. Kernprozess: FFT-Faltung pro Kanal ausführen }
+    SetLength(Res, Min(Length(A1), Length(A2)));
+    for c := 0 to High(Res) do begin
+      WriteLn('Convolving Channel ', c+1, '...');
+      Res[c] := ConvolveFFT(A1[c], A2[c]);
+    end;
+
+    { 8. Optionale Transformationen anwenden }
+    if HasOption('min') then begin
+      for c := 0 to High(Res) do Res[c] := ConvertToMinimumPhase(Res[c]);
+    end;
+    
+    { 9. Normalisieren, Lautstärke sichern und exportieren }
+    Normalize(Res);
+    SaveWav(fOut, Res, SR1, bOut, HasOption('m', 'mono'));
+    
+    WriteLn(Format('Success! Processing Time: %d ms', [GetTickCount64 - StartTime]));
+    Terminate(0); // Erfolgreicher Exit für die Test-Suite
+  except 
+    on E: Exception do begin 
+      WriteLn(StdErr, 'Error: ', E.Message); 
+      Terminate(1); 
+    end; 
+  end;
+end;
 
 
 procedure TIRConvolverApp.ShowUsage;
