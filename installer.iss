@@ -1,12 +1,12 @@
 [Setup]
 AppName=TaraDSP
-AppVersion=1.0.0
+AppVersion={#AppVersion}
 DefaultDirName={autopf}\TaraDSP
 DefaultGroupName=TaraDSP
 Compression=lzma2
 SolidCompression=yes
 OutputDir=.\installer_out
-OutputBaseFilename=TaraDSP_Setup
+OutputBaseFilename=TaraDSP_Setup_{#AppVersion}
 ArchitecturesInstallIn64BitMode=x64
 
 [Files]
