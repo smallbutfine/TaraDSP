@@ -53,9 +53,11 @@ jobs:
         if [ "${{ matrix.os }}" = "windows-latest" ]; then
           gcc -O3 -c pffft.c -o pffft.obj -msse -mfpmath=sse
         elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-          # Erzeugt zwei getrennte C-Objekte für beide Mac-Architekturen
-          gcc -O3 -arch x86_64 -mmacosx-version-min=11.0 -c pffft.c -o pffft_x86.o
-          gcc -O3 -arch arm64 -mmacosx-version-min=11.0 -c pffft.c -o pffft_arm.o
+          # Erzeugt direkt eine universelle Dynamic Library für Intel UND Apple Silicon
+          clang -O3 -dynamiclib -arch x86_64 -arch arm64 -mmacosx-version-min=11.0 pffft.c -o libpffft.dylib
+          
+          # Prüft das Ergebnis im Log zur Sicherheit
+          file libpffft.dylib
         else
           gcc -O3 -fPIC -c pffft.c -o pffft.o
         fi
@@ -65,31 +67,9 @@ jobs:
       if: matrix.os != 'windows-latest'
       run: |
         if [ "${{ matrix.os }}" = "macos-latest" ]; then
-          # Übergibt das Mac-Target plattformübergreifend an die Umgebung
           export FPCOPT="-WM11.0"
-          
-          echo "=== Baue macOS Intel (x86_64) Binary ==="
-          cp pffft_x86.o pffft.o
-          lazbuild --build-mode=Release --cpu=x86_64 --os=darwin IRConvolverPro.lpi
-          mv IRConvolverPro IRConvolverPro_x86
-          
-          echo "=== Baue macOS Apple Silicon (ARM64) Binary ==="
-          cp pffft_arm.o pffft.o
-          lazbuild --build-mode=Release --cpu=aarch64 --os=darwin IRConvolverPro.lpi
-          mv IRConvolverPro IRConvolverPro_arm
-          
-          echo "=== Verschmelze Architekturen zu Universal Binary ==="
-          lipo -create IRConvolverPro_x86 IRConvolverPro_arm -output IRConvolverPro
-          
-          # Zeigt im Actions-Log die erfolgreiche Universal-Struktur
-          file IRConvolverPro
-          
-          # Bereinigt temporäre Build-Dateien
-          rm IRConvolverPro_x86 IRConvolverPro_arm pffft.o
-        else
-          # Standard-Build für Linux
-          lazbuild --build-mode=Release IRConvolverPro.lpi
         fi
+        lazbuild --build-mode=Release IRConvolverPro.lpi
       shell: bash
 
     - name: Build CLI & GUI Editions
