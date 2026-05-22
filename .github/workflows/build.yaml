@@ -104,15 +104,25 @@ jobs:
     - name: Build Application (Windows)
       if: matrix.os == 'windows-latest'
       run: |
-        lazbuild -B --build-mode=Release --compiler-options="-CfAVX2 -CpCOREAVX2" TaraDSP.lpi
+        # 1. Offizielle 64-Bit libsoxr.dll live über MSYS2/Pacman herunterladen
+        C:\msys64\usr\bin\bash.exe -l -c "pacman -Sy --noconfirm mingw-w64-x86_64-libsoxr"
         
+        # 2. Die heruntergeladene DLL direkt in dein Hauptverzeichnis kopieren
+        copy "C:\msys64\mingw64\bin\libsoxr.dll" ".\libsoxr.dll" /y
+        
+        # 3. AVX2 Version bauen
+        lazbuild -B --build-mode=Release --compiler-options="-CfAVX2 -CpCOREAVX2" TaraDSP.lpi
         if exist taradsp.exe move taradsp.exe TaraDSP.exe
         
+        # 4. No-AVX2 Version bauen
         lazbuild -B --build-mode=Release-NoAVX2 TaraDSP.lpi
-        
         if exist taradsp-noAVX2.exe move taradsp-noAVX2.exe TaraDSP-noAVX2.exe
+        
+        # 5. Notwendige MinGW-Laufzeit-DLLs für das C-Backend sichern
+        mkdir min_dll 2>nul
+        copy "C:\msys64\mingw64\bin\libgcc_s_seh-1.dll" ".\min_dll\" /y 2>nul
+        copy "C:\msys64\mingw64\bin\libwinpthread-1.dll" ".\min_dll\" /y 2>nul
       shell: cmd
-
 
     - name: Run TaraDSP Test Suite (Windows)
       if: matrix.os == 'windows-latest'
@@ -126,15 +136,22 @@ jobs:
       run: |
         mkdir -p dist
         
-        # Kopiert die Hauptvarianten (AVX2 ohne Zusatz) und No-AVX2 (mit korrekter Schreibweise)
+        # 1. Haupt-Binaries kopieren
         cp TaraDSP.exe dist/ 2>/dev/null || true
         cp TaraDSP dist/ 2>/dev/null || true
         cp TaraDSP-noAVX2* dist/ 2>/dev/null || true
         
-        # Zusatzdateien sichern
+        # 2. Windows-DLLs kopieren (Sowohl deine eigenen als auch die MinGW-Laufzeitdateien)
+        cp *.dll dist/ 2>/dev/null || true
+        cp min_dll/*.dll dist/ 2>/dev/null || true
+        
+        # 3. macOS- und Zusatzdateien sichern
         [ -f libpffft.dylib ] && cp libpffft.dylib dist/ || true
         [ -f settings.ini ] && cp settings.ini dist/ || true
         [ -f LICENSE ] && cp LICENSE dist/ || true
+        
+        # Aufräumen
+        rm -rf min_dll 2>/dev/null || true
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
