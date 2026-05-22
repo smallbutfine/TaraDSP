@@ -73,9 +73,7 @@ type
 
 { --- Externe Bibliothekseinbindung (libsoxr) --- }
 
-{$IFDEF DARWIN}
-  {$LINKLIB soxr} // Zwingt den macOS-Linker, libsoxr dynamisch einzubinden
-{$ENDIF}
+// HINWEIS: {$LINKLIB soxr} wurde entfernt, um den x86_64 Linker-Fehler zu beheben
 
 function soxr_create(in_rate, out_rate: Double; num_chans: Cardinal; error: PInteger; io_spec, q_spec, runtime_spec: Pointer): Pointer; cdecl; external LIB_SOXR;
 function soxr_process(resampler: Pointer; in_buf: PSingle; in_len: Cardinal; done_in: PCardinal; out_buf: PSingle; out_len: Cardinal; done_out: PCardinal): Integer; cdecl; external LIB_SOXR;
