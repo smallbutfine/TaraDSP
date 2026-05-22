@@ -1,4 +1,4 @@
-# IRConvolverPro Test Suite
+# TaraDSP Test Suite
 # Tests CLI functionality, Hardware Truncation, and Mastering Mode
 
 $Exe = ".\TaraDSP.exe"
