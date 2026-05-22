@@ -1,15 +1,6 @@
-{
-  TaraDSP - Mastering-Grade FFT Impulse Response / Mastering Toolkit
-  Copyright (c) 2024, Martin Haverland
-  Licensed under the BSD 3-Clause License.
-}
-
-program TaraDSP;
-
-{$MODE OBJFPC}{$H+}
-
 uses
   {$IFDEF UNIX}cthreads,{$ENDIF}
+  {$IFDEF WINDOWS}Windows, dynlibs,{$ENDIF}
   {$IFDEF DARWIN}dynlibs,{$ENDIF}
   SysUtils, Classes, Math, CustApp, fptimer, IniFiles;
 
@@ -113,11 +104,6 @@ procedure soxr_delete(resampler: Pointer); cdecl; external LIB_SOXR;
 {$ENDIF}
 
 { --- Externe Bibliothekseinbindung (Universal-Schnittstelle) --- }
-
-uses
-  {$IFDEF WINDOWS}Windows, dynlibs;{$ENDIF}
-  {$IFDEF DARWIN}dynlibs;{$ENDIF}
-  {$IFDEF LINUX}dynlibs;{$ENDIF}
 
 type
   TFuncSoxrCreate  = function(in_rate, out_rate: Double; num_chans: Cardinal; error: PInteger; io_spec, q_spec, runtime_spec: Pointer): Pointer; cdecl;
