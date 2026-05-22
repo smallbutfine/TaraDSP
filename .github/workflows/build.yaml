@@ -136,14 +136,16 @@ jobs:
       run: |
         mkdir -p dist
         
-        # 1. Haupt-Binaries kopieren
+        # 1. Haupt-Binaries kopieren (Läuft auf allen Plattformen)
         cp TaraDSP.exe dist/ 2>/dev/null || true
         cp TaraDSP dist/ 2>/dev/null || true
         cp TaraDSP-noAVX2* dist/ 2>/dev/null || true
         
-        # 2. Windows-DLLs kopieren (Sowohl deine eigenen als auch die MinGW-Laufzeitdateien)
-        cp *.dll dist/ 2>/dev/null || true
-        cp min_dll/*.dll dist/ 2>/dev/null || true
+        # 2. Windows-DLLs kopieren (NUR auf dem Windows-Runner ausführen!)
+        if [ "${{ matrix.os }}" = "windows-latest" ]; then
+          cp *.dll dist/ 2>/dev/null || true
+          cp min_dll/*.dll dist/ 2>/dev/null || true
+        fi
         
         # 3. macOS- und Zusatzdateien sichern
         [ -f libpffft.dylib ] && cp libpffft.dylib dist/ || true
