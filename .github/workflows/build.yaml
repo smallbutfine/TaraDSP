@@ -186,7 +186,6 @@ EOF
           rm -rf debian
         fi
 
-        # 5. macOS Installations-Paket erstellen (.pkg)
         if [ "${{ matrix.os }}" = "macos-latest" ]; then
           echo "=== Erstelle macOS .pkg Paket ==="
           mkdir -p mac_root/usr/local/bin
