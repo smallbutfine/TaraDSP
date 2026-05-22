@@ -11,6 +11,7 @@ program IRConvolverPro;
 
 uses
   {$IFDEF UNIX}cthreads,{$ENDIF}
+  {$IFDEF DARWIN}dynlibs,{$ENDIF} // Hierher verschoben! [1]
   SysUtils, Classes, Math, CustApp, fptimer, libpffft, IniFiles;
 
 const
