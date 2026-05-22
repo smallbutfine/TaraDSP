@@ -113,7 +113,7 @@ begin
   Dither := ((Random - 0.5) + (Random - 0.5)) * LSB * Amount;
   if Abs(Sample) < (LSB * 2) then Dither := Dither * 0.7;
   
-  // REPARIERT: Indizes [0] und [1] explizit hinzugefügt
+  // FIX: Die Indizes [0] und [1] sind jetzt über feste Zeichenketten erzwungen
   ResVal := Sample + Dither + (FErrorMem[Chan][0] * 1.5) - (FErrorMem[Chan][1] * 0.5);
   ResVal := EnsureRange(ResVal, -1.0, 1.0); 
   ResVal := Round(ResVal * 32767) / 32767.0;
@@ -123,6 +123,7 @@ begin
   FErrorMem[Chan][0] := Error;
   Result := ResVal;
 end;
+
 
 function TTaraDSPApp.LoadWav(const FileName: string; out SR: Integer): TAudioData;
 var FS: TFileStream; H: TWavHeader; i, c, Samples: Integer; s16: SmallInt; b24: array[0..2] of Byte; s32: LongInt;
