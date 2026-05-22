@@ -40,21 +40,29 @@ jobs:
         # Verlinkt die macOS Homebrew-Bibliothek in das System-Suchverzeichnis
         sudo ln -sf $(brew --prefix libsoxr)/lib/libsoxr.dylib /usr/local/lib/libsoxr.dylib
 
+    - name: Set up MSYS2 (Windows)
+      if: matrix.os == 'windows-latest'
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        install: mingw-w64-x86_64-gcc
+        update: false
+
     - name: Compile Static C-Backend (PFFFT)
       run: |
         if [ "${{ matrix.os }}" = "windows-latest" ]; then
-          C:/msys64/mingw64/bin/gcc -O3 -c pffft.c -o pffft.obj -mavx2 -mfpmath=sse
-          C:/msys64/mingw64/bin/gcc -O3 -c pffft.c -o pffft_noAVX2.obj -msse -mfpmath=sse
+          # FEHLER BEHOBEN: Nutzt jetzt den perfekt konfigurierten MSYS2-Compiler direkt über den PATH
+          gcc -O3 -c pffft.c -o pffft.obj -mavx2 -mfpmath=sse
+          gcc -O3 -c pffft.c -o pffft_noAVX2.obj -msse -mfpmath=sse
         elif [ "${{ matrix.os }}" = "macos-latest" ]; then
           clang -O3 -dynamiclib -arch x86_64 -arch arm64 -mmacosx-version-min=11.0 pffft.c -o libpffft.dylib
           file libpffft.dylib
         else
-          # Linux AVX2 Version
           gcc -O3 -fPIC -mavx2 -c pffft.c -o pffft.o
-          # Linux No-AVX2 Version: FEHLER BEHOBEN (-c und pffft.c hinzugefügt)
           gcc -O3 -fPIC -c pffft.c -o pffft_noAVX2.o
         fi
       shell: bash
+
 
     - name: Build Application (Linux & macOS)
       if: matrix.os != 'windows-latest'
