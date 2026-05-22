@@ -9,22 +9,33 @@ uses
   SysUtils, Classes, Math, CustApp, IniFiles, dspengine, resampleengine;
 
 const
-  {$IFDEF WINDOWS} LIB_SOXR = 'libsoxr.dll'; {$ELSE}
-  {$IFDEF DARWIN} LIB_SOXR = 'libsoxr.dylib'; {$ELSE} LIB_SOXR = 'libsoxr.so.0'; {$ENDIF}{$ENDIF}
+  {$IFDEF WINDOWS} 
+    LIB_SOXR = 'libsoxr.dll'; 
+  {$ELSE}
+    {$IFDEF DARWIN} 
+      LIB_SOXR = 'libsoxr.dylib'; 
+    {$ELSE} 
+      LIB_SOXR = 'libsoxr.so.0'; 
+    {$ENDIF}
+  {$ENDIF}
+  
   PFFFT_FORWARD = 0; 
   PFFFT_BACKWARD = 1;
 
 type
-  TErrorHistory = array[0..1] of Single;
   TWavHeader = packed record
-    RIFFID, WavID, FmtID: array[0..3] of Char; Size, FmtSize: LongInt;
-    FormatTag, Channels: Word; SampleRate, BytesPerSec: LongInt;
-    BlockAlign, BitsPerSample: Word; DataID: array[0..3] of Char; DataSize: LongInt;
+    RIFFID, WavID, FmtID: array[0..3] of Char; 
+    Size, FmtSize: LongInt;
+    FormatTag, Channels: Word; 
+    SampleRate, BytesPerSec: LongInt;
+    BlockAlign, BitsPerSample: Word; 
+    DataID: array[0..3] of Char; 
+    DataSize: LongInt;
   end;
 
   TTaraDSPApp = class(TCustomApplication)
   private
-    FErrorMem: array of TErrorHistory;
+    FErrorMem: array of Single;
     FArtist: string;
     procedure LoadConfig;
     function  LogExtract(Value: Single): Single; inline;
@@ -59,7 +70,6 @@ var
   _pffft_zconvolve_accumulate: TPffftZCn = nil;
   _pffft_aligned_malloc: TPffftMal = nil;
   _pffft_aligned_free: TPffftFre = nil;
-
 procedure InitDynamicLibraries;
 var SHandle, PHandle, RHandle: TLibHandle;
 begin
@@ -100,31 +110,29 @@ function TTaraDSPApp.LogExtract(Value: Single): Single; inline;
 begin if Value < 1e-10 then Value := 1e-10; Result := Ln(Value); end;
 
 procedure TTaraDSPApp.ResetMasteringEngine(Channels: Integer);
-var c: Integer;
+var i: Integer;
 begin
-  SetLength(FErrorMem, Channels);
-  for c := 0 to High(FErrorMem) do begin FErrorMem[c] := 0.0; FErrorMem[c] := 0.0; end;
+  SetLength(FErrorMem, Channels * 2);
+  for i := 0 to High(FErrorMem) do FErrorMem[i] := 0.0;
 end;
 
 function TTaraDSPApp.ApplyMasteringDither(Sample: Single; Chan: Integer; Amount: Single): Single;
-var Dither, ResVal, Error, LSB: Single;
+var Dither, ResVal, Error, LSB: Single; Idx: Integer;
 begin
   LSB := 1.0 / 32767.0; 
   Dither := ((Random - 0.5) + (Random - 0.5)) * LSB * Amount;
   if Abs(Sample) < (LSB * 2) then Dither := Dither * 0.7;
   
-  // FIX: Die Indizes [0] und [1] sind jetzt über feste Zeichenketten erzwungen
-  ResVal := Sample + Dither + (FErrorMem[Chan][0] * 1.5) - (FErrorMem[Chan][1] * 0.5);
+  Idx := Chan * 2;
+  ResVal := Sample + Dither + (FErrorMem[Idx] * 1.5) - (FErrorMem[Idx + 1] * 0.5);
   ResVal := EnsureRange(ResVal, -1.0, 1.0); 
   ResVal := Round(ResVal * 32767) / 32767.0;
 
   Error := Sample - ResVal; 
-  FErrorMem[Chan][1] := FErrorMem[Chan][0]; 
-  FErrorMem[Chan][0] := Error;
+  FErrorMem[Idx + 1] := FErrorMem[Idx]; 
+  FErrorMem[Idx] := Error;
   Result := ResVal;
 end;
-
-
 function TTaraDSPApp.LoadWav(const FileName: string; out SR: Integer): TAudioData;
 var FS: TFileStream; H: TWavHeader; i, c, Samples: Integer; s16: SmallInt; b24: array[0..2] of Byte; s32: LongInt;
 begin
@@ -163,6 +171,7 @@ begin
     FS.Free; 
   end;
 end;
+
 procedure TTaraDSPApp.SaveWav(const FileName: string; const Data: TAudioData; SR, Bits: Integer; ForceMono: Boolean);
 var FS: TFileStream; H: TWavHeader; i, c, OutChans: Integer; s16: SmallInt; s32: LongInt; b24: array[0..2] of Byte;
 begin
@@ -171,12 +180,12 @@ begin
   FillChar(H, SizeOf(H), 0);
   H.RIFFID := 'RIFF'; H.WavID := 'WAVE'; H.FmtID := 'fmt '; H.FmtSize := 16; H.FormatTag := 1;
   H.Channels := OutChans; H.SampleRate := SR; H.BitsPerSample := Bits; H.BlockAlign := H.Channels * (Bits div 8);
-  H.BytesPerSec := SR * H.BlockAlign; H.DataID := 'data'; H.DataSize := Length(Data) * H.BlockAlign; H.Size := 36 + H.DataSize;
+  H.BytesPerSec := SR * H.BlockAlign; H.DataID := 'data'; H.DataSize := Length(Data[0]) * H.BlockAlign; H.Size := 36 + H.DataSize;
   ResetMasteringEngine(OutChans); 
   FS := TFileStream.Create(FileName, fmCreate);
   try
     FS.Write(H, SizeOf(H));
-    for i := 0 to High(Data) do 
+    for i := 0 to High(Data[0]) do 
     begin
       for c := 0 to OutChans - 1 do 
       begin
@@ -208,10 +217,10 @@ procedure TTaraDSPApp.WriteInfoChunk(Stream: TStream; const ID: string; const Va
 var Len: LongInt; Zero: Char = #0;
 begin
   if Length(Value) = 0 then Exit; 
-  Stream.Write(ID, 4); 
+  Stream.Write(ID[1], 4); 
   Len := Length(Value) + 1; 
   Stream.Write(Len, 4);
-  Stream.Write(Value, Length(Value)); 
+  Stream.Write(Value[1], Length(Value)); 
   Stream.Write(Zero, 1); 
   if (Len mod 2 <> 0) then 
   begin
@@ -241,7 +250,6 @@ begin
     end;
   end;
 end;
-
 function TTaraDSPApp.ConvolveFFT(const Sig, Ker: TFloatBuffer): TFloatBuffer;
 var setup: Pointer; n, i, L1, L2: Integer; in1, in2, f1, f2, fRes, work: PSingle;
 begin
@@ -339,7 +347,7 @@ begin
       SetLength(A2, Length(A1)); 
       for c := 0 to High(A2) do 
       begin 
-        SetLength(A2[c], 1); A2[c][0] := 1.0; 
+        SetLength(A2[c], 1); A2[c] := 1.0; 
       end; 
       SR2 := SR1; 
     end;
@@ -394,3 +402,4 @@ begin
     end; 
   end; 
 end.
+
