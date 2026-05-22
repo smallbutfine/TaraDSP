@@ -1,7 +1,7 @@
 Changelog: IRConvolverPro v1.2 (Integrated Edition)
 New Features
 
-    GUI Edition Integrated: Introducing IRConvolverPro-GUI.exe, a full-featured graphical user interface for comfortable single-file processing.
+    GUI Edition Integrated: Introducing TaraDSP-GUI.exe, a full-featured graphical user interface for comfortable single-file processing.
     Hardware Truncation (-l / --len): Added a sample-accurate truncation feature. IRs can now be capped at fixed lengths (e.g., 1024 or 2048 samples) specifically for hardware modelers like Valeton GP-200, Line6 Helix, or Quad Cortex.
     Micro-Fade-Out Logic: Automated 20-sample micro-fade applied during truncation to eliminate digital clicks and ensure smooth signal termination.
     Dual-Mode Processing: The engine now operates in two modes:
