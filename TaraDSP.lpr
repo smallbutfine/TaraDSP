@@ -361,11 +361,20 @@ end;
 procedure TTaraDSPApp.DoRun;
 var StartTime: Int64; f1, f2, fOut, Msg: string; A1, A2, Res: TAudioData; SR1, SR2, bOut, c, TargetSR, TruncLen: Integer;
 begin
-  LoadConfig; Msg := CheckOptions('x:y:o:b:r:l:f:t:h m', 'help mono min in1 in2');
-  if (Msg <> '') or HasOption('h', 'help') or (ParamCount < 2) then begin ShowUsage; ExitCode := 1; Terminate; Exit; end;
+  LoadConfig; 
+  Msg := CheckOptions('x:y:o:b:r:l:f:t:h m', 'help mono min in1 in2');
+  if (Msg <> '') or HasOption('h', 'help') or (ParamCount < 2) then 
+  begin 
+    ShowUsage; ExitCode := 1; Terminate; Exit; 
+  end;
+  
   if HasOption('x', 'in1') then f1 := GetOptionValue('x', 'in1') else f1 := GetOptionValue('x');
   if HasOption('y', 'in2') then f2 := GetOptionValue('y', 'in2') else f2 := GetOptionValue('y');
-  fOut := GetOptionValue('o'); bOut := StrToIntDef(GetOptionValue('b', 'bits'), 24); TargetSR := StrToIntDef(GetOptionValue('r', 'rate'), 0); TruncLen := StrToIntDef(GetOptionValue('l'), 0);
+  fOut := GetOptionValue('o'); 
+  bOut := StrToIntDef(GetOptionValue('b'), 24); 
+  TargetSR := StrToIntDef(GetOptionValue('r'), 0); 
+  TruncLen := StrToIntDef(GetOptionValue('l'), 0);
+  
   StartTime := GetTickCount64;
   try
     A1 := LoadWav(f1, SR1); 
@@ -379,12 +388,17 @@ begin
       for c := 0 to High(A2) do 
       begin 
         SetLength(A2[c], 1); 
-        A2[c][0] := 1.0; // Der entscheidende Fix: Setzt das erste Sample auf 1.0
+        A2[c][0] := 1.0; 
       end; 
       SR2 := SR1; 
     end;
-    if HasOption('t') then TrimSilence(A2, -Abs(StrToFloatDef(GetOptionValue('t'), -70.0, DefaultFormatSettings)));
-    if HasOption('f') then ApplyFades(A2, SR2, 1.0, StrToFloatDef(GetOptionValue('f'), 10.0, DefaultFormatSettings));
+    
+    if HasOption('t') then 
+      TrimSilence(A2, -Abs(StrToFloatDef(GetOptionValue('t'), -70.0, DefaultFormatSettings)));
+      
+    if HasOption('f') then 
+      ApplyFades(A2, SR2, 1.0, StrToFloatDef(GetOptionValue('f'), 10.0, DefaultFormatSettings));
+      
     if (TargetSR > 0) then 
     begin 
       if SR1 <> TargetSR then A1 := ResampleAudio(A1, SR1, TargetSR, @ToBridgeSaveWav); 
@@ -395,16 +409,33 @@ begin
     begin 
       A2 := ResampleAudio(A2, SR2, SR1, @ToBridgeSaveWav); 
     end;
+    
     if (TruncLen > 0) then 
     begin 
-      for c := 0 to High(A1) do if Length(A1[c]) > TruncLen then SetLength(A1[c], TruncLen); 
-      for c := 0 to High(A2) do if Length(A2[c]) > TruncLen then SetLength(A2[c], TruncLen); 
+      for c := 0 to High(A1) do 
+      begin
+        if Length(A1[c]) > TruncLen then SetLength(A1[c], TruncLen); 
+      end;
+      for c := 0 to High(A2) do 
+      begin
+        if Length(A2[c]) > TruncLen then SetLength(A2[c], TruncLen); 
+      end;
     end;
-    SetLength(Res, Min(Length(A1), Length(A2))); 
-    for c := 0 to High(Res) do 
+
+    if (Length(A1) > 0) and (Length(A2) > 0) then
     begin
-      Res[c] := ConvolveFFT(A1[c], A2[c]);
+      SetLength(Res, Min(Length(A1), Length(A2))); 
+      for c := 0 to High(Res) do 
+      begin
+        WriteLn('Convolving Channel ', c + 1, '...'); 
+        Res[c] := ConvolveFFT(A1[c], A2[c]); 
+      end;
+    end
+    else 
+    begin
+      raise Exception.Create('Kanalanzahl der Eingangsdateien ist ungültig (0).');
     end;
+
     if HasOption('min') then 
     begin
       for c := 0 to High(Res) do 
@@ -412,10 +443,18 @@ begin
         Res[c] := ConvertToMinimumPhase(Res[c]);
       end;
     end;
+    
     Normalize(Res); 
     SaveWav(fOut, Res, SR1, bOut, HasOption('m', 'mono'));
-    WriteLn(Format('Success! Processing Time: %d ms', [GetTickCount64 - StartTime])); ExitCode := 0; Terminate;
-  except on E: Exception do begin WriteLn(StdErr, 'Error: ', E.Message); ExitCode := 1; Terminate; end; end;
+    
+    WriteLn(Format('Success! Processing Time: %d ms', [GetTickCount64 - StartTime])); 
+    ExitCode := 0; Terminate;
+  except 
+    on E: Exception do 
+    begin 
+      WriteLn(StdErr, 'Error: ', E.Message); ExitCode := 1; Terminate; 
+    end; 
+  end;
 end;
 
 procedure TTaraDSPApp.ShowUsage;
