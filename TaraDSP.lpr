@@ -28,6 +28,8 @@ type
     procedure LoadConfig;
     function  LogExtract(Value: Single): Single; inline;
     function  LoadWav(const FileName: string; out SR: Integer): TAudioData;
+    function  ApplyMasteringDither(Sample: Single; Chan: Integer; Amount: Single): Single;
+    procedure ResetMasteringEngine(Channels: Integer);
   public
     procedure SaveWav(const FileName: string; const Data: TAudioData; SR, Bits: Integer; ForceMono: Boolean);
     function  ConvolveFFT(const Sig, Ker: TFloatBuffer): TFloatBuffer;
@@ -74,14 +76,34 @@ begin
     _pffft_aligned_free := GetProcAddress(PHandle, 'pffft_aligned_free');
   end;
 end;
+{ --- Implementation --- }
 
 constructor TTaraDSPApp.Create(AOwner: TComponent);
 begin inherited Create(AOwner); Randomize; InitDynamicLibraries; end;
+
 procedure TTaraDSPApp.LoadConfig;
 begin FArtist := GetOptionValue('x', 'in1'); end;
 
 function TTaraDSPApp.LogExtract(Value: Single): Single; inline;
 begin if Value < 1e-10 then Value := 1e-10; Result := Ln(Value); end;
+
+procedure TTaraDSPApp.ResetMasteringEngine(Channels: Integer);
+var c: Integer;
+begin
+  SetLength(FErrorMem, Channels);
+  for c := 0 to High(FErrorMem) do begin FErrorMem[c][0] := 0; FErrorMem[c][1] := 0; end;
+end;
+
+function TTaraDSPApp.ApplyMasteringDither(Sample: Single; Chan: Integer; Amount: Single): Single;
+var Dither, ResVal, Error, LSB: Single;
+begin
+  LSB := 1.0 / 32767.0; Dither := ((Random - 0.5) + (Random - 0.5)) * LSB * Amount;
+  if Abs(Sample) < (LSB * 2) then Dither := Dither * 0.7;
+  ResVal := Sample + Dither + (FErrorMem[Chan][0] * 1.5) - (FErrorMem[Chan][1] * 0.5);
+  ResVal := EnsureRange(ResVal, -1.0, 1.0); ResVal := Round(ResVal * 32767) / 32767.0;
+  Error := Sample - ResVal; FErrorMem[Chan][1] := FErrorMem[Chan][0]; FErrorMem[Chan][0] := Error;
+  Result := ResVal;
+end;
 
 function TTaraDSPApp.LoadWav(const FileName: string; out SR: Integer): TAudioData;
 var FS: TFileStream; H: TWavHeader; i, c, Samples: Integer; s16: SmallInt; b24: array[0..2] of Byte; s32: LongInt;
@@ -96,40 +118,21 @@ begin
   finally FS.Free; end;
 end;
 
-function TTaraDSPApp.ApplyMasteringDither(Sample: Single; Chan: Integer; Amount: Single): Single;
-var 
-  Dither, ResVal, Error, LSB: Single;
-begin
-  LSB := 1.0 / 32767.0; 
-  Dither := ((Random - 0.5) + (Random - 0.5)) * LSB * Amount;
-  if Abs(Sample) < (LSB * 2) then Dither := Dither * 0.7;
-  
-  ResVal := Sample + Dither + (FErrorMem[Chan][0] * 1.5) - (FErrorMem[Chan][1] * 0.5);
-  ResVal := EnsureRange(ResVal, -1.0, 1.0); 
-  ResVal := Round(ResVal * 32767) / 32767.0;
-
-  Error := Sample - ResVal; 
-  FErrorMem[Chan][1] := FErrorMem[Chan][0]; 
-  FErrorMem[Chan][0] := Error;
-  Result := ResVal;
-end;
-
 procedure TTaraDSPApp.SaveWav(const FileName: string; const Data: TAudioData; SR, Bits: Integer; ForceMono: Boolean);
 var FS: TFileStream; H: TWavHeader; i, c, OutChans: Integer; s16: SmallInt; s32: LongInt; b24: array[0..2] of Byte;
 begin
   OutChans := IfThen(ForceMono, 1, Length(Data)); FillChar(H, SizeOf(H), 0);
   H.RIFFID := 'RIFF'; H.WavID := 'WAVE'; H.FmtID := 'fmt '; H.FmtSize := 16; H.FormatTag := 1;
   H.Channels := OutChans; H.SampleRate := SR; H.BitsPerSample := Bits; H.BlockAlign := H.Channels * (Bits div 8);
-  H.BytesPerSec := SR * H.BlockAlign; H.DataID := 'data'; H.DataSize := Length(Data) * H.BlockAlign; H.Size := 36 + H.DataSize;
-  SetLength(FErrorMem, OutChans); FS := TFileStream.Create(FileName, fmCreate);
+  H.BytesPerSec := SR * H.BlockAlign; H.DataID := 'data'; H.DataSize := Length(Data[0]) * H.BlockAlign; H.Size := 36 + H.DataSize;
+  ResetMasteringEngine(OutChans); FS := TFileStream.Create(FileName, fmCreate);
   try
     FS.Write(H, SizeOf(H));
-    for i := 0 to High(Data) do for c := 0 to OutChans - 1 do
-      if Bits = 16 then begin s16 := Round(Data[c][i] * 32767); FS.Write(s16, 2); end
+    for i := 0 to High(Data[0]) do for c := 0 to OutChans - 1 do
+      if Bits = 16 then begin s16 := Round(ApplyMasteringDither(Data[c][i], c, 1.0) * 32767); FS.Write(s16, 2); end
       else begin s32 := Round(EnsureRange(Data[c][i], -1.0, 1.0) * 8388607); b24[0] := s32 and $FF; b24[1] := (s32 shr 8) and $FF; b24[2] := (s32 shr 16) and $FF; FS.Write(b24, 3); end;
   finally FS.Free; end;
 end;
-
 function TTaraDSPApp.ConvolveFFT(const Sig, Ker: TFloatBuffer): TFloatBuffer;
 var setup: Pointer; n, i, L1, L2: Integer; in1, in2, f1, f2, fRes, work: PSingle;
 begin
@@ -137,7 +140,7 @@ begin
   setup := _pffft_new_setup(n, 0); in1 := _pffft_aligned_malloc(n * 4); in2 := _pffft_aligned_malloc(n * 4);
   f1 := _pffft_aligned_malloc(n * 4); f2 := _pffft_aligned_malloc(n * 4); fRes := _pffft_aligned_malloc(n * 4); work := _pffft_aligned_malloc(n * 4);
   try
-    FillChar(in1^, n * 4, 0); FillChar(in2^, n * 4, 0); if L1 > 0 then Move(Sig[0], in1^, L1 * 4); if L2 > 0 then Move(Ker[0], in2^, L2 * 4);
+    FillChar(in1^, n * 4, 0); FillChar(in2^, n * 4, 0); if L1 > 0 then Move(Sig, in1^, L1 * 4); if L2 > 0 then Move(Ker, in2^, L2 * 4);
     _pffft_transform_ordered(setup, in1, f1, work, PFFFT_FORWARD); _pffft_transform_ordered(setup, in2, f2, work, PFFFT_FORWARD);
     _pffft_zconvolve_accumulate(setup, f1, f2, fRes, 1.0); _pffft_transform_ordered(setup, fRes, in1, work, PFFFT_BACKWARD);
     SetLength(Result, L1 + L2 - 1); for i := 0 to High(Result) do Result[i] := in1[i] / n;
@@ -150,7 +153,7 @@ begin
   if Length(Data) = 0 then Exit(nil); n := 1; while n < (Length(Data) * 2) do n := n shl 1; HalfN := n div 2;
   setup := _pffft_new_setup(n, 0); inOut := _pffft_aligned_malloc(n * 4); spec := _pffft_aligned_malloc(n * 4); work := _pffft_aligned_malloc(n * 4);
   try
-    FillChar(inOut^, n * 4, 0); Move(Data[0], inOut^, Length(Data) * 4); _pffft_transform_ordered(setup, inOut, spec, work, PFFFT_FORWARD);
+    FillChar(inOut^, n * 4, 0); Move(Data, inOut^, Length(Data) * 4); _pffft_transform_ordered(setup, inOut, spec, work, PFFFT_FORWARD);
     spec := LogExtract(Abs(spec)); spec := LogExtract(Abs(spec));
     for i := 1 to HalfN - 1 do begin Mag := Sqrt(Sqr(spec[2*i]) + Sqr(spec[2*i+1])); Mag := LogExtract(Mag); spec[2*i] := Mag; spec[2*i+1] := 0.0; end;
     _pffft_transform_ordered(setup, spec, inOut, work, PFFFT_BACKWARD); for i := 0 to n - 1 do inOut[i] := inOut[i] / n;
@@ -174,7 +177,7 @@ begin
     A1 := LoadWav(f1, SR1); if f2 <> '' then A2 := LoadWav(f2, SR2) else begin SetLength(A2, Length(A1)); for c := 0 to High(A2) do begin SetLength(A2[c], 1); A2[c] := 1.0; end; SR2 := SR1; end;
     if HasOption('t') then TrimSilence(A2, -Abs(StrToFloatDef(GetOptionValue('t'), -70.0, DefaultFormatSettings)));
     if HasOption('f') then ApplyFades(A2, SR2, 1.0, StrToFloatDef(GetOptionValue('f'), 10.0, DefaultFormatSettings));
-    TMethod.Code := @TTaraDSPApp.SaveWav; TMethod.Data := Self;
+    TMethod.Code := @Self.SaveWav; TMethod.Data := Self;
     if (TargetSR > 0) then begin if SR1 <> TargetSR then A1 := ResampleAudio(A1, SR1, TargetSR, @TMethod); if SR2 <> TargetSR then A2 := ResampleAudio(A2, SR2, TargetSR, @TMethod); SR1 := TargetSR; end
     else if SR1 <> SR2 then begin A2 := ResampleAudio(A2, SR2, SR1, @TMethod); end;
     if (TruncLen > 0) then begin for c := 0 to High(A1) do if Length(A1[c]) > TruncLen then SetLength(A1[c], TruncLen); for c := 0 to High(A2) do if Length(A2[c]) > TruncLen then SetLength(A2[c], TruncLen); end;
@@ -192,3 +195,4 @@ begin
 end;
 
 begin with TTaraDSPApp.Create(nil) do try Run; finally Free; end; end.
+
