@@ -68,11 +68,12 @@ jobs:
       if: matrix.os != 'windows-latest'
       run: |
         if [ "${{ matrix.os }}" = "macos-latest" ]; then
-          # Nutzt die korrekte Syntax, um Linker-Optionen über lazbuild an fpc weiterzureichen
-          lazbuild --build-mode=Release --user-options="-Fl/usr/local/lib -Fl$(brew --prefix)/lib" IRConvolverPro.lpi
-        else
-          lazbuild --build-mode=Release IRConvolverPro.lpi
+          # Übergibt die Linker-Pfade direkt als Umgebungsvariable an FPC
+          export FPCOPT="-Fl/usr/local/lib -Fl$(brew --prefix)/lib"
         fi
+        
+        # Startet den Build ganz normal ohne zusätzliche Kommandozeilenoptionen
+        lazbuild --build-mode=Release IRConvolverPro.lpi
       shell: bash
           
     - name: Prepare Artifacts
