@@ -65,6 +65,11 @@ var
     FArtist: string;
     procedure LoadConfig;
     function LogExtract(Value: Single): Single; inline;
+    
+    { NEU: Resampling-Erweiterungen }
+    function GetAvailableEngine: TSRCEngine;
+    function ResampleLinear(const Channel: TFloatBuffer; InSR, OutSR: Integer): TFloatBuffer;
+    function ResampleViaFinalCD(const Channel: TFloatBuffer; InSR, OutSR: Integer): TFloatBuffer;
     { I/O }
     function  LoadWav(const FileName: string; out SR: Integer): TAudioData;
     procedure SaveWav(const FileName: string; const Data: TAudioData; SR, Bits: Integer; ForceMono: Boolean);
