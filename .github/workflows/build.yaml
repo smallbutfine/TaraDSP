@@ -49,10 +49,12 @@ jobs:
         platform: x64
       
     - name: Compile Static C-Backend (PFFFT)
-      # Erzeugt .obj auf Windows und .o auf Unix
       run: |
-        if [ "$RUNNER_OS" == "Windows" ]; then
+        if [ "${{ matrix.os }}" = "windows-latest" ]; then
           gcc -O3 -c pffft.c -o pffft.obj -msse -mfpmath=sse
+        elif [ "${{ matrix.os }}" = "macos-latest" ]; then
+          # Erzwingt x86_64 Architektur für den Intel-Pascal-Compiler auf macOS
+          gcc -O3 -arch x86_64 -c pffft.c -o pffft.o
         else
           gcc -O3 -fPIC -c pffft.c -o pffft.o
         fi
@@ -65,8 +67,12 @@ jobs:
     - name: Build Application (Linux & macOS)
       if: matrix.os != 'windows-latest'
       run: |
-        # Direktaufruf von lazbuild ohne den Umweg über die fehleranfällige build.sh
-        lazbuild --build-mode=Release IRConvolverPro.lpi
+        if [ "${{ matrix.os }}" = "macos-latest" ]; then
+          # Teilt Lazarus mit, wo die Homebrew-Bibliotheken (libsoxr) liegen
+          lazbuild --build-mode=Release -Fl/usr/local/lib -Fl$(brew --prefix)/lib IRConvolverPro.lpi
+        else
+          lazbuild --build-mode=Release IRConvolverPro.lpi
+        fi
       shell: bash
           
     - name: Prepare Artifacts
