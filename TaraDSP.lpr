@@ -21,6 +21,8 @@ const
   
   PFFFT_FORWARD = 0; 
   PFFFT_BACKWARD = 1;
+  / NEU: Mathematische Masken für die Windows-FPU
+  MCW_EM = $0008001F;
 
 type
   TWavHeader = packed record
