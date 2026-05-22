@@ -48,13 +48,19 @@ jobs:
         install: mingw-w64-x86_64-gcc
         update: false
 
-    - name: Compile Static C-Backend (PFFFT)
+    # 1. C-Backend Kompilierung exklusiv für Windows (Nutzt die native MSYS2-Shell)
+    - name: Compile Static C-Backend PFFFT (Windows)
+      if: matrix.os == 'windows-latest'
       run: |
-        if [ "${{ matrix.os }}" = "windows-latest" ]; then
-          # FEHLER BEHOBEN: Nutzt jetzt den perfekt konfigurierten MSYS2-Compiler direkt über den PATH
-          gcc -O3 -c pffft.c -o pffft.obj -mavx2 -mfpmath=sse
-          gcc -O3 -c pffft.c -o pffft_noAVX2.obj -msse -mfpmath=sse
-        elif [ "${{ matrix.os }}" = "macos-latest" ]; then
+        gcc -O3 -c pffft.c -o pffft.obj -mavx2 -mfpmath=sse
+        gcc -O3 -c pffft.c -o pffft_noAVX2.obj -msse -mfpmath=sse
+      shell: msys2 {0}
+
+    # 2. C-Backend Kompilierung für Linux & macOS (Nutzt die standardmäßige Bash)
+    - name: Compile Static C-Backend PFFFT (Linux & macOS)
+      if: matrix.os != 'windows-latest'
+      run: |
+        if [ "${{ matrix.os }}" = "macos-latest" ]; then
           clang -O3 -dynamiclib -arch x86_64 -arch arm64 -mmacosx-version-min=11.0 pffft.c -o libpffft.dylib
           file libpffft.dylib
         else
@@ -62,7 +68,6 @@ jobs:
           gcc -O3 -fPIC -c pffft.c -o pffft_noAVX2.o
         fi
       shell: bash
-
 
     - name: Build Application (Linux & macOS)
       if: matrix.os != 'windows-latest'
