@@ -412,23 +412,23 @@ var
 begin
   LoadConfig;
   
-  { 1. Registriert die erlaubten Parameter, damit TCustomApplication sie versteht.
-       Ein Doppelpunkt (:) bedeutet, dass nach dem Parameter ein Wert folgen muss. }
-  Msg := CheckOptions('i1:i2:o:b:r:l:h:m', 'help:mono:min');
+  { Registriert die erlaubten Optionen. 
+    Kurzoptionen: -x (In1), -y (In2), -o (Out), -b (Bits), -r (Rate), -l (Limit) }
+  Msg := CheckOptions('x:y:o:b:r:l:h:m', 'help:mono:min:in1:in2');
   if (Msg <> '') or HasOption('h', 'help') or (ParamCount < 2) then begin 
     if Msg <> '' then WriteLn(StdErr, 'Parameter-Fehler: ', Msg);
     ShowUsage; 
-    Terminate(1); // Setzt den Exit-Code auf 1 für fehlerhafte GitHub Actions
+    Terminate(1);
     Exit; 
   end;
   
-  { 2. Werte von der Kommandozeile auslesen }
-  f1 := GetOptionValue('i1'); 
-  f2 := GetOptionValue('i2'); 
+  { Liest die Werte über die sauberen Kurz- und Langoptionen aus }
+  if HasOption('x', 'in1') then f1 := GetOptionValue('x', 'in1') else f1 := GetOptionValue('x');
+  if HasOption('y', 'in2') then f2 := GetOptionValue('y', 'in2') else f2 := GetOptionValue('y');
   fOut := GetOptionValue('o');
   bOut := StrToIntDef(GetOptionValue('b', 'bits'), 24);
   TargetSR := StrToIntDef(GetOptionValue('r', 'rate'), 0);
-  TruncLen := StrToIntDef(GetOptionValue('l'), 0); // Liest das Limit aus Test 2 aus
+  TruncLen := StrToIntDef(GetOptionValue('l'), 0);
 
   StartTime := GetTickCount64; // Startet die Zeitmessung plattformunabhängig
   try
