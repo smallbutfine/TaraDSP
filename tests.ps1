@@ -1,31 +1,35 @@
 # TaraDSP Test Suite
-$Exe = ".\taradsp.exe"
+# Automatischer Suchmodus für Compiler-Ausgaben integriert
+
 $TestData = ".\Test_Data"
 $Results = ".\Test_Results"
 
 Write-Host "[*] Starting TaraDSP Test Suite..." -ForegroundColor Cyan
 
-# === NEU: SANITY CHECK FÜR DIE PIPELINE ===
-Write-Host "[*] Verifying Executable Integrity..." -NoNewline
-try {
-    # Führt die Exe testweise aus, um Windows-Ladefehler abzufangen
-    $testRun = Start-Process -FilePath $Exe -ArgumentList "-h" -NoNewWindow -PassThru -Wait
-    if ($testRun.ExitCode -ne 0 -and $testRun.ExitCode -ne 1) {
-        Write-Host " CRASHED (Exit Code: $($testRun.ExitCode))" -ForegroundColor Red
-        Write-Host "[!] Windows konnte die Anwendung nicht laden. Mögliche Ursachen:" -ForegroundColor Yellow
-        Write-Host "    1. libpffft.dll oder libsoxr.dll fehlt im selben Ordner." -ForegroundColor Yellow
-        Write-Host "    2. Die CPU des GitHub-Servers unterstützt das kompilierte AVX2 nicht." -ForegroundColor Yellow
-        exit 1
+# === NEU: AUTOMATISCHE EXE-SUCHE UND REPARATUR ===
+Write-Host "[*] Searching for compiled taradsp.exe..."
+$FoundExe = Get-ChildItem -Recurse -Filter "taradsp.exe" | Select-Object -First 1
+
+if ($FoundExe) {
+    $RealExePath = $FoundExe.FullName
+    Write-Host "[+] Found executable at: $RealExePath" -ForegroundColor Green
+    
+    # Kopiere die Exe ins Hauptverzeichnis, damit der Test-Pfad (.\taradsp.exe) stimmt
+    if ($RealExePath -ne "$(Get-Location)\taradsp.exe") {
+        Copy-Item -Path $RealExePath -Destination ".\taradsp.exe" -Force
     }
-    Write-Host " OK" -ForegroundColor Green
-} catch {
-    Write-Host " UNABLE TO LAUNCH ($_)" -ForegroundColor Red
+} else {
+    Write-Host "[!] CRITICAL ERROR: taradsp.exe not found anywhere in the workspace!" -ForegroundColor Red
     exit 1
 }
 
+$Exe = ".\taradsp.exe"
+
+# Sicherstellen, dass die Umgebung sauber ist
 if (Test-Path $Results) { Remove-Item -Recurse -Force $Results }
 New-Item -ItemType Directory -Path $Results | Out-Null
 
+$GlobalPass = $true
 
 # TEST 1: Basic Convolution & 24-bit Output
 Write-Host "[Test 1] Standard Convolution (24-bit)... " -NoNewline
