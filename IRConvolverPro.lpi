@@ -89,6 +89,11 @@
     <Other>
       <WriteFPCLogo Value="False"/>
       <CustomOptions Value="-CfAVX2 -CpCOREAVX2 -OoFASTMATH"/>
+      <CompilerMessages>
+        <IgnoredMessages Value=""/>
+      </CompilerMessages>
+      <CustomOptionsCondition Value="TargetOS='darwin'"/>
+      <CustomOptions Value="-WM11.0"/>
     </Other>
  </CompilerOptions>
 </CONFIG>
