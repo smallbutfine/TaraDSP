@@ -36,6 +36,20 @@ type
 
   PPFFFT_Setup = Pointer;
   TPFFFT_Transform = (PFFFT_REAL = 0, PFFFT_COMPLEX = 1);
+  
+  { Die verfügbaren Resampling-Engines }
+  TSRCEngine = (engLinear, engSoxr, engR8Brain, engFinalCD);
+
+  { r8brain-API Funktionspointer }
+  TR8B_Create = function(InSR, OutSR: Double; MaxSamples: Integer; ReqTransBand: Double; Res: Integer): Pointer; cdecl;
+  TR8B_Process = function(Instance: Pointer; InBuf: PSingle; InLen: Integer; out OutBuf: PSingle): Integer; cdecl;
+  TR8B_Delete = procedure(Instance: Pointer); cdecl;
+
+var
+  R8BrainLibHandle: TLibHandle = NilHandle;
+  r8b_create: TR8B_Create = nil;
+  r8b_process: TR8B_Process = nil;
+  r8b_delete: TR8B_Delete = nil;
 
   TWavHeader = packed record
     RIFFID: array[0..3] of Char; Size: LongInt; WavID: array[0..3] of Char;
@@ -93,6 +107,11 @@ type
 
 { Globale Bridge-Funktionspointer, die im gesamten Code aufgerufen werden }
 var
+  R8BrainLibHandle: TLibHandle = NilHandle;
+  r8b_create: TR8B_Create = nil;
+  r8b_process: TR8B_Process = nil;
+  r8b_delete: TR8B_Delete = nil;
+  
   _soxr_create: TFuncSoxrCreate = nil;
   _soxr_process: TFuncSoxrProcess = nil;
   _soxr_delete: TFuncSoxrDelete = nil;
