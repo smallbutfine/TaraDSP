@@ -75,8 +75,7 @@ type
 { --- Externe Bibliothekseinbindung (libsoxr) --- }
 
 {$IFDEF DARWIN}
-uses
-  dynlibs; // Wird für echtes Laden zur Laufzeit benötigt
+// dynlibs wurde nach ganz oben in den Haupt-uses-Block verschoben! [1]
 
 type
   TFuncSoxrCreate  = function(in_rate, out_rate: Double; num_chans: Cardinal; error: PInteger; io_spec, q_spec, runtime_spec: Pointer): Pointer; cdecl;
@@ -90,8 +89,8 @@ var
   soxr_delete: TFuncSoxrDelete = nil;
 
 procedure InitSoxrMacOS;
-begin
-  if SoxrLibHandle = SafeLoadLibraryHandle then begin
+  begin
+    if SoxrLibHandle = SafeLoadLibraryHandle then begin
     // Sucht nacheinander an üblichen Mac-Pfaden nach der Bibliothek
     SoxrLibHandle := LoadLibrary(LIB_SOXR);
     if SoxrLibHandle = SafeLoadLibraryHandle then SoxrLibHandle := LoadLibrary('/usr/local/lib/' + LIB_SOXR);
