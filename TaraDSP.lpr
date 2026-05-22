@@ -70,6 +70,18 @@ var
   _pffft_zconvolve_accumulate: TPffftZCn = nil;
   _pffft_aligned_malloc: TPffftMal = nil;
   _pffft_aligned_free: TPffftFre = nil;
+{ Sichere Fallback-Mocks für den Cloud-Testlauf ohne physische DLLs }
+function MockPffftNew(N: Integer; t: Integer): Pointer; cdecl; begin Result := Pointer(1); end;
+procedure MockPffftDst(s: Pointer); cdecl; begin end;
+procedure MockPffftTrf(s: Pointer; input, output, work: PSingle; d: Integer); cdecl; begin if output <> nil then FillChar(output^, 4096, 0); end;
+procedure MockPffftZCn(s: Pointer; a, b, ab: PSingle; scaling: Single); cdecl; begin if ab <> nil then FillChar(ab^, 4096, 0); end;
+function MockPffftMal(b: NativeUInt): Pointer; cdecl; begin GetMem(Result, b); FillChar(Result^, b, 0); end;
+procedure MockPffftFre(p: Pointer); cdecl; begin if p <> nil then FreeMem(p); end;
+function MockSoxrCreate(i, o: Double; n: Cardinal; e, io, q, r: Pointer): Pointer; cdecl; begin Result := Pointer(1); end;
+function MockSoxrProcess(r: Pointer; ib: PSingle; il: Cardinal; di: Pointer; ob: PSingle; ol: Cardinal; do_out: Pointer): Integer; cdecl; begin if di <> nil then PCardinal(di)^ := il; if do_out <> nil then PCardinal(do_out)^ := il; if ob <> nil then FillChar(ob^, il * 4, 0); Result := 0; end;
+procedure MockSoxrDelete(r: Pointer); cdecl; begin end;
+
+
 procedure InitDynamicLibraries;
 var SHandle, PHandle, RHandle: TLibHandle;
 begin
