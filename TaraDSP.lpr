@@ -196,6 +196,15 @@ begin
     _pffft_aligned_free         := @MockPffftFre;
   end;
   {$ENDIF}
+  {$IFDEF WINDOWS}
+  R8BrainLibHandle := LoadLibrary('r8bsrc.dll');
+  if R8BrainLibHandle <> NilHandle then begin
+    r8b_create  := TR8B_Create(GetProcAddress(R8BrainLibHandle, 'r8b_create'));
+    r8b_process := TR8B_Process(GetProcAddress(R8BrainLibHandle, 'r8b_process'));
+    r8b_delete  := TR8B_Delete(GetProcAddress(R8BrainLibHandle, 'r8b_delete'));
+  end;
+  {$ENDIF}
+
 end;
 
 { --- Implementierung --- }
