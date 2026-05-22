@@ -8,7 +8,7 @@ set LAZ_PATH=lazbuild
 %LAZ_PATH% --build-mode=Release TaraDSP.lpi
 
 if %ERRORLEVEL% NEQ 0 (
-    echo [!] Fehler beim Kompilieren!
+    echo [!] Error while compiling!
     if not defined GITHUB_ACTIONS pause
     exit /b %ERRORLEVEL%
 )
