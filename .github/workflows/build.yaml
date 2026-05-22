@@ -67,11 +67,6 @@ jobs:
     - name: Build Application (Linux & macOS)
       if: matrix.os != 'windows-latest'
       run: |
-        if [ "${{ matrix.os }}" = "macos-latest" ]; then
-          # Setzt das macOS-Ziel-SDK für den Pascal-Compiler auf Version 11.0 hoch
-          export FPCOPT="-WM11.0"
-        fi
-        
         lazbuild --build-mode=Release IRConvolverPro.lpi
       shell: bash
           
