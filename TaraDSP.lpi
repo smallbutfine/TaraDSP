@@ -15,36 +15,35 @@
     </General>
     <BuildModes>
       <Item Name="Release" Default="True"/>
-      <Item Name="Debug">
+      <Item Name="Release-NoAVX2">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
-            <Filename Value="TaraDSP"/>
+            <Filename Value="taradsp-noAVX2"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
             <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
-          <Parsing>
-            <SyntaxOptions>
-              <IncludeAssertionCode Value="True"/>
-            </SyntaxOptions>
-          </Parsing>
           <CodeGeneration>
-            <Checks>
-              <IOChecks Value="True"/>
-              <RangeChecks Value="True"/>
-              <OverflowChecks Value="True"/>
-              <StackChecks Value="True"/>
-            </Checks>
-            <VerifyObjMethodCallValidity Value="True"/>
+            <SmartLinkUnit Value="True"/>
+            <RelocatableUnit Value="True"/>
+            <Optimizations>
+              <OptimizationLevel Value="3"/>
+            </Optimizations>
           </CodeGeneration>
           <Linking>
             <Debugging>
-              <DebugInfoType Value="dsDwarf3"/>
-              <UseExternalDbgSyms Value="True"/>
+              <GenerateDebugInfo Value="False"/>
+              <RunWithoutDebug Value="True"/>
+              <StripSymbols Value="True"/>
             </Debugging>
+            <LinkSmart Value="True"/>
           </Linking>
+          <Other>
+            <WriteFPCLogo Value="False"/>
+            <CustomOptions Value="-OoFASTMATH"/>
+          </Other>
         </CompilerOptions>
       </Item>
     </BuildModes>
@@ -88,12 +87,7 @@
     </Linking>
     <Other>
       <WriteFPCLogo Value="False"/>
-      <CustomOptions Value="-OoFASTMATH"/>
-      <CompilerMessages>
-        <IgnoredMessages Value=""/>
-      </CompilerMessages>
-      <CustomOptionsCondition Value="TargetOS='darwin'"/>
-      <CustomOptions Value="-WM11.0"/>
+      <CustomOptions Value="-CfAVX2 -CpCOREAVX2 -OoFASTMATH"/>
     </Other>
  </CompilerOptions>
 </CONFIG>
