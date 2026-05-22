@@ -53,23 +53,50 @@ jobs:
         if [ "${{ matrix.os }}" = "windows-latest" ]; then
           gcc -O3 -c pffft.c -o pffft.obj -msse -mfpmath=sse
         elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-          # Erzwingt x86_64 und setzt das minimale OS-Target auf ein modernes Level (11.0 Big Sur)
-          gcc -O3 -arch x86_64 -mmacosx-version-min=11.0 -c pffft.c -o pffft.o
+          # Erzeugt zwei getrennte C-Objekte für beide Mac-Architekturen
+          gcc -O3 -arch x86_64 -mmacosx-version-min=11.0 -c pffft.c -o pffft_x86.o
+          gcc -O3 -arch arm64 -mmacosx-version-min=11.0 -c pffft.c -o pffft_arm.o
         else
           gcc -O3 -fPIC -c pffft.c -o pffft.o
         fi
       shell: bash
 
+    - name: Build Application (Linux & macOS)
+      if: matrix.os != 'windows-latest'
+      run: |
+        if [ "${{ matrix.os }}" = "macos-latest" ]; then
+          export FPCOPT="-WM11.0"
+          
+          echo "=== Baue macOS Intel (x86_64) Binary ==="
+          cp pffft_x86.o pffft.o
+          lazbuild --build-mode=Release --target-cpu=x86_64 IRConvolverPro.lpi
+          mv IRConvolverPro IRConvolverPro_x86
+          
+          echo "=== Baue macOS Apple Silicon (ARM64) Binary ==="
+          cp pffft_arm.o pffft.o
+          lazbuild --build-mode=Release --target-cpu=aarch64 IRConvolverPro.lpi
+          mv IRConvolverPro IRConvolverPro_arm
+          
+          echo "=== Verschmelze Architekturen zu Universal Binary ==="
+          lipo -create IRConvolverPro_x86 IRConvolverPro_arm -output IRConvolverPro
+          
+          # Prüft das Ergebnis im Log zur Sicherheit
+          file IRConvolverPro
+          
+          # Temporäre Zwischen-Binaries aufräumen
+          rm IRConvolverPro_x86 IRConvolverPro_arm pffft.o
+        else
+          # Linux Standard-Build
+          lazbuild --build-mode=Release IRConvolverPro.lpi
+        fi
+      shell: bash
+
+
     - name: Build CLI & GUI Editions
       if: ${{ matrix.os == 'windows-latest' }}
       run: ./build.bat
       
-    - name: Build Application (Linux & macOS)
-      if: matrix.os != 'windows-latest'
-      run: |
-        lazbuild --build-mode=Release IRConvolverPro.lpi
-      shell: bash
-          
+      
     - name: Prepare Artifacts
       shell: bash
       run: |
