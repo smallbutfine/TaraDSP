@@ -104,20 +104,20 @@ jobs:
     - name: Build Application (Windows)
       if: matrix.os == 'windows-latest'
       run: |
-        # Windows: Erst AVX2 bauen (nutzt deine build.bat)
+        # 1. AVX2 bauen (nutzt deine build.bat)
         ./build.bat
         
-        # Die normale AVX2-Exe bleibt als "TaraDSP.exe" (OHNE Namenszusatz) erhalten.
-        # Wir stellen nur sicher, dass die Schreibweise stimmt:
+        # Sicherstellen, dass das Hauptbinary ohne Zusatz exakt geschrieben ist
         if exist taradsp.exe move taradsp.exe TaraDSP.exe
         
-        # Windows: Dann No-AVX2-Version bauen
+        # 2. No-AVX2-Version bauen
         set PROJECT_FILE=TaraDSP.lpi
         if exist taradsp.lpi set PROJECT_FILE=taradsp.lpi
         lazbuild -B --build-mode=Release-NoAVX2 %PROJECT_FILE%
         
-        # Erzwingt die korrekte Groß-Kleinschreibung für die No-AVX2-Exe
-        if exist taradsp-noAVX2.exe move taradsp-noAVX2.exe TaraDSP-noAVX2.exe
+        # 3. Dynamische Suche nach der NoAVX2-Datei über PowerShell
+        # FPC legt die Exe je nach Cache in .\lib\x86_64-win64\ ab. Wir holen sie vor!
+        powershell -Command "$f = Get-ChildItem -Recurse -Include *noAVX2.exe | Select-Object -First 1; if ($f) { Copy-Item $f.FullName -Destination '.\TaraDSP-noAVX2.exe' -Force; Write-Host 'Found and moved NoAVX2 Exe!' } else { Write-Host 'NoAVX2 Exe not found in build tree' }"
       shell: cmd
 
     - name: Run TaraDSP Test Suite (Windows)
