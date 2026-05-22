@@ -345,7 +345,100 @@ begin
 end;
 
 function TTaraDSPApp.ConvertToMinimumPhase(const Data: TFloatBuffer): TFloatBuffer;
-begin Result := Data; end;
+var
+  setup: PPFFFT_Setup;
+  n, i, HalfN: Integer;
+  inOut, spec, work: PSingle;
+  Mag, Phase: Single;
+begin
+  if Length(Data) = 0 then Exit(nil);
+
+  // 1. FFT-Größe bestimmen (nächste Zweierpotenz, mindestens doppelte Datenlänge wegen Aliasing)
+  n := 1;
+  while n < (Length(Data) * 2) do n := n shl 1;
+  HalfN := n div 2;
+
+  setup := _pffft_new_setup(n, PFFFT_REAL);
+  inOut := _pffft_aligned_malloc(n * SizeOf(Single));
+  spec  := _pffft_aligned_malloc(n * SizeOf(Single));
+  work  := _pffft_aligned_malloc(n * SizeOf(Single));
+  try
+    // Daten in den Eingabepuffer kopieren und mit Nullen auffüllen
+    FillChar(inOut^, n * SizeOf(Single), 0);
+    Move(Data[0], inOut^, Length(Data) * SizeOf(Single));
+
+    // 2. Vorwärts-FFT: Zeitbereich -> Frequenzbereich
+    _pffft_transform_ordered(setup, inOut, spec, work, PFFFT_FORWARD);
+
+    { PFFFT lagert Real- und Imaginärteil im Puffer paarweise: 
+      spec[0] = Real(0), spec[1] = Real(Nyquist)
+      Ab i=1: spec[2*i] = Real(i), spec[2*i+1] = Imag(i) }
+
+    // DC und Nyquist-Komponente transformieren (nur Realteile)
+    spec[0] := LogExtract(Abs(spec[0]));
+    spec[1] := LogExtract(Abs(spec[1]));
+
+    // Spektrum in den Logarithmischen Amplitudenbereich überführen (Real Cepstrum Fundament)
+    for i := 1 to HalfN - 1 do
+    begin
+      Mag := Sqrt(Sqr(spec[2 * i]) + Sqr(spec[2 * i + 1]));
+      Mag := LogExtract(Mag);
+      spec[2 * i] := Mag;
+      spec[2 * i + 1] := 0.0; // Imaginärteil für das reale Cepstrum nullen
+    end;
+
+    // 3. Rückwärts-FFT: Log-Spektrum -> Cepstrum (Zeitbereich)
+    _pffft_transform_ordered(setup, spec, inOut, work, PFFFT_BACKWARD);
+    for i := 0 to n - 1 do inOut[i] := inOut[i] / n; // PFFFT Skalierung
+
+    // 4. Liftering (Homomorphes System): Kausalität erzwingen
+    // Werte bei t=0 und t=Nyquist bleiben gleich, t > Nyquist wird gespiegelt/gelöscht
+    inOut[0] := inOut[0];
+    inOut[HalfN] := inOut[HalfN];
+    for i := 1 to HalfN - 1 do
+    begin
+      inOut[i] := inOut[i] * 2.0;       // Kausale Hälfte verdoppeln
+      inOut[n - i] := 0.0;             // Antikausale Hälfte eliminieren
+    end;
+
+    // 5. Vorwärts-FFT: Cepstrum -> Minimum-Phase-Spektrum
+    _pffft_transform_ordered(setup, inOut, spec, work, PFFFT_FORWARD);
+
+    // DC und Nyquist exponentiell zurückrechnen
+    spec[0] := Exp(spec[0]);
+    spec[1] := Exp(spec[1]);
+
+    // Komplexe Exponentiation (Phasenrekonstruktion via Hilbert-Beziehung)
+    for i := 1 to HalfN - 1 do
+    begin
+      Mag := Exp(spec[2 * i]);          // Betrag zurückholen
+      Phase := spec[2 * i + 1];        // Generierte Phase aus der Transformation
+      spec[2 * i] := Mag * Cos(Phase);  // Neuer Realteil
+      spec[2 * i + 1] := Mag * Sin(Phase); // Neuer Imaginärteil
+    end;
+
+    // 6. Finale Rückwärts-FFT: Minimum-Phase-Spektrum -> Minimum-Phase-Zeitbereich
+    _pffft_transform_ordered(setup, spec, inOut, work, PFFFT_BACKWARD);
+    
+    // Ergebnis auf Originalgröße zuschneiden und normieren
+    SetLength(Result, Length(Data));
+    for i := 0 to High(Result) do 
+      Result[i] := inOut[i] / n;
+
+  finally
+    _pffft_aligned_free(inOut);
+    _pffft_aligned_free(spec);
+    _pffft_aligned_free(work);
+    _pffft_destroy_setup(setup);
+  end;
+end;
+
+{ Interne DSP-Hilfsfunktion zur Vermeidung von ln(0) Abstürzen }
+function LogExtract(Value: Single): Single; inline;
+begin
+  if Value < 1e-10 then Value := 1e-10;
+  Result := LogN(Value);
+end;
 
 procedure TTaraDSPApp.ApplyFades(var Data: TAudioData; SR: Integer; InMS, OutMS: Single); begin end;
 procedure TTaraDSPApp.TrimSilence(var Data: TAudioData; ThresholdDB: Single); begin end;
