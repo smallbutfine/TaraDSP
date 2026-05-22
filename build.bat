@@ -1,11 +1,11 @@
 @echo off
-echo [*] Baue IRConvolverPro (Release Mode)...
+echo [*] Building TaraDSP (Release Mode)...
 
 :: Nutzt lazbuild aus dem PATH (auf GitHub) oder lokal
 set LAZ_PATH=lazbuild
 
 :: Kompiliere das Projekt mit der Release-Konfiguration
-%LAZ_PATH% --build-mode=Release IRConvolverPro.lpi
+%LAZ_PATH% --build-mode=Release TaraDSP.lpi
 
 if %ERRORLEVEL% NEQ 0 (
     echo [!] Fehler beim Kompilieren!
