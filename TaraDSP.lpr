@@ -921,18 +921,195 @@ begin
   if m > 1e-7 then for c := 0 to High(Data) do for i := 0 to High(Data[c]) do Data[c][i] := Data[c][i] / m;
 end;
 
-function TIRConvolverApp.ConvertToMinimumPhase(const Data: TFloatBuffer): TFloatBuffer;
+function TTaraDSPApp.ConvertToMinimumPhase(const Data: TFloatBuffer): TFloatBuffer;
+var
+  setup: PPFFFT_Setup;
+  n, i, HalfN: Integer;
+  inOut, spec, work: PSingle;
+  Mag, Phase: Single;
 begin
-  Result := Data;
+  if Length(Data) = 0 then Exit(nil);
+
+  // 1. FFT-Größe bestimmen (nächste Zweierpotenz, mindestens doppelte Datenlänge wegen Aliasing)
+  n := 1;
+  while n < (Length(Data) * 2) do n := n shl 1;
+  HalfN := n div 2;
+
+  setup := _pffft_new_setup(n, PFFFT_REAL);
+  inOut := _pffft_aligned_malloc(n * SizeOf(Single));
+  spec  := _pffft_aligned_malloc(n * SizeOf(Single));
+  work  := _pffft_aligned_malloc(n * SizeOf(Single));
+  try
+    // Daten in den Eingabepuffer kopieren und mit Nullen auffüllen
+    FillChar(inOut^, n * SizeOf(Single), 0);
+    Move(Data[0], inOut^, Length(Data) * SizeOf(Single));
+
+    // 2. Vorwärts-FFT: Zeitbereich -> Frequenzbereich
+    _pffft_transform_ordered(setup, inOut, spec, work, PFFFT_FORWARD);
+
+    { PFFFT lagert Real- und Imaginärteil im Puffer paarweise: 
+      spec[0] = Real(0), spec[1] = Real(Nyquist)
+      Ab i=1: spec[2*i] = Real(i), spec[2*i+1] = Imag(i) }
+
+    // DC und Nyquist-Komponente transformieren (nur Realteile)
+    spec[0] := LogExtract(Abs(spec[0]));
+    spec[1] := LogExtract(Abs(spec[1]));
+
+    // Spektrum in den Logarithmischen Amplitudenbereich überführen (Real Cepstrum Fundament)
+    for i := 1 to HalfN - 1 do
+    begin
+      Mag := Sqrt(Sqr(spec[2 * i]) + Sqr(spec[2 * i + 1]));
+      Mag := LogExtract(Mag);
+      spec[2 * i] := Mag;
+      spec[2 * i + 1] := 0.0; // Imaginärteil für das reale Cepstrum nullen
+    end;
+
+    // 3. Rückwärts-FFT: Log-Spektrum -> Cepstrum (Zeitbereich)
+    _pffft_transform_ordered(setup, spec, inOut, work, PFFFT_BACKWARD);
+    for i := 0 to n - 1 do inOut[i] := inOut[i] / n; // PFFFT Skalierung
+
+    // 4. Liftering (Homomorphes System): Kausalität erzwingen
+    // Werte bei t=0 und t=Nyquist bleiben gleich, t > Nyquist wird gespiegelt/gelöscht
+    inOut[0] := inOut[0];
+    inOut[HalfN] := inOut[HalfN];
+    for i := 1 to HalfN - 1 do
+    begin
+      inOut[i] := inOut[i] * 2.0;       // Kausale Hälfte verdoppeln
+      inOut[n - i] := 0.0;             // Antikausale Hälfte eliminieren
+    end;
+
+    // 5. Vorwärts-FFT: Cepstrum -> Minimum-Phase-Spektrum
+    _pffft_transform_ordered(setup, inOut, spec, work, PFFFT_FORWARD);
+
+    // DC und Nyquist exponentiell zurückrechnen
+    spec[0] := Exp(spec[0]);
+    spec[1] := Exp(spec[1]);
+
+    // Komplexe Exponentiation (Phasenrekonstruktion via Hilbert-Beziehung)
+    for i := 1 to HalfN - 1 do
+    begin
+      Mag := Exp(spec[2 * i]);          // Betrag zurückholen
+      Phase := spec[2 * i + 1];        // Generierte Phase aus der Transformation
+      spec[2 * i] := Mag * Cos(Phase);  // Neuer Realteil
+      spec[2 * i + 1] := Mag * Sin(Phase); // Neuer Imaginärteil
+    end;
+
+    // 6. Finale Rückwärts-FFT: Minimum-Phase-Spektrum -> Minimum-Phase-Zeitbereich
+    _pffft_transform_ordered(setup, spec, inOut, work, PFFFT_BACKWARD);
+    
+    // Ergebnis auf Originalgröße zuschneiden und normieren
+    SetLength(Result, Length(Data));
+    for i := 0 to High(Result) do 
+      Result[i] := inOut[i] / n;
+
+  finally
+    _pffft_aligned_free(inOut);
+    _pffft_aligned_free(spec);
+    _pffft_aligned_free(work);
+    _pffft_destroy_setup(setup);
+  end;
 end;
 
-procedure TIRConvolverApp.ApplyFades(var Data: TAudioData; SR: Integer; InMS, OutMS: Single);
+{ Interne DSP-Hilfsfunktion zur Vermeidung von ln(0) Abstürzen }
+function LogExtract(Value: Single): Single; inline;
 begin
+  if Value < 1e-10 then Value := 1e-10;
+  Result := LogN(Value);
 end;
 
-procedure TIRConvolverApp.TrimSilence(var Data: TAudioData; ThresholdDB: Single);
+procedure TTaraDSPApp.ApplyFades(var Data: TAudioData; SR: Integer; InMS, OutMS: Single);
+var
+  c, i, InSamples, OutSamples, TotalSamples: Integer;
+  Gain: Single;
 begin
+  if (Length(Data) = 0) or (Length(Data[0]) = 0) then Exit;
+
+  // Berechne die benötigte Anzahl an Samples aus den Millisekunden
+  InSamples := Round((InMS / 1000.0) * SR);
+  OutSamples := Round((OutMS / 1000.0) * SR);
+  TotalSamples := Length(Data[0]);
+
+  // Absicherung gegen zu lange Fade-Zeiten
+  if (InSamples + OutSamples) > TotalSamples then begin
+    InSamples := TotalSamples div 2;
+    OutSamples := TotalSamples div 2;
+  end;
+
+  for c := 0 to High(Data) do
+  begin
+    // 1. Fade-In (Einblenden)
+    if InSamples > 0 then
+      for i := 0 to InSamples - 1 do begin
+        Gain := i / InSamples;
+        Data[c][i] := Data[c][i] * Gain;
+      end;
+
+    // 2. Fade-Out (Ausblenden)
+    if OutSamples > 0 then
+      for i := 0 to OutSamples - 1 do begin
+        Gain := 1.0 - (i / OutSamples);
+        Data[c][TotalSamples - OutSamples + i] := Data[c][TotalSamples - OutSamples + i] * Gain;
+      end;
+  end;
 end;
+
+
+procedure TTaraDSPApp.TrimSilence(var Data: TAudioData; ThresholdDB: Single);
+var
+  c, i, StartIdx, EndIdx, CurrentLength, NewLength: Integer;
+  Limit, AbsoluteValue: Single;
+begin
+  if (Length(Data) = 0) or (Length(Data[0]) = 0) then Exit;
+
+  // Wandle den dB-Schwellenwert in einen linearen Amplitudenwert um
+  Limit := Power(10.0, ThresholdDB / 20.0);
+  CurrentLength := Length(Data[0]);
+  
+  StartIdx := CurrentLength;
+  EndIdx := 0;
+
+  // 1. Analysiere alle Kanäle, um die globalen Grenzen des Audio-Inhalts zu finden
+  for c := 0 to High(Data) do
+  begin
+    // Finde den Start-Punkt (von vorne scannen)
+    for i := 0 to CurrentLength - 1 do begin
+      AbsoluteValue := Abs(Data[c][i]);
+      if AbsoluteValue > Limit then begin
+        if i < StartIdx then StartIdx := i;
+        break;
+      end;
+    end;
+
+    // Finde den End-Punkt (von hinten scannen)
+    for i := CurrentLength - 1 downto 0 do begin
+      AbsoluteValue := Abs(Data[c][i]);
+      if AbsoluteValue > Limit then begin
+        if i > EndIdx then EndIdx := i;
+        break;
+      end;
+    end;
+  end;
+
+  // Falls die Datei komplett leer/still war, lasse ein minimales Sample übrig, um Abstürze zu verhindern
+  if StartIdx > EndIdx then begin
+    StartIdx := 0;
+    EndIdx := 0;
+  end;
+
+  NewLength := (EndIdx - StartIdx) + 1;
+
+  // 2. Daten im Array nach vorne verschieben und die Puffer-Größe kürzen
+  for c := 0 to High(Data) do
+  begin
+    if StartIdx > 0 then
+      Move(Data[c][StartIdx], Data[c][0], NewLength * SizeOf(Single));
+    
+    SetLength(Data[c], NewLength);
+  end;
+  
+  WriteLn(Format('[*] Trimmed Silence: Reduced from %d to %d samples.', [CurrentLength, NewLength]));
+end;
+
 
 { --- Hauptprogramm ausführen --- }
 
@@ -947,7 +1124,8 @@ begin
   
   { 1. Registriert die erlaubten Parameter.
        Ein Doppelpunkt (:) bedeutet, dass ein Wert folgen MUSS. }
-  Msg := CheckOptions('x:y:o:b:r:l:h:m', 'help:mono:min:in1:in2');
+  Msg := CheckOptions('x:y:o:b:r:l:h:m:f:t:', 'help:mono:min:in1:in2');
+
   if (Msg <> '') or HasOption('h', 'help') or (ParamCount < 2) then begin 
     if Msg <> '' then WriteLn(StdErr, 'Parameter-Fehler: ', Msg);
     ShowUsage; 
@@ -1005,6 +1183,13 @@ begin
         if Length(A2[c]) > TruncLen then SetLength(A2[c], TruncLen);
       end;
     end;
+    { Optionale Stille-Kürzung (Trim) vor der Faltung anwenden }
+    if HasOption('t') then 
+     TrimSilence(A2, StrToFloatDef(GetOptionValue('t'), -70.0));
+
+    { Optionales Ein- und Ausblenden (Fades) auf die Impulsantwort anwenden }
+    if HasOption('f') then
+    ApplyFades(A2, SR2, 1.0, StrToFloatDef(GetOptionValue('f'), 10.0)); // 1ms In, X ms Out
 
     { 7. Kernprozess: FFT-Faltung ausführen }
     SetLength(Res, Min(Length(A1), Length(A2)));
