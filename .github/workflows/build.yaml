@@ -68,8 +68,8 @@ jobs:
       if: matrix.os != 'windows-latest'
       run: |
         if [ "${{ matrix.os }}" = "macos-latest" ]; then
-          # Teilt Lazarus mit, wo die Homebrew-Bibliotheken (libsoxr) liegen
-          lazbuild --build-mode=Release -Fl/usr/local/lib -Fl$(brew --prefix)/lib IRConvolverPro.lpi
+          # Nutzt die korrekte Syntax, um Linker-Optionen über lazbuild an fpc weiterzureichen
+          lazbuild --build-mode=Release --user-options="-Fl/usr/local/lib -Fl$(brew --prefix)/lib" IRConvolverPro.lpi
         else
           lazbuild --build-mode=Release IRConvolverPro.lpi
         fi
