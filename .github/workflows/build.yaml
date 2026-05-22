@@ -43,15 +43,15 @@ jobs:
     - name: Compile Static C-Backend (PFFFT)
       run: |
         if [ "${{ matrix.os }}" = "windows-latest" ]; then
-          gcc -O3 -c pffft.c -o pffft.obj -mavx2 -mfpmath=sse
-          gcc -O3 -c pffft.c -o pffft_noAVX2.obj -msse -mfpmath=sse
+          # FEHLER BEHOBEN: Wir nutzen den vollen, sauberen Pfad zum MSYS2-GCC-Compiler
+          C:/msys64/mingw64/bin/gcc -O3 -c pffft.c -o pffft.obj -mavx2 -mfpmath=sse
+          C:/msys64/mingw64/bin/gcc -O3 -c pffft.c -o pffft_noAVX2.obj -msse -mfpmath=sse
         elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-          # Erzeugt direkt eine universelle Dynamic Library für Intel UND Apple Silicon
           clang -O3 -dynamiclib -arch x86_64 -arch arm64 -mmacosx-version-min=11.0 pffft.c -o libpffft.dylib
           file libpffft.dylib
         else
           gcc -O3 -fPIC -mavx2 -c pffft.c -o pffft.o
-          gcc -O3 -fPIC -c pffft.c -o pffft_noAVX2.o
+          gcc -O3 -fPIC -c pffft_noAVX2.o
         fi
       shell: bash
 
