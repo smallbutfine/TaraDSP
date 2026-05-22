@@ -136,10 +136,9 @@ jobs:
       run: |
         mkdir -p dist
         
-        # 1. Versionsnummer aus dem Git-Tag extrahieren (Fallback auf '1.0.0', falls kein Tag vorhanden)
+        # 1. Versionsnummer aus dem Git-Tag extrahieren (Fallback auf 1.0.0)
         VERSION="1.0.0"
         if [[ "${{ github.ref_type }}" == "tag" ]]; then
-          # Entfernt das 'v' am Anfang, falls vorhanden (v1.2.3 -> 1.2.3)
           VERSION=$(echo "${{ github.ref_name }}" | sed 's/^v//')
         fi
         echo "Baue Version: $VERSION"
@@ -155,8 +154,8 @@ jobs:
           cp min_dll/*.dll dist/ 2>/dev/null || true
           
           echo "=== Erstelle Windows Installer (Inno Setup) ==="
-          # Übergibt die Versionsnummer direkt als Parameter (/D) an Inno Setup
-          '/c/Program Files (x86)/Inno Setup 6/ISCC.exe' /DAppVersion="$VERSION" installer.iss
+          # FEHLER BEHOBEN: Nutzung von -D und sauberer Maskierung für den YAML-Parser
+          "/c/Program Files (x86)/Inno Setup 6/ISCC.exe" "-DAppVersion=${VERSION}" installer.iss
           
           cp installer_out/TaraDSP_Setup_*.exe dist/
         fi
@@ -181,11 +180,11 @@ EOF
           cp dist/TaraDSP-noAVX2 debian/usr/bin/taradsp-noAVX2
           chmod +x debian/usr/bin/taradsp*
           
-          # Paketname enthält nun die dynamische Versionsnummer
           dpkg-deb --build debian "dist/taradsp_${VERSION}_amd64.deb"
           rm -rf debian
         fi
 
+        # 5. macOS Installations-Paket erstellen (.pkg)
         if [ "${{ matrix.os }}" = "macos-latest" ]; then
           echo "=== Erstelle macOS .pkg Paket ==="
           mkdir -p mac_root/usr/local/bin
@@ -195,7 +194,6 @@ EOF
           cp libpffft.dylib mac_root/usr/local/lib/libpffft.dylib
           chmod +x mac_root/usr/local/bin/taradsp
           
-          # Übergibt die dynamische Version an das macOS-Paketwerkzeug
           pkgbuild --identifier "com.taradsp.pkg" \
                    --version "$VERSION" \
                    --root mac_root \
