@@ -1183,13 +1183,13 @@ begin
         if Length(A2[c]) > TruncLen then SetLength(A2[c], TruncLen);
       end;
     end;
-    { Optionale Stille-Kürzung (Trim) vor der Faltung anwenden }
-    if HasOption('t') then 
-     TrimSilence(A2, StrToFloatDef(GetOptionValue('t'), -70.0));
+   { Optionale Stille-Kürzung (Trim) vor der Faltung anwenden }
+   if HasOption('t') then 
+     TrimSilence(A2, StrToFloatDef(GetOptionValue('t'), -70.0, DefaultFormatSettings));
 
-    { Optionales Ein- und Ausblenden (Fades) auf die Impulsantwort anwenden }
-    if HasOption('f') then
-    ApplyFades(A2, SR2, 1.0, StrToFloatDef(GetOptionValue('f'), 10.0)); // 1ms In, X ms Out
+   { Optionales Ein- und Ausblenden (Fades) auf die Impulsantwort anwenden }
+   if HasOption('f') then
+     ApplyFades(A2, SR2, 1.0, StrToFloatDef(GetOptionValue('f'), 10.0, DefaultFormatSettings));
 
     { 7. Kernprozess: FFT-Faltung ausführen }
     SetLength(Res, Min(Length(A1), Length(A2)));
