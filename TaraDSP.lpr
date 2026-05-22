@@ -322,6 +322,7 @@ begin
   begin
     if CustomApplication is TTaraDSPApp then
     begin
+      // REPARIERT: Übergibt die Audio-Daten als vollständiges TAudioData-Array
       TTaraDSPApp(CustomApplication).SaveWav(Fn, D, SR, B, M);
     end;
   end;
