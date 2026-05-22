@@ -1,10 +1,10 @@
 {
-  IRConvolverPro - Mastering-Grade FFT Impulse Response Toolkit
-  Copyright (c) 2024, [Your Name/Organization]
+  TaraDSP - Mastering-Grade FFT Impulse Response / Mastering Toolkit
+  Copyright (c) 2024, Martin Haverland
   Licensed under the BSD 3-Clause License.
 }
 
-program IRConvolverPro;
+program TaraDSP;
 
 {$MODE OBJFPC}{$H+}
 
