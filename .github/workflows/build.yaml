@@ -54,6 +54,8 @@ jobs:
       run: |
         gcc -O3 -c pffft.c -o pffft.obj -mavx2 -mfpmath=sse
         gcc -O3 -c pffft.c -o pffft_noAVX2.obj -msse -mfpmath=sse
+        # NEU: Erzeugt eine echte, hochoptimierte libpffft.dll direkt im Arbeitsordner!
+        gcc -O3 -shared pffft.c -o libpffft.dll -msse -mfpmath=sse
       shell: msys2 {0}
 
     # 2. C-Backend Kompilierung für Linux & macOS (Nutzt die standardmäßige Bash)
