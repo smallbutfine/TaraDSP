@@ -10,9 +10,7 @@ uses
 type
   TFloatBuffer  = array of Single;
   TAudioData    = array of TFloatBuffer;
-  PPFFFT_Setup  = Pointer;
 
-{ DSP-Kernfunktionen exportieren }
 procedure ApplyFades(var Data: TAudioData; SR: Integer; InMS, OutMS: Single);
 procedure TrimSilence(var Data: TAudioData; ThresholdDB: Single);
 
@@ -51,9 +49,10 @@ begin
   if StartIdx > EndIdx then begin StartIdx := 0; EndIdx := 0; end;
   NewLength := (EndIdx - StartIdx) + 1;
   for c := 0 to High(Data) do begin
-    if StartIdx > 0 then Move(Data[c][StartIdx], Data[c][0], NewLength * 4);
+    if StartIdx > 0 then Move(Data[c][StartIdx], Data[c][0], NewLength * SizeOf(Single));
     SetLength(Data[c], NewLength);
   end;
+  WriteLn(Format('[*] Trimmed Silence: Reduced from %d to %d samples.', [CurrentLength, NewLength]));
 end;
 
 end.
