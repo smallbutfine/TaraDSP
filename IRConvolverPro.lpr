@@ -75,28 +75,25 @@ type
 { --- Externe Bibliothekseinbindung (libsoxr) --- }
 
 {$IFDEF DARWIN}
-// dynlibs wurde nach ganz oben in den Haupt-uses-Block verschoben! [1]
-
 type
   TFuncSoxrCreate  = function(in_rate, out_rate: Double; num_chans: Cardinal; error: PInteger; io_spec, q_spec, runtime_spec: Pointer): Pointer; cdecl;
   TFuncSoxrProcess = function(resampler: Pointer; in_buf: PSingle; in_len: Cardinal; done_in: PCardinal; out_buf: PSingle; out_len: Cardinal; done_out: PCardinal): Integer; cdecl;
   TFuncSoxrDelete  = procedure(resampler: Pointer); cdecl;
 
 var
-  SoxrLibHandle: TLibHandle = SafeLoadLibraryHandle;
+  SoxrLibHandle: TLibHandle = NilHandle;
   soxr_create: TFuncSoxrCreate = nil;
   soxr_process: TFuncSoxrProcess = nil;
   soxr_delete: TFuncSoxrDelete = nil;
 
 procedure InitSoxrMacOS;
-  begin
-    if SoxrLibHandle = SafeLoadLibraryHandle then begin
-    // Sucht nacheinander an üblichen Mac-Pfaden nach der Bibliothek
+begin
+  if SoxrLibHandle = NilHandle then begin
     SoxrLibHandle := LoadLibrary(LIB_SOXR);
-    if SoxrLibHandle = SafeLoadLibraryHandle then SoxrLibHandle := LoadLibrary('/usr/local/lib/' + LIB_SOXR);
-    if SoxrLibHandle = SafeLoadLibraryHandle then SoxrLibHandle := LoadLibrary('/opt/homebrew/lib/' + LIB_SOXR);
+    if SoxrLibHandle = NilHandle then SoxrLibHandle := LoadLibrary('/usr/local/lib/' + LIB_SOXR);
+    if SoxrLibHandle = NilHandle then SoxrLibHandle := LoadLibrary('/opt/homebrew/lib/' + LIB_SOXR);
     
-    if SoxrLibHandle <> SafeLoadLibraryHandle then begin
+    if SoxrLibHandle <> NilHandle then begin
       soxr_create  := TFuncSoxrCreate(GetProcAddress(SoxrLibHandle, 'soxr_create'));
       soxr_process := TFuncSoxrProcess(GetProcAddress(SoxrLibHandle, 'soxr_process'));
       soxr_delete  := TFuncSoxrDelete(GetProcAddress(SoxrLibHandle, 'soxr_delete'));
