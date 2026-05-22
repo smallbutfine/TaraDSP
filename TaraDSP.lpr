@@ -451,12 +451,20 @@ var
   SR1, SR2, bOut, c, TargetSR, TruncLen: Integer;
 begin
   LoadConfig;
-  Msg := CheckOptions('x:y:o:b:r:l:h:m', 'help:mono:min:in1:in2');
+  
+  { REPARIERT: Alle Optionen, die einen Wert erwarten (x, y, o, b, r, l, f, t), 
+    müssen zwingend ein Suffix mit Doppelpunkt (:) erhalten. 
+    Optionen ohne Wert (h, m) stehen ohne Doppelpunkt am Ende. }
+  Msg := CheckOptions('x:y:o:b:r:l:f:t:h m', 'help mono min in1 in2');
   if (Msg <> '') or HasOption('h', 'help') or (ParamCount < 2) then begin 
     if Msg <> '' then WriteLn(StdErr, 'Parameter-Fehler: ', Msg);
-    ShowUsage; ExitCode := 1; Terminate; Exit; 
+    ShowUsage; 
+    ExitCode := 1; 
+    Terminate; 
+    Exit; 
   end;
   
+  { Werte über die sauberen Kurz- und Langoptionen auslesen }
   if HasOption('x', 'in1') then f1 := GetOptionValue('x', 'in1') else f1 := GetOptionValue('x');
   if HasOption('y', 'in2') then f2 := GetOptionValue('y', 'in2') else f2 := GetOptionValue('y');
   fOut := GetOptionValue('o');
@@ -477,6 +485,14 @@ begin
       for c := 0 to High(A2) do begin SetLength(A2[c], 1); A2[c][0] := 1.0; end;
       SR2 := SR1;
     end;
+
+    { Optionale Stille-Kürzung (Trim) VOR dem Resampling anwenden }
+    if HasOption('t') then 
+      TrimSilence(A2, StrToFloatDef(GetOptionValue('t'), -70.0, DefaultFormatSettings));
+
+    { Optionales Ein- und Ausblenden (Fades) VOR dem Resampling anwenden }
+    if HasOption('f') then
+      ApplyFades(A2, SR2, 1.0, StrToFloatDef(GetOptionValue('f'), 10.0, DefaultFormatSettings));
 
     if (TargetSR > 0) then begin
       if SR1 <> TargetSR then A1 := ResampleSoxr(A1, SR1, TargetSR);
