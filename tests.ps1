@@ -13,13 +13,20 @@ $FoundExe = Get-ChildItem -Recurse -Filter "TaraDSP-noAVX2.exe" | Select-Object 
 if ($FoundExe) {
     $RealExePath = $FoundExe.FullName
     Write-Host "[+] Found executable at: $RealExePath" -ForegroundColor Green
-    Copy-Item -Path $RealExePath -Destination ".\TaraDSP.exe" -Force
+    # Kopiert nur, wenn die Datei nicht schon im Hauptverzeichnis liegt
+    if ($RealExePath -ne "$(Get-Location)\TaraDSP.exe") {
+        Copy-Item -Path $RealExePath -Destination ".\TaraDSP.exe" -Force
+    }
 } else {
     # Fallback, falls die Datei ohne den Suffix erzeugt wurde
     $FoundFallback = Get-ChildItem -Recurse -Filter "TaraDSP.exe" | Select-Object -First 1
     if ($FoundFallback) {
-        Write-Host "[+] Found fallback executable at: $($FoundFallback.FullName)" -ForegroundColor Green
-        Copy-Item -Path $FoundFallback.FullName -Destination ".\TaraDSP.exe" -Force
+        $RealFallbackPath = $FoundFallback.FullName
+        Write-Host "[+] Found fallback executable at: $RealFallbackPath" -ForegroundColor Green
+        # Kopiert nur, wenn die Quell-Datei nicht schon am Ziel-Ort liegt (Behebt den Fehler!)
+        if ($RealFallbackPath -ne "$(Get-Location)\TaraDSP.exe") {
+            Copy-Item -Path $RealFallbackPath -Destination ".\TaraDSP.exe" -Force
+        }
     } else {
         Write-Host "[!] CRITICAL ERROR: No TaraDSP executable found anywhere!" -ForegroundColor Red
         exit 1
