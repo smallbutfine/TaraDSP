@@ -7,7 +7,9 @@ interface
 uses
   SysUtils, Classes, Math, dynlibs, dspengine;
 
-type
+type 
+  // Definiert den Methodenzeiger exakt als prozedurale Objekt-Variable
+  TSaveWavCall = procedure(const Fn: string; const D: TAudioData; SR, B: Integer; M: Boolean) of object;
   TSRC_Engine = (engLinear, engSoxr, engR8Brain, engFinalCD);
 
 var
@@ -47,13 +49,23 @@ end;
 type TSaveWavCall = procedure(const Fn: string; const D: TAudioData; SR, B: Integer; M: Boolean) of object;
 
 function ResampleViaFinalCD(const Channel: TFloatBuffer; InSR, OutSR: Integer; SaveWavProc: Pointer): TFloatBuffer;
-var TmpIn, TmpOut: string; DummyData: TAudioData;
+function ResampleViaFinalCD(const Channel: TFloatBuffer; InSR, OutSR: Integer; SaveWavProc: Pointer): TFloatBuffer;
+var 
+  TmpIn, TmpOut: string; 
+  DummyData: TAudioData;
+  MethodCall: TSaveWavCall;
 begin
   TmpIn := 'tmp_src_in.wav'; TmpOut := 'tmp_src_out.wav';
-  SetLength(DummyData, 1); DummyData[0] := Channel;
-  TSaveWavCall(SaveWavProc)(TmpIn, DummyData, InSR, 32, False);
+  SetLength(DummyData, 1); DummyData := Channel;
+  
+  // FEHLER BEHOBEN: Wir mappen den rohen Datenpointer absolut typensicher 
+  // über ein internes TMethod-Konstrukt auf den Pascal-Methodenaufruf.
+  TMethod(MethodCall) := TMethod(SaveWavProc^);
+  MethodCall(TmpIn, DummyData, InSR, 32, False);
+  
   {$IFDEF WINDOWS} ExecuteProcess('finalcd.exe', [TmpIn, TmpOut, IntToStr(OutSR)]); {$ENDIF}
   {$IFDEF UNIX} ExecuteProcess('./finalcd', [TmpIn, TmpOut, IntToStr(OutSR)]); {$ENDIF}
+  
   DeleteFile(TmpIn); DeleteFile(TmpOut);
   Result := ResampleLinear(Channel, InSR, OutSR);
 end;
