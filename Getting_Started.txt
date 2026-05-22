@@ -1,5 +1,5 @@
-IRConvolverPro v1.0 - Quick Start Guide
-IRConvolverPro is a high-performance command-line utility for processing and creating professional Impulse Responses (IRs). It combines industry-standard algorithms with a mastering-grade DSP engine.
+TaraDSP v1.0 - Quick Start Guide
+TaraDSP is a high-performance command-line utility for audio processing and creating professional Impulse Responses (IRs). It combines industry-standard algorithms with a mastering-grade DSP engine.
 1. Installation
 
     Extract the ZIP archive to a folder of your choice.
@@ -10,14 +10,14 @@ IRConvolverPro is a high-performance command-line utility for processing and cre
 To convolve an audio file (e.g., a room recording) with a cabinet IR:
 bash
 
-IRConvolverPro.exe -i1 "my_recording.wav" -i2 "cab_ir.wav" -o "output.wav" -b 24
+TaraDSP -i1 "my_recording.wav" -i2 "cab_ir.wav" -o "output.wav" -b 24
 
-Verwende Code mit Vorsicht.
+
 3. Batch Processing (Entire Folders)
 To process a whole directory of IRs with a master cabinet IR:
 bash
 
-IRConvolverPro.exe -i1 ".\Raw_IRs\" -i2 "master_cab.wav" -o ".\Processed_IRs\" -b 24
+TaraDSP -i1 ".\Raw_IRs\" -i2 "master_cab.wav" -o ".\Processed_IRs\" -b 24
 
 Verwende Code mit Vorsicht.
 4. Professional Mastering Options
