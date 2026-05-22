@@ -69,22 +69,35 @@ jobs:
       if: matrix.os != 'windows-latest'
       run: |
         rm -rf lib/ backup/ 2>/dev/null || true
-        
-        # Konstante, feste Nutzung deiner offiziellen Schreibweise TaraDSP
         PROJECT_FILE="TaraDSP.lpi"
         
         if [ "${{ matrix.os }}" = "macos-latest" ]; then
           export FPCOPT="-WM11.0"
           lazbuild -B --build-mode=Release "$PROJECT_FILE"
+          
+          # Sicherstellen, dass das Mac-Universal-Binary korrekt geschrieben ist
+          [ -f taradsp ] && mv taradsp TaraDSP || true
         else
           # Linux: Erst die AVX2-Version bauen
           lazbuild -B --build-mode=Release "$PROJECT_FILE"
-          mv TaraDSP TaraDSP-AVX2
+          
+          # Die AVX2-Version bleibt OHNE Namenszusatz direkt als TaraDSP bestehen
+          BIN_NAME="taradsp"
+          [ -f "TaraDSP" ] && BIN_NAME="TaraDSP"
+          mv "$BIN_NAME" TaraDSP_temp
           
           # Linux: Dann Cache leeren und die No-AVX2-Version bauen
           rm -rf lib/ backup/ 2>/dev/null || true
           cp pffft_noAVX2.o pffft.o
           lazbuild -B --build-mode=Release-NoAVX2 "$PROJECT_FILE"
+          
+          # Erzwingt korrekte Groß-Kleinschreibung für die No-AVX2 Variante
+          BIN_NOAVX_NAME="taradsp-noAVX2"
+          [ -f "TaraDSP-noAVX2" ] && BIN_NOAVX_NAME="TaraDSP-noAVX2"
+          mv "$BIN_NOAVX_NAME" TaraDSP-noAVX2
+          
+          # Temporären Namen für das AVX2-Hauptbinary zurücksetzen
+          mv TaraDSP_temp TaraDSP
         fi
       shell: bash
     
@@ -94,13 +107,17 @@ jobs:
         # Windows: Erst AVX2 bauen (nutzt deine build.bat)
         ./build.bat
         
-        # Erkennt den Namen der erzeugten Exe und benennt sie um
-        if exist TaraDSP.exe ( move TaraDSP.exe TaraDSP-AVX2.exe ) else ( move taradsp.exe TaraDSP-AVX2.exe )
+        # Die normale AVX2-Exe bleibt als "TaraDSP.exe" (OHNE Namenszusatz) erhalten.
+        # Wir stellen nur sicher, dass die Schreibweise stimmt:
+        if exist taradsp.exe move taradsp.exe TaraDSP.exe
         
         # Windows: Dann No-AVX2-Version bauen
-        PROJECT_FILE="TaraDSP.lpi"
-        if exist taradsp.lpi ( set PROJECT_FILE=taradsp.lpi )
+        set PROJECT_FILE=TaraDSP.lpi
+        if exist taradsp.lpi set PROJECT_FILE=taradsp.lpi
         lazbuild -B --build-mode=Release-NoAVX2 %PROJECT_FILE%
+        
+        # Erzwingt die korrekte Groß-Kleinschreibung für die No-AVX2-Exe
+        if exist taradsp-noAVX2.exe move taradsp-noAVX2.exe TaraDSP-noAVX2.exe
       shell: cmd
 
     - name: Run TaraDSP Test Suite (Windows)
