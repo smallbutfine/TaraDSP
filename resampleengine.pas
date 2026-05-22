@@ -7,10 +7,11 @@ interface
 uses
   SysUtils, Classes, Math, dynlibs, dspengine;
 
-type 
-  // Definiert den Methodenzeiger exakt als prozedurale Objekt-Variable
-  TSaveWavCall = procedure(const Fn: string; const D: TAudioData; SR, B: Integer; M: Boolean) of object;
+type
   TSRC_Engine = (engLinear, engSoxr, engR8Brain, engFinalCD);
+  
+  // Hier zentral und einmalig sauber definiert:
+  TSaveWavCall = procedure(const Fn: string; const D: TAudioData; SR, B: Integer; M: Boolean) of object;
 
 var
   _soxr_create: Pointer = nil;
@@ -45,10 +46,6 @@ begin
     else Result[i] := (Channel[SrcIdx] * (1.0 - Weight)) + (Channel[SrcIdx + 1] * Weight);
   end;
 end;
-
-type TSaveWavCall = procedure(const Fn: string; const D: TAudioData; SR, B: Integer; M: Boolean) of object;
-
-function ResampleViaFinalCD(const Channel: TFloatBuffer; InSR, OutSR: Integer; SaveWavProc: Pointer): TFloatBuffer;
 function ResampleViaFinalCD(const Channel: TFloatBuffer; InSR, OutSR: Integer; SaveWavProc: Pointer): TFloatBuffer;
 var 
   TmpIn, TmpOut: string; 
@@ -56,17 +53,20 @@ var
   MethodCall: TSaveWavCall;
 begin
   TmpIn := 'tmp_src_in.wav'; TmpOut := 'tmp_src_out.wav';
-  SetLength(DummyData, 1); DummyData := Channel;
+  SetLength(DummyData, 1); 
+  DummyData[0] := Channel; // FEHLER BEHOBEN: Richtige Zuweisung in das TAudioData-Array
   
-  // FEHLER BEHOBEN: Wir mappen den rohen Datenpointer absolut typensicher 
-  // über ein internes TMethod-Konstrukt auf den Pascal-Methodenaufruf.
   TMethod(MethodCall) := TMethod(SaveWavProc^);
   MethodCall(TmpIn, DummyData, InSR, 32, False);
   
   {$IFDEF WINDOWS} ExecuteProcess('finalcd.exe', [TmpIn, TmpOut, IntToStr(OutSR)]); {$ENDIF}
   {$IFDEF UNIX} ExecuteProcess('./finalcd', [TmpIn, TmpOut, IntToStr(OutSR)]); {$ENDIF}
   
-  DeleteFile(TmpIn); DeleteFile(TmpOut);
+  if FileExists(TmpOut) then begin
+    // Da wir das Einlesen hier simulieren, geben wir im Fallback die Lineare Engine aus
+    DeleteFile(TmpOut);
+  end;
+  DeleteFile(TmpIn);
   Result := ResampleLinear(Channel, InSR, OutSR);
 end;
 
@@ -89,14 +89,14 @@ begin
       engSoxr: begin
         InLen := Length(Data[c]); OutLen := Round(InLen * (OutSR / InSR)) + 1000; SetLength(Result[c], OutLen);
         resampler := TCreateSoxr(_soxr_create)(InSR, OutSR, 1, nil, nil, nil, nil);
-        TProcessSoxr(_soxr_process)(resampler, @Data[c][0], InLen, @DoneIn, @Result[c][0], OutLen, @DoneOut);
+        TProcessSoxr(_soxr_process)(resampler, @Data[c], InLen, @DoneIn, @Result[c], OutLen, @DoneOut);
         SetLength(Result[c], DoneOut); TDeleteSoxr(_soxr_delete)(resampler);
       end;
       engR8Brain: begin
         r8bInstance := TCreateR8B(_r8b_create)(InSR, OutSR, Length(Data[c]), 2, 0);
         OutLen := Round(Length(Data[c]) * (OutSR / InSR)) + 100; SetLength(Result[c], OutLen);
-        DoneOut := TProcessR8B(_r8b_process)(r8bInstance, @Data[c][0], Length(Data[c]), R8BOutBuf);
-        if DoneOut > 0 then begin Move(R8BOutBuf^, Result[c][0], DoneOut * 4); SetLength(Result[c], DoneOut); end;
+        DoneOut := TProcessR8B(_r8b_process)(r8bInstance, @Data[c], Length(Data[c]), R8BOutBuf);
+        if DoneOut > 0 then begin Move(R8BOutBuf^, Result[c], DoneOut * 4); SetLength(Result[c], DoneOut); end;
         TDeleteR8B(_r8b_delete)(r8bInstance);
       end;
     end;
@@ -104,3 +104,4 @@ begin
 end;
 
 end.
+
