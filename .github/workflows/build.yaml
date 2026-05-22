@@ -68,47 +68,56 @@ jobs:
     - name: Build Application (Linux & macOS)
       if: matrix.os != 'windows-latest'
       run: |
-        # Bereinigt alte Cache-Leichen vor dem Build
         rm -rf lib/ backup/ 2>/dev/null || true
         
         if [ "${{ matrix.os }}" = "macos-latest" ]; then
           export FPCOPT="-WM11.0"
+          lazbuild -B --build-mode=Release taradsp.lpi
+        else
+          # Linux: Erst AVX2 bauen
+          cp pffft.o pffft.o
+          lazbuild -B --build-mode=Release taradsp.lpi
+          mv taradsp taradsp-AVX2
+          
+          # Linux: Dann No-AVX2 bauen
+          rm -rf lib/ backup/ 2>/dev/null || true
+          cp pffft_noAVX2.o pffft.o
+          lazbuild -B --build-mode=Release-NoAVX2 taradsp.lpi
         fi
-        
-        # Zwingt lazbuild mit -B alles absolut frisch zu übersetzen
-        lazbuild -B --build-mode=Release TaraDSP.lpi
       shell: bash
     
     - name: Build Application (Windows)
       if: matrix.os == 'windows-latest'
-      run: ./build.bat
+      run: |
+        # Windows: Erst AVX2 bauen (Nutzt deine build.bat)
+        ./build.bat
+        move taradsp.exe taradsp-AVX2.exe
+        
+        # Windows: Dann No-AVX2 bauen
+        lazbuild -B --build-mode=Release-NoAVX2 taradsp.lpi
       shell: cmd
 
-    # === AUTOMATISCHE TESTDATEN-GENERIERUNG + TESTS ===
     - name: Run TaraDSP Test Suite (Windows)
       if: matrix.os == 'windows-latest'
       run: |
-        # 1. Erstellt den Ordner und die WAV-Dateien live auf dem Server
         ./create_test_data.ps1
-        
-        # 2. Führt deine eigentliche Test-Suite aus
+        # Wir testen die hochkompatible noAVX2 Exe auf dem Server, um Abstürze zu vermeiden
+        copy /y taradsp-noAVX2.exe taradsp.exe
         ./tests.ps1
       shell: powershell
 
-    # === DER DOPPELTE EINTRAG WURDE HIER ENTFERNT ===
     - name: Prepare Artifacts
       shell: bash
       run: |
         mkdir -p dist
         
-        # Kopiere Binaries
-        cp TaraDSP.exe dist/ 2>/dev/null || true
-        cp TaraDSP dist/ 2>/dev/null || true
+        # Kopiere alle erzeugten Varianten in den Release-Ordner
+        cp taradsp-AVX2* dist/ 2>/dev/null || true
+        cp taradsp-noAVX2* dist/ 2>/dev/null || true
+        cp taradsp dist/ 2>/dev/null || true
         
-        # Kopiere die universelle Mac-Dylib mit in den dist-Ordner
+        # Zusatzdateien sichern
         [ -f libpffft.dylib ] && cp libpffft.dylib dist/ || true
-        
-        # Einstellungen und Lizenz sichern
         [ -f settings.ini ] && cp settings.ini dist/ || true
         [ -f LICENSE ] && cp LICENSE dist/ || true
 
