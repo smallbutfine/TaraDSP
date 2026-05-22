@@ -1,5 +1,5 @@
-🚀 Release: IRConvolverPro v1.0.0 (Mastering Edition)
-We are proud to announce the first stable release of IRConvolverPro, a high-performance, command-line driven toolkit for professional Impulse Response (IR) processing. Built with Free Pascal, it combines mathematical precision with mastering-grade audio aesthetics.
+🚀 Release: TaraDSP v1.0.0 (Mastering Edition)
+We are proud to announce the first stable release of TaraDSP, a high-performance, command-line driven toolkit for professional Impulse Response (IR) processing. Built with Free Pascal, it combines mathematical precision with mastering-grade audio aesthetics.
 🌟 Key Features
 1. High-Performance Convolution Engine
 
@@ -28,9 +28,9 @@ We are proud to announce the first stable release of IRConvolverPro, a high-perf
 
 📦 Installation (Windows 64-bit)
 
-    Download the IRConvolverPro_Win64_v1.0.zip from the assets below.
+    Download the TaraDSP_Win64_v1.0.zip from the assets below.
     Extract all files (including libpffft.dll, libsoxr.dll, and r8bsrc.dll) into a single folder.
-    Open your terminal and type IRConvolverPro -h to see all available options.
+    Open your terminal and type TaraDSP -h to see all available options.
 
 🛠 Build from Source
 
@@ -56,4 +56,4 @@ We are proud to announce the first stable release of IRConvolverPro, a high-perf
 
 ## CLI Usage
 ```bash
-./IRConvolverPro -i1 [input_file_or_dir] -i2 [master_ir] -o [output] -b 24
+./TaraDSP -i1 [input_file_or_dir] -i2 [master_ir] -o [output] -b 24
