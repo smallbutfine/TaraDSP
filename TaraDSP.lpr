@@ -348,7 +348,8 @@ begin
       SetLength(A2, Length(A1)); 
       for c := 0 to High(A2) do 
       begin 
-        SetLength(A2[c], 1); A2[c] := 1.0; 
+        SetLength(A2[c], 1);
+        A2[c] := 1.0; 
       end; 
       SR2 := SR1; 
     end;
