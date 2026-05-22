@@ -70,19 +70,27 @@ jobs:
       run: |
         rm -rf lib/ backup/ 2>/dev/null || true
         
+        # Verwende hier den exakten Namen deiner .lpi Datei (z. B. TaraDSP.lpi oder taradsp.lpi)
+        # Wenn sie auf GitHub "TaraDSP.lpi" heißt, muss es hier genau so stehen:
+        PROJECT_FILE="TaraDSP.lpi"
+        [ -f "taradsp.lpi" ] && PROJECT_FILE="taradsp.lpi"
+        
         if [ "${{ matrix.os }}" = "macos-latest" ]; then
           export FPCOPT="-WM11.0"
-          lazbuild -B --build-mode=Release taradsp.lpi
+          lazbuild -B --build-mode=Release "$PROJECT_FILE"
         else
           # Linux: Baut die standardmäßige AVX2-Version
-          # (pffft.o wurde im GCC-Schritt bereits passend erzeugt)
-          lazbuild -B --build-mode=Release taradsp.lpi
-          mv taradsp taradsp-AVX2
+          lazbuild -B --build-mode=Release "$PROJECT_FILE"
+          
+          # Das erzeugte Binary ermitteln (beachtet Groß-/Kleinschreibung)
+          BIN_NAME="taradsp"
+          [ -f "TaraDSP" ] && BIN_NAME="TaraDSP"
+          mv "$BIN_NAME" taradsp-AVX2
           
           # Linux: Cache leeren, No-AVX2-Objekt einspielen und No-AVX2 bauen
           rm -rf lib/ backup/ 2>/dev/null || true
           cp pffft_noAVX2.o pffft.o
-          lazbuild -B --build-mode=Release-NoAVX2 taradsp.lpi
+          lazbuild -B --build-mode=Release-NoAVX2 "$PROJECT_FILE"
         fi
       shell: bash
     
