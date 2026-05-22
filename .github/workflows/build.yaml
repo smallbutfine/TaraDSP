@@ -70,8 +70,7 @@ jobs:
       run: |
         rm -rf lib/ backup/ 2>/dev/null || true
         
-        # Verwende hier den exakten Namen deiner .lpi Datei (z. B. TaraDSP.lpi oder taradsp.lpi)
-        # Wenn sie auf GitHub "TaraDSP.lpi" heißt, muss es hier genau so stehen:
+        # Erkennt den exakten Namen deiner Projektdatei auf dem Server
         PROJECT_FILE="TaraDSP.lpi"
         [ -f "taradsp.lpi" ] && PROJECT_FILE="taradsp.lpi"
         
@@ -79,42 +78,43 @@ jobs:
           export FPCOPT="-WM11.0"
           lazbuild -B --build-mode=Release "$PROJECT_FILE"
         else
-          # Linux: Baut die standardmäßige AVX2-Version
+          # Linux: Erst die AVX2-Version bauen
           lazbuild -B --build-mode=Release "$PROJECT_FILE"
           
-          # Das erzeugte Binary ermitteln (beachtet Groß-/Kleinschreibung)
           BIN_NAME="taradsp"
           [ -f "TaraDSP" ] && BIN_NAME="TaraDSP"
-          mv "$BIN_NAME" taradsp-AVX2
+          mv "$BIN_NAME" TaraDSP-AVX2
           
-          # Linux: Cache leeren, No-AVX2-Objekt einspielen und No-AVX2 bauen
+          # Linux: Dann Cache leeren und die No-AVX2-Version bauen
           rm -rf lib/ backup/ 2>/dev/null || true
           cp pffft_noAVX2.o pffft.o
           lazbuild -B --build-mode=Release-NoAVX2 "$PROJECT_FILE"
+          
+          BIN_NOAVX_NAME="taradsp-noAVX2"
+          [ -f "TaraDSP-noAVX2" ] && BIN_NOAVX_NAME="TaraDSP-noAVX2"
+          mv "$BIN_NOAVX_NAME" TaraDSP-noAVX2
         fi
       shell: bash
     
     - name: Build Application (Windows)
       if: matrix.os == 'windows-latest'
       run: |
-        # Windows: Erst AVX2 bauen (Nutzt deine build.bat)
+        # Windows: Erst AVX2 bauen (nutzt deine build.bat)
         ./build.bat
-        move taradsp.exe taradsp-AVX2.exe
         
-        # Windows: Dann No-AVX2 bauen
-        lazbuild -B --build-mode=Release-NoAVX2 taradsp.lpi
+        # Erkennt den Namen der erzeugten Exe und benennt sie um
+        if exist TaraDSP.exe ( move TaraDSP.exe TaraDSP-AVX2.exe ) else ( move taradsp.exe TaraDSP-AVX2.exe )
+        
+        # Windows: Dann No-AVX2-Version bauen
+        PROJECT_FILE="TaraDSP.lpi"
+        if exist taradsp.lpi ( set PROJECT_FILE=taradsp.lpi )
+        lazbuild -B --build-mode=Release-NoAVX2 %PROJECT_FILE%
       shell: cmd
 
     - name: Run TaraDSP Test Suite (Windows)
       if: matrix.os == 'windows-latest'
       run: |
-        # 1. Testdaten live auf dem Server generieren
         ./create_test_data.ps1
-        
-        # 2. Kopiert die hochtolerante noAVX2-Version für den Cloud-Test (PowerShell-Syntax)
-        Copy-Item -Path ".\taradsp-noAVX2.exe" -Destination ".\taradsp.exe" -Force
-        
-        # 3. Führt deine Test-Suite aus
         ./tests.ps1
       shell: powershell
 
@@ -123,9 +123,12 @@ jobs:
       run: |
         mkdir -p dist
         
-        # Kopiere alle erzeugten Varianten in den Release-Ordner
+        # Kopiert alle Architekturen mit korrekter Groß-Kleinschreibung
+        cp TaraDSP-AVX2* dist/ 2>/dev/null || true
+        cp TaraDSP-noAVX2* dist/ 2>/dev/null || true
         cp taradsp-AVX2* dist/ 2>/dev/null || true
         cp taradsp-noAVX2* dist/ 2>/dev/null || true
+        cp TaraDSP dist/ 2>/dev/null || true
         cp taradsp dist/ 2>/dev/null || true
         
         # Zusatzdateien sichern
