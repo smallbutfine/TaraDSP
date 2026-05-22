@@ -166,15 +166,15 @@ end;
 { --- High-End Resampling (libsoxr VHQ) --- }
 
 function TIRConvolverApp.ResampleSoxr(const Data: TAudioData; InSR, OutSR: Integer): TAudioData;
-  {$IFDEF DARWIN}
-  if not Assigned(soxr_create) then raise Exception.Create('libsoxr couldn't be loaded on this Mac.');
-  {$ENDIF}
-
 var
   resampler: Pointer;
   c: Integer;
   InLen, OutLen, DoneIn, DoneOut: Cardinal;
 begin
+  {$IFDEF DARWIN}
+  if not Assigned(soxr_create) then raise Exception.Create('libsoxr konnte auf diesem Mac nicht geladen werden.');
+  {$ENDIF}
+
   if InSR = OutSR then begin
     Result := Data; 
     Exit;
