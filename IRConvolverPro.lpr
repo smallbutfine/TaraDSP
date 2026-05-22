@@ -73,11 +73,18 @@ type
 
 { --- Externe Bibliothekseinbindung (libsoxr) --- }
 
-// HINWEIS: {$LINKLIB soxr} wurde entfernt, um den x86_64 Linker-Fehler zu beheben
-
+{$IFDEF DARWIN}
+// Auf macOS laden wir die Funktionen absolut dynamisch zur Laufzeit,
+// um den x86_64 Linker-Fehler auf GitHub Actions zu umgehen.
+function soxr_create(in_rate, out_rate: Double; num_chans: Cardinal; error: PInteger; io_spec, q_spec, runtime_spec: Pointer): Pointer; cdecl; external LIB_SOXR name 'soxr_create';
+function soxr_process(resampler: Pointer; in_buf: PSingle; in_len: Cardinal; done_in: PCardinal; out_buf: PSingle; out_len: Cardinal; done_out: PCardinal): Integer; cdecl; external LIB_SOXR name 'soxr_process';
+procedure soxr_delete(resampler: Pointer); cdecl; external LIB_SOXR name 'soxr_delete';
+{$ELSE}
+// Windows und Linux nutzen die normale Verlinkung
 function soxr_create(in_rate, out_rate: Double; num_chans: Cardinal; error: PInteger; io_spec, q_spec, runtime_spec: Pointer): Pointer; cdecl; external LIB_SOXR;
 function soxr_process(resampler: Pointer; in_buf: PSingle; in_len: Cardinal; done_in: PCardinal; out_buf: PSingle; out_len: Cardinal; done_out: PCardinal): Integer; cdecl; external LIB_SOXR;
 procedure soxr_delete(resampler: Pointer); cdecl; external LIB_SOXR;
+{$ENDIF}
 
 { --- Implementierung --- }
 
