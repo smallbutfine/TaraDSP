@@ -35,3 +35,15 @@ if (!(Test-Path "$Results\Batch_Out")) { New-Item -ItemType Directory -Path "$Re
 if ($LASTEXITCODE -eq 0) { Write-Host " PASS" -ForegroundColor Green } else { Write-Host " FAIL" -ForegroundColor Red }
 
 Write-Host "[*] Test Suite Finished." -ForegroundColor Cyan
+
+Write-Host "[*] Test Suite Finished." -ForegroundColor Cyan
+
+# === GitHub Actions Integration ===
+# Überprüfe, ob im Log ein "FAIL" auftauchte (z.B. indem wir den globalen Erfolg tracken)
+# Oder wir prüfen einfach, ob die finalen Testdateien existieren:
+if (!(Test-Path "$Results\test1_conv.wav") -or !(Test-Path "$Results\test3_master.wav")) {
+    Write-Host "[!] Test Suite FAILED: Missing output files." -ForegroundColor Red
+    exit 1 # Zwingt GitHub Actions, den Build als "Fehlgeschlagen" zu markieren
+}
+
+exit 0 # Alles erfolgreich
