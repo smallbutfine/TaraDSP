@@ -132,13 +132,10 @@ jobs:
       run: |
         mkdir -p dist
         
-        # Kopiert alle Architekturen mit korrekter Groß-Kleinschreibung
-        cp TaraDSP-AVX2* dist/ 2>/dev/null || true
-        cp TaraDSP-noAVX2* dist/ 2>/dev/null || true
-        cp taradsp-AVX2* dist/ 2>/dev/null || true
-        cp taradsp-noAVX2* dist/ 2>/dev/null || true
+        # Kopiert die Hauptvarianten (AVX2 ohne Zusatz) und No-AVX2 (mit korrekter Schreibweise)
+        cp TaraDSP.exe dist/ 2>/dev/null || true
         cp TaraDSP dist/ 2>/dev/null || true
-        cp taradsp dist/ 2>/dev/null || true
+        cp TaraDSP-noAVX2* dist/ 2>/dev/null || true
         
         # Zusatzdateien sichern
         [ -f libpffft.dylib ] && cp libpffft.dylib dist/ || true
