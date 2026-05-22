@@ -70,9 +70,8 @@ jobs:
       run: |
         rm -rf lib/ backup/ 2>/dev/null || true
         
-        # Erkennt den exakten Namen deiner Projektdatei auf dem Server
+        # Konstante, feste Nutzung deiner offiziellen Schreibweise TaraDSP
         PROJECT_FILE="TaraDSP.lpi"
-        [ -f "taradsp.lpi" ] && PROJECT_FILE="taradsp.lpi"
         
         if [ "${{ matrix.os }}" = "macos-latest" ]; then
           export FPCOPT="-WM11.0"
@@ -80,19 +79,12 @@ jobs:
         else
           # Linux: Erst die AVX2-Version bauen
           lazbuild -B --build-mode=Release "$PROJECT_FILE"
-          
-          BIN_NAME="taradsp"
-          [ -f "TaraDSP" ] && BIN_NAME="TaraDSP"
-          mv "$BIN_NAME" TaraDSP-AVX2
+          mv TaraDSP TaraDSP-AVX2
           
           # Linux: Dann Cache leeren und die No-AVX2-Version bauen
           rm -rf lib/ backup/ 2>/dev/null || true
           cp pffft_noAVX2.o pffft.o
           lazbuild -B --build-mode=Release-NoAVX2 "$PROJECT_FILE"
-          
-          BIN_NOAVX_NAME="taradsp-noAVX2"
-          [ -f "TaraDSP-noAVX2" ] && BIN_NOAVX_NAME="TaraDSP-noAVX2"
-          mv "$BIN_NOAVX_NAME" TaraDSP-noAVX2
         fi
       shell: bash
     
