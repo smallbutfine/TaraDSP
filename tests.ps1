@@ -89,6 +89,11 @@ if ($LASTEXITCODE -eq 0 -and (Test-Path "$Results\Batch_Out\batch_success.wav"))
     $GlobalPass = $false
 }
 
+# TEST 5: Minimum Phase Transformation
+Write-Host "[Test 5] Minimum Phase Transform... " -NoNewline
+& $Exe -x "$TestData\source.wav" -y "$TestData\cab_ir.wav" -o "$Results\test5_minphase.wav" --min
+if ($LASTEXITCODE -eq 0 -and (Test-Path "$Results\test5_minphase.wav")) { Write-Host "PASS" -ForegroundColor Green } else { Write-Host "FAIL" -ForegroundColor Red; $GlobalPass = $false }
+
 Write-Host "[*] Test Suite Finished." -ForegroundColor Cyan
 
 if ($GlobalPass -eq $false) {
