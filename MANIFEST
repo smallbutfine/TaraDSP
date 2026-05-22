@@ -1,6 +1,6 @@
-Project Manifesto: IRConvolverPro (High-Performance IR Toolkit)
+Project Manifesto: TaraDSP (High-Performance Mastering / IR Toolkit)
 1. Project Overview
-IRConvolverPro is a professional-grade, command-line driven audio utility specifically designed for the creation, processing, and management of Impulse Responses (IRs). Developed in Free Pascal, it bridges the gap between simple convolution scripts and high-end audio engineering software.
+TaraDSP is a professional-grade, command-line driven audio utility specifically designed for the creation, processing, and management of Impulse Responses (IRs). Developed in Free Pascal, it bridges the gap between simple convolution scripts and high-end audio engineering software.
 2. Core Architecture & Performance
 
     Engine: Powered by the PFFFT (Pretty Fast FFT) library, ensuring
