@@ -108,9 +108,13 @@ jobs:
     - name: Run TaraDSP Test Suite (Windows)
       if: matrix.os == 'windows-latest'
       run: |
+        # 1. Testdaten live auf dem Server generieren
         ./create_test_data.ps1
-        # Wir testen die hochkompatible noAVX2 Exe auf dem Server, um Abstürze zu vermeiden
-        copy /y taradsp-noAVX2.exe taradsp.exe
+        
+        # 2. Kopiert die hochtolerante noAVX2-Version für den Cloud-Test (PowerShell-Syntax)
+        Copy-Item -Path ".\taradsp-noAVX2.exe" -Destination ".\taradsp.exe" -Force
+        
+        # 3. Führt deine Test-Suite aus
         ./tests.ps1
       shell: powershell
 
