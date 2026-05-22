@@ -40,12 +40,6 @@ jobs:
         # Verlinkt die macOS Homebrew-Bibliothek in das System-Suchverzeichnis
         sudo ln -sf $(brew --prefix libsoxr)/lib/libsoxr.dylib /usr/local/lib/libsoxr.dylib
 
-    - name: Set up MinGW
-      if: matrix.os == 'windows-latest'
-      uses: egor-tensin/setup-mingw@v3
-      with:
-        platform: x64
-      
     - name: Compile Static C-Backend (PFFFT)
       run: |
         if [ "${{ matrix.os }}" = "windows-latest" ]; then
