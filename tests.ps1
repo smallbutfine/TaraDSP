@@ -1,29 +1,32 @@
 # TaraDSP Test Suite
-# Automatischer Suchmodus für Compiler-Ausgaben integriert
+# Automatischer Suchmodus für Compiler-Ausgaben (beachtet Case Sensitivity)
 
 $TestData = ".\Test_Data"
 $Results = ".\Test_Results"
 
 Write-Host "[*] Starting TaraDSP Test Suite..." -ForegroundColor Cyan
 
-# === NEU: AUTOMATISCHE EXE-SUCHE UND REPARATUR ===
-Write-Host "[*] Searching for compiled taradsp.exe..."
-$FoundExe = Get-ChildItem -Recurse -Filter "taradsp.exe" | Select-Object -First 1
+# === AUTOMATISCHE EXE-SUCHE UND REPARATUR ===
+Write-Host "[*] Searching for compiled TaraDSP-noAVX2.exe..."
+$FoundExe = Get-ChildItem -Recurse -Filter "TaraDSP-noAVX2.exe" | Select-Object -First 1
 
 if ($FoundExe) {
     $RealExePath = $FoundExe.FullName
     Write-Host "[+] Found executable at: $RealExePath" -ForegroundColor Green
-    
-    # Kopiere die Exe ins Hauptverzeichnis, damit der Test-Pfad (.\taradsp.exe) stimmt
-    if ($RealExePath -ne "$(Get-Location)\taradsp.exe") {
-        Copy-Item -Path $RealExePath -Destination ".\taradsp.exe" -Force
-    }
+    Copy-Item -Path $RealExePath -Destination ".\TaraDSP.exe" -Force
 } else {
-    Write-Host "[!] CRITICAL ERROR: taradsp.exe not found anywhere in the workspace!" -ForegroundColor Red
-    exit 1
+    # Fallback, falls die Datei ohne den Suffix erzeugt wurde
+    $FoundFallback = Get-ChildItem -Recurse -Filter "TaraDSP.exe" | Select-Object -First 1
+    if ($FoundFallback) {
+        Write-Host "[+] Found fallback executable at: $($FoundFallback.FullName)" -ForegroundColor Green
+        Copy-Item -Path $FoundFallback.FullName -Destination ".\TaraDSP.exe" -Force
+    } else {
+        Write-Host "[!] CRITICAL ERROR: No TaraDSP executable found anywhere!" -ForegroundColor Red
+        exit 1
+    }
 }
 
-$Exe = ".\taradsp.exe"
+$Exe = ".\TaraDSP.exe"
 
 # Sicherstellen, dass die Umgebung sauber ist
 if (Test-Path $Results) { Remove-Item -Recurse -Force $Results }
