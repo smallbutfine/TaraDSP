@@ -88,7 +88,7 @@
     </Linking>
     <Other>
       <WriteFPCLogo Value="False"/>
-      <CustomOptions Value="-CfAVX2 -CpCOREAVX2 -OoFASTMATH"/>
+      <CustomOptions Value="-CfAVX2 -CpCOREAVX2 -OoFASTMATH -WM11.0"/>
     </Other>
-  </CompilerOptions>
+ </CompilerOptions>
 </CONFIG>
