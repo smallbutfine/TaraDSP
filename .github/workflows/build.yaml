@@ -121,7 +121,7 @@ jobs:
       run: |
         mkdir -p dist
         
-        # 1. Versionsnummer extrahieren
+        # 1. Versionsnummer aus Git-Tag extrahieren (Fallback auf 1.0.0)
         VERSION="1.0.0"
         if [[ "${{ github.ref_type }}" == "tag" ]]; then
           VERSION=$(echo "${{ github.ref_name }}" | sed 's/^v//')
@@ -148,16 +148,15 @@ jobs:
           echo "=== Erstelle Linux .deb Paket ==="
           mkdir -p debian/DEBIAN debian/usr/bin
           
-          cat <<EOF > debian/DEBIAN/control
-Package: taradsp
-Version: $VERSION
-Section: sound
-Priority: optional
-Architecture: amd64
-Depends: libsoxr0
-Maintainer: Your Name <your.email@example.com>
-Description: Mastering-Grade FFT Impulse Response Toolkit
-EOF
+          # Sicheres zeilenweises Schreiben der Control-Datei
+          echo "Package: taradsp" > debian/DEBIAN/control
+          echo "Version: $VERSION" >> debian/DEBIAN/control
+          echo "Section: sound" >> debian/DEBIAN/control
+          echo "Priority: optional" >> debian/DEBIAN/control
+          echo "Architecture: amd64" >> debian/DEBIAN/control
+          echo "Depends: libsoxr0" >> debian/DEBIAN/control
+          echo "Maintainer: Your Name <your.email@example.com>" >> debian/DEBIAN/control
+          echo "Description: Mastering-Grade FFT Impulse Response Toolkit" >> debian/DEBIAN/control
           
           cp dist/TaraDSP debian/usr/bin/taradsp
           cp dist/TaraDSP-noAVX2 debian/usr/bin/taradsp-noAVX2
