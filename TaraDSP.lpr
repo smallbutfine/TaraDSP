@@ -412,17 +412,18 @@ var
 begin
   LoadConfig;
   
-  { Registriert die erlaubten Optionen. 
-    Kurzoptionen: -x (In1), -y (In2), -o (Out), -b (Bits), -r (Rate), -l (Limit) }
+  { 1. Registriert die erlaubten Parameter.
+       Ein Doppelpunkt (:) bedeutet, dass ein Wert folgen MUSS. }
   Msg := CheckOptions('x:y:o:b:r:l:h:m', 'help:mono:min:in1:in2');
   if (Msg <> '') or HasOption('h', 'help') or (ParamCount < 2) then begin 
     if Msg <> '' then WriteLn(StdErr, 'Parameter-Fehler: ', Msg);
     ShowUsage; 
-    Terminate(1);
+    ExitCode := 1; // Zwingend wichtig für GitHub Actions!
+    Terminate; 
     Exit; 
   end;
   
-  { Liest die Werte über die sauberen Kurz- und Langoptionen aus }
+  { 2. Liest die Parameter aus }
   if HasOption('x', 'in1') then f1 := GetOptionValue('x', 'in1') else f1 := GetOptionValue('x');
   if HasOption('y', 'in2') then f2 := GetOptionValue('y', 'in2') else f2 := GetOptionValue('y');
   fOut := GetOptionValue('o');
@@ -430,22 +431,21 @@ begin
   TargetSR := StrToIntDef(GetOptionValue('r', 'rate'), 0);
   TruncLen := StrToIntDef(GetOptionValue('l'), 0);
 
-  StartTime := GetTickCount64; // Startet die Zeitmessung plattformunabhängig
+  StartTime := GetTickCount64;
   try
     { 3. Erste WAV-Datei (Source) laden }
     A1 := LoadWav(f1, SR1); 
     if A1 = nil then 
-      raise Exception.Create('Fehler beim Laden der Quell-WAV-Datei oder ungültiges Format.');
+      raise Exception.Create('Fehler beim Laden der Quell-WAV-Datei.');
 
-    { 4. Zweite WAV-Datei (Impulsantwort) laden mit Mastering-Fallback }
+    { 4. Zweite WAV-Datei (Impulsantwort) laden mit Mastering-Fallback (Test 3) }
     if f2 <> '' then begin
       A2 := LoadWav(f2, SR2);
       if A2 = nil then 
         raise Exception.Create('Fehler beim Laden der Impulsantwort-WAV-Datei.');
     end 
     else begin
-      { TEST 3 Fallback: Wenn -i2 fehlt, arbeiten wir im reinen Mastering-Modus.
-        Wir erzeugen einen Identitäts-Impuls (Wert 1.0), damit das Signal unverändert bleibt. }
+      { Wenn -y fehlt, erzeugen wir einen Identitäts-Impuls für den Mastering-Modus }
       SetLength(A2, Length(A1));
       for c := 0 to High(A2) do begin
         SetLength(A2[c], 1);
@@ -454,7 +454,7 @@ begin
       SR2 := SR1;
     end;
 
-    { 5. Resampling-Logik ausführen, falls Sampleraten sich unterscheiden }
+    { 5. Resampling-Logik ausführen }
     if (TargetSR > 0) then begin
       if SR1 <> TargetSR then A1 := ResampleSoxr(A1, SR1, TargetSR);
       if SR2 <> TargetSR then A2 := ResampleSoxr(A2, SR2, TargetSR);
@@ -463,7 +463,7 @@ begin
       A2 := ResampleSoxr(A2, SR2, SR1);
     end;
 
-    { 6. Hardware-Kürzung (Truncation) anwenden, falls über -l gefordert (Test 2) }
+    { 6. Hardware-Kürzung (Truncation) anwenden (Test 2) }
     if (TruncLen > 0) then begin
       for c := 0 to High(A1) do begin
         if Length(A1[c]) > TruncLen then SetLength(A1[c], TruncLen);
@@ -473,7 +473,7 @@ begin
       end;
     end;
 
-    { 7. Kernprozess: FFT-Faltung pro Kanal ausführen }
+    { 7. Kernprozess: FFT-Faltung ausführen }
     SetLength(Res, Min(Length(A1), Length(A2)));
     for c := 0 to High(Res) do begin
       WriteLn('Convolving Channel ', c+1, '...');
@@ -485,20 +485,21 @@ begin
       for c := 0 to High(Res) do Res[c] := ConvertToMinimumPhase(Res[c]);
     end;
     
-    { 9. Normalisieren, Lautstärke sichern und exportieren }
+    { 9. Normalisieren und exportieren }
     Normalize(Res);
     SaveWav(fOut, Res, SR1, bOut, HasOption('m', 'mono'));
     
     WriteLn(Format('Success! Processing Time: %d ms', [GetTickCount64 - StartTime]));
-    Terminate(0); // Erfolgreicher Exit für die Test-Suite
+    ExitCode := 0; // Erfolg signalisieren
+    Terminate;
   except 
     on E: Exception do begin 
       WriteLn(StdErr, 'Error: ', E.Message); 
-      Terminate(1); 
+      ExitCode := 1; // Fehler signalisieren
+      Terminate; 
     end; 
   end;
 end;
-
 
 procedure TIRConvolverApp.ShowUsage;
 begin
