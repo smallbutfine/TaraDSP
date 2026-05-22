@@ -109,11 +109,18 @@ end;
 function TTaraDSPApp.ApplyMasteringDither(Sample: Single; Chan: Integer; Amount: Single): Single;
 var Dither, ResVal, Error, LSB: Single;
 begin
-  LSB := 1.0 / 32767.0; Dither := ((Random - 0.5) + (Random - 0.5)) * LSB * Amount;
+  LSB := 1.0 / 32767.0; 
+  Dither := ((Random - 0.5) + (Random - 0.5)) * LSB * Amount;
   if Abs(Sample) < (LSB * 2) then Dither := Dither * 0.7;
-  ResVal := Sample + Dither + (FErrorMem[Chan] * 1.5) - (FErrorMem[Chan] * 0.5);
-  ResVal := EnsureRange(ResVal, -1.0, 1.0); ResVal := Round(ResVal * 32767) / 32767.0;
-  Error := Sample - ResVal; FErrorMem[Chan] := FErrorMem[Chan]; FErrorMem[Chan] := Error;
+  
+  // REPARIERT: Indizes [0] und [1] explizit hinzugefügt
+  ResVal := Sample + Dither + (FErrorMem[Chan][0] * 1.5) - (FErrorMem[Chan][1] * 0.5);
+  ResVal := EnsureRange(ResVal, -1.0, 1.0); 
+  ResVal := Round(ResVal * 32767) / 32767.0;
+
+  Error := Sample - ResVal; 
+  FErrorMem[Chan][1] := FErrorMem[Chan][0]; 
+  FErrorMem[Chan][0] := Error;
   Result := ResVal;
 end;
 
