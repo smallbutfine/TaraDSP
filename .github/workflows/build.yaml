@@ -136,32 +136,39 @@ jobs:
       run: |
         mkdir -p dist
         
-        # 1. Haupt-Binaries kopieren
+        # 1. Versionsnummer aus dem Git-Tag extrahieren (Fallback auf '1.0.0', falls kein Tag vorhanden)
+        VERSION="1.0.0"
+        if [[ "${{ github.ref_type }}" == "tag" ]]; then
+          # Entfernt das 'v' am Anfang, falls vorhanden (v1.2.3 -> 1.2.3)
+          VERSION=$(echo "${{ github.ref_name }}" | sed 's/^v//')
+        fi
+        echo "Baue Version: $VERSION"
+        
+        # 2. Haupt-Binaries kopieren
         cp TaraDSP.exe dist/ 2>/dev/null || true
         cp TaraDSP dist/ 2>/dev/null || true
         cp TaraDSP-noAVX2* dist/ 2>/dev/null || true
         
-        # 2. Windows-DLLs kopieren (NUR auf dem Windows-Runner)
+        # 3. Windows-DLLs kopieren & Inno Setup ausführen
         if [ "${{ matrix.os }}" = "windows-latest" ]; then
           cp *.dll dist/ 2>/dev/null || true
           cp min_dll/*.dll dist/ 2>/dev/null || true
           
           echo "=== Erstelle Windows Installer (Inno Setup) ==="
-          "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+          # Übergibt die Versionsnummer direkt als Parameter (/D) an Inno Setup
+          '/c/Program Files (x86)/Inno Setup 6/ISCC.exe' /DAppVersion="$VERSION" installer.iss
           
-          # Kopiere den fertigen Installer in den dist-Ordner für das Release
-          cp installer_out/TaraDSP_Setup.exe dist/
+          cp installer_out/TaraDSP_Setup_*.exe dist/
         fi
         
-        # 3. Linux Debian-Paket erstellen (.deb)
+        # 4. Linux Debian-Paket erstellen (.deb)
         if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
           echo "=== Erstelle Linux .deb Paket ==="
           mkdir -p debian/DEBIAN debian/usr/bin
           
-          # Erstelle die Control-Datei für den Paketmanager
           cat <<EOF > debian/DEBIAN/control
 Package: taradsp
-Version: 1.0.0
+Version: $VERSION
 Section: sound
 Priority: optional
 Architecture: amd64
@@ -170,17 +177,36 @@ Maintainer: Your Name <your.email@example.com>
 Description: Mastering-Grade FFT Impulse Response Toolkit
 EOF
           
-          # Kopiere die Linux-Binaries in das Paket-Dateisystem
           cp dist/TaraDSP debian/usr/bin/taradsp
           cp dist/TaraDSP-noAVX2 debian/usr/bin/taradsp-noAVX2
           chmod +x debian/usr/bin/taradsp*
           
-          # Paket packen und in den dist-Ordner legen
-          dpkg-deb --build debian dist/taradsp_1.0.0_amd64.deb
+          # Paketname enthält nun die dynamische Versionsnummer
+          dpkg-deb --build debian "dist/taradsp_${VERSION}_amd64.deb"
           rm -rf debian
         fi
+
+        # 5. macOS Installations-Paket erstellen (.pkg)
+        if [ "${{ matrix.os }}" = "macos-latest" ]; then
+          echo "=== Erstelle macOS .pkg Paket ==="
+          mkdir -p mac_root/usr/local/bin
+          mkdir -p mac_root/usr/local/lib
+          
+          cp dist/TaraDSP mac_root/usr/local/bin/taradsp
+          cp libpffft.dylib mac_root/usr/local/lib/libpffft.dylib
+          chmod +x mac_root/usr/local/bin/taradsp
+          
+          # Übergibt die dynamische Version an das macOS-Paketwerkzeug
+          pkgbuild --identifier "com.taradsp.pkg" \
+                   --version "$VERSION" \
+                   --root mac_root \
+                   --install-location / \
+                   "dist/TaraDSP_Setup_${VERSION}.pkg"
+                   
+          rm -rf mac_root
+        fi
         
-        # 4. macOS- und Zusatzdateien sichern
+        # 6. Zusatzdateien im Hauptverzeichnis sichern
         [ -f libpffft.dylib ] && cp libpffft.dylib dist/ || true
         [ -f settings.ini ] && cp settings.ini dist/ || true
         [ -f LICENSE ] && cp LICENSE dist/ || true
