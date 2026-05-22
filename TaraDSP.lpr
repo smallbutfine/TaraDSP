@@ -90,10 +90,6 @@ begin
     _soxr_create := GetProcAddress(SHandle, 'soxr_create');
     _soxr_process := GetProcAddress(SHandle, 'soxr_process');
     _soxr_delete := GetProcAddress(SHandle, 'soxr_delete');
-  end else begin
-    _soxr_create := @MockSoxrCreate; 
-    _soxr_process := @MockSoxrProcess; 
-    _soxr_delete := @MockSoxrDelete;
   end;
   
   PHandle := NilHandle;
@@ -118,13 +114,6 @@ begin
     _pffft_zconvolve_accumulate := TPffftZCn(GetProcAddress(PHandle, 'pffft_zconvolve_accumulate'));
     _pffft_aligned_malloc := TPffftMal(GetProcAddress(PHandle, 'pffft_aligned_malloc'));
     _pffft_aligned_free := TPffftFre(GetProcAddress(PHandle, 'pffft_aligned_free'));
-  end else begin
-    _pffft_new_setup := @MockPffftNew; 
-    _pffft_destroy_setup := @MockPffftDst;
-    _pffft_transform_ordered := @MockPffftTrf; 
-    _pffft_zconvolve_accumulate := @MockPffftZCn;
-    _pffft_aligned_malloc := @MockPffftMal; 
-    _pffft_aligned_free := @MockPffftFre;
   end;
 end;
 
