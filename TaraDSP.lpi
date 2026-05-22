@@ -12,6 +12,13 @@
       <Title Value="TaraDSP"/>
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
+    <VersionInfo>
+      <UseVersionInfo Value="True"/>
+      <AutoIncrementBuild Value="True"/>
+      <MajorVersionNr Value="1"/>
+      <MinorVersionNr Value="0"/>
+    </VersionInfo>
+
     </General>
     <BuildModes>
       <Item Name="Release" Default="True"/>
