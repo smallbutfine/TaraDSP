@@ -66,16 +66,16 @@ jobs:
     - name: Build Application (Linux & macOS)
       if: matrix.os != 'windows-latest'
       run: |
+        # Bereinigt alte Cache-Leichen vor dem Build
+        rm -rf lib/ backup/ 2>/dev/null || true
+        
         if [ "${{ matrix.os }}" = "macos-latest" ]; then
           export FPCOPT="-WM11.0"
         fi
-        lazbuild --build-mode=Release IRConvolverPro.lpi
+        
+        # Zwingt lazbuild mit -B alles absolut frisch zu übersetzen
+        lazbuild -B --build-mode=Release IRConvolverPro.lpi
       shell: bash
-
-    - name: Build CLI & GUI Editions
-      if: ${{ matrix.os == 'windows-latest' }}
-      run: ./build.bat
-      
       
     - name: Prepare Artifacts
       shell: bash
