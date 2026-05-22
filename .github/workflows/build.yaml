@@ -74,12 +74,12 @@ jobs:
           export FPCOPT="-WM11.0"
           lazbuild -B --build-mode=Release taradsp.lpi
         else
-          # Linux: Erst AVX2 bauen
-          cp pffft.o pffft.o
+          # Linux: Baut die standardmäßige AVX2-Version
+          # (pffft.o wurde im GCC-Schritt bereits passend erzeugt)
           lazbuild -B --build-mode=Release taradsp.lpi
           mv taradsp taradsp-AVX2
           
-          # Linux: Dann No-AVX2 bauen
+          # Linux: Cache leeren, No-AVX2-Objekt einspielen und No-AVX2 bauen
           rm -rf lib/ backup/ 2>/dev/null || true
           cp pffft_noAVX2.o pffft.o
           lazbuild -B --build-mode=Release-NoAVX2 taradsp.lpi
