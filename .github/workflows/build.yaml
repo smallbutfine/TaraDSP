@@ -111,8 +111,6 @@ jobs:
         lazbuild -B --build-mode=Release-NoAVX2 TaraDSP.lpi
         
         if exist taradsp-noAVX2.exe move taradsp-noAVX2.exe TaraDSP-noAVX2.exe
-        
-        powershell -Command "$f = Get-ChildItem -Recurse -Include *noAVX2.exe | Select-Object -First 1; if ($f -and $f.FullName -ne '$(Get-Location)\TaraDSP-noAVX2.exe') { Copy-Item $f.FullName -Destination '.\TaraDSP-noAVX2.exe' -Force }"
       shell: cmd
 
 
