@@ -74,13 +74,36 @@ type
 { --- Externe Bibliothekseinbindung (libsoxr) --- }
 
 {$IFDEF DARWIN}
-// Auf macOS laden wir die Funktionen absolut dynamisch zur Laufzeit,
-// um den x86_64 Linker-Fehler auf GitHub Actions zu umgehen.
-function soxr_create(in_rate, out_rate: Double; num_chans: Cardinal; error: PInteger; io_spec, q_spec, runtime_spec: Pointer): Pointer; cdecl; external LIB_SOXR name 'soxr_create';
-function soxr_process(resampler: Pointer; in_buf: PSingle; in_len: Cardinal; done_in: PCardinal; out_buf: PSingle; out_len: Cardinal; done_out: PCardinal): Integer; cdecl; external LIB_SOXR name 'soxr_process';
-procedure soxr_delete(resampler: Pointer); cdecl; external LIB_SOXR name 'soxr_delete';
+uses
+  dynlibs; // Wird für echtes Laden zur Laufzeit benötigt
+
+type
+  TFuncSoxrCreate  = function(in_rate, out_rate: Double; num_chans: Cardinal; error: PInteger; io_spec, q_spec, runtime_spec: Pointer): Pointer; cdecl;
+  TFuncSoxrProcess = function(resampler: Pointer; in_buf: PSingle; in_len: Cardinal; done_in: PCardinal; out_buf: PSingle; out_len: Cardinal; done_out: PCardinal): Integer; cdecl;
+  TFuncSoxrDelete  = procedure(resampler: Pointer); cdecl;
+
+var
+  SoxrLibHandle: TLibHandle = SafeLoadLibraryHandle;
+  soxr_create: TFuncSoxrCreate = nil;
+  soxr_process: TFuncSoxrProcess = nil;
+  soxr_delete: TFuncSoxrDelete = nil;
+
+procedure InitSoxrMacOS;
+begin
+  if SoxrLibHandle = SafeLoadLibraryHandle then begin
+    // Sucht nacheinander an üblichen Mac-Pfaden nach der Bibliothek
+    SoxrLibHandle := LoadLibrary(LIB_SOXR);
+    if SoxrLibHandle = SafeLoadLibraryHandle then SoxrLibHandle := LoadLibrary('/usr/local/lib/' + LIB_SOXR);
+    if SoxrLibHandle = SafeLoadLibraryHandle then SoxrLibHandle := LoadLibrary('/opt/homebrew/lib/' + LIB_SOXR);
+    
+    if SoxrLibHandle <> SafeLoadLibraryHandle then begin
+      soxr_create  := TFuncSoxrCreate(GetProcAddress(SoxrLibHandle, 'soxr_create'));
+      soxr_process := TFuncSoxrProcess(GetProcAddress(SoxrLibHandle, 'soxr_process'));
+      soxr_delete  := TFuncSoxrDelete(GetProcAddress(SoxrLibHandle, 'soxr_delete'));
+    end;
+  end;
+end;
 {$ELSE}
-// Windows und Linux nutzen die normale Verlinkung
 function soxr_create(in_rate, out_rate: Double; num_chans: Cardinal; error: PInteger; io_spec, q_spec, runtime_spec: Pointer): Pointer; cdecl; external LIB_SOXR;
 function soxr_process(resampler: Pointer; in_buf: PSingle; in_len: Cardinal; done_in: PCardinal; out_buf: PSingle; out_len: Cardinal; done_out: PCardinal): Integer; cdecl; external LIB_SOXR;
 procedure soxr_delete(resampler: Pointer); cdecl; external LIB_SOXR;
@@ -92,7 +115,11 @@ constructor TIRConvolverApp.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   Randomize;
+  {$IFDEF DARWIN}
+  InitSoxrMacOS; // Lädt die Funktionspointer auf dem Mac sicher beim Start
+  {$ENDIF}
 end;
+
 
 procedure TIRConvolverApp.LoadConfig;
 var Ini: TIniFile; Fn: string;
