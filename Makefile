@@ -1,9 +1,9 @@
-# IRConvolverPro Master Build Script (CLI & GUI)
+# TaraDSP Master Build Script (CLI & GUI)
 # Automates C-compilation for PFFFT and Pascal-linking for FPC
 
 # Project Names
-PROJ_CLI = IRConvolverPro-CLI
-PROJ_GUI = IRConvolverPro-GUI
+PROJ_CLI = TaraDSP
+PROJ_GUI = TaraDSP-GUI
 
 # Tools
 CC = gcc
