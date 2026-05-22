@@ -92,7 +92,40 @@ if ($LASTEXITCODE -eq 0 -and (Test-Path "$Results\Batch_Out\batch_success.wav"))
 # TEST 5: Minimum Phase Transformation
 Write-Host "[Test 5] Minimum Phase Transform... " -NoNewline
 & $Exe -x "$TestData\source.wav" -y "$TestData\cab_ir.wav" -o "$Results\test5_minphase.wav" --min
-if ($LASTEXITCODE -eq 0 -and (Test-Path "$Results\test5_minphase.wav")) { Write-Host "PASS" -ForegroundColor Green } else { Write-Host "FAIL" -ForegroundColor Red; $GlobalPass = $false }
+if ($LASTEXITCODE -eq 0 -and (Test-Path "$Results\test5_minphase.wav")) { 
+    Write-Host "PASS" -ForegroundColor Green 
+} else { 
+    Write-Host "FAIL" -ForegroundColor Red
+    $GlobalPass = $false
+}
+
+# TEST 6: Smart Auto-Trim Silence (-t)
+Write-Host "[Test 6] Auto-Trim Silence (-t -60)... " -NoNewline
+& $Exe -x "$TestData\source.wav" -y "$TestData\cab_ir.wav" -o "$Results\test6_trimmed.wav" -t -60
+if ($LASTEXITCODE -eq 0 -and (Test-Path "$Results\test6_trimmed.wav")) {
+    $sizeTrimmed = (Get-Item "$Results\test6_trimmed.wav").Length
+    $sizeNormal = (Get-Item "$Results\test1_conv.wav").Length
+    # Durch das Abschneiden der Stille MUSS die Datei kleiner sein als die Standard-Faltung
+    if ($sizeTrimmed -lt $sizeNormal) {
+        Write-Host "PASS" -ForegroundColor Green
+    } else {
+        Write-Host "FAIL (Silence not truncated)" -ForegroundColor Red
+        $GlobalPass = $false
+    }
+} else {
+    Write-Host "FAIL (File not generated)" -ForegroundColor Red
+    $GlobalPass = $false
+}
+
+# TEST 7: Audio Fade-Out Engine (-f)
+Write-Host "[Test 7] Fade-Out Application (-f 5.0)... " -NoNewline
+& $Exe -x "$TestData\source.wav" -y "$TestData\cab_ir.wav" -o "$Results\test7_fade.wav" -f 5.0
+if ($LASTEXITCODE -eq 0 -and (Test-Path "$Results\test7_fade.wav")) { 
+    Write-Host "PASS" -ForegroundColor Green 
+} else { 
+    Write-Host "FAIL" -ForegroundColor Red 
+    $GlobalPass = $false
+}
 
 Write-Host "[*] Test Suite Finished." -ForegroundColor Cyan
 
