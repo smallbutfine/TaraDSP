@@ -25,14 +25,23 @@ jobs:
       with:
         lazarus-version: 'stable'
 
-    - name: Install Build Essentials (Linux/macOS)
-      if: runner.os == 'Windows'
+    - name: Install Build Essentials (Linux)
+      if: matrix.os == 'ubuntu-latest'
       run: |
-        if [ "$RUNNER_OS" == "Linux" ]; then
-          sudo apt-get update
-          sudo apt-get install -y build-essential libgtk2.0-dev libsoxr-dev
-        fi
-      shell: bash
+        sudo apt-get update
+        sudo apt-get install -y build-essential libgtk2.0-dev libsoxr-dev libx11-dev
+        
+        # Erzeugt einen sicheren Symlink für den Pascal-Linker, falls Ubuntu den Pfad versteckt
+        sudo ln -sf /usr/lib/x86_64-linux-gnu/libsoxr.so.0 /usr/lib/libsoxr.so
+
+    - name: Install Dependencies (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        brew install libsoxr
+        
+        # Verlinkt die macOS Homebrew-Bibliothek in das System-Suchverzeichnis
+        sudo ln -sf $(brew --prefix libsoxr)/lib/libsoxr.dylib /usr/local/lib/libsoxr.dylib
+
     - name: Set up MinGW
       if: runner.os == 'Windows'
       uses: egor-tensin/setup-mingw@v3
