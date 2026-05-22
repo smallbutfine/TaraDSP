@@ -67,13 +67,7 @@ jobs:
     - name: Build Application (Linux & macOS)
       if: matrix.os != 'windows-latest'
       run: |
-        if [ "${{ matrix.os }}" = "macos-latest" ]; then
-          # Übergibt das macOS-Target sauber als Compiler-Option nur an den Mac-Build
-          lazbuild --build-mode=Release --compiler-options="-WM11.0" IRConvolverPro.lpi
-        else
-          # Linux baut standardmäßig ohne macOS-Parameter
-          lazbuild --build-mode=Release IRConvolverPro.lpi
-        fi
+        lazbuild --build-mode=Release IRConvolverPro.lpi
       shell: bash
           
     - name: Prepare Artifacts
