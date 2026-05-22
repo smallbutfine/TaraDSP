@@ -1,4 +1,3 @@
-
 {
   IRConvolverPro - Mastering-Grade FFT Impulse Response Toolkit
   Copyright (c) 2024, [Your Name/Organization]
@@ -11,26 +10,33 @@ program IRConvolverPro;
 
 uses
   {$IFDEF UNIX}cthreads,{$ENDIF}
-  {$IFDEF DARWIN}dynlibs,{$ENDIF} // Hierher verschoben! [1]
+  {$IFDEF DARWIN}dynlibs,{$ENDIF}
   SysUtils, Classes, Math, CustApp, fptimer, IniFiles;
 
 const
-  // Plattformunabhängige Bibliotheksnamen für den Linker (Resampling)
+  // Plattformunabhängige Bibliotheksnamen für den Linker
   {$IFDEF WINDOWS}
-  LIB_SOXR = 'libsoxr.dll';
+    LIB_SOXR = 'libsoxr.dll';
   {$ELSE}
     {$IFDEF DARWIN}
-    LIB_SOXR = 'libsoxr.dylib';
+      LIB_SOXR = 'libsoxr.dylib';
     {$ELSE}
-    LIB_SOXR = 'libsoxr.so.0'; // Standard unter Ubuntu/Debian
+      LIB_SOXR = 'libsoxr.so.0';
     {$ENDIF}
   {$ENDIF}
+
+  PFFFT_FORWARD  = 0;
+  PFFFT_BACKWARD = 1;
 
 type
   TFloatBuffer  = array of Single;
   TAudioData    = array of TFloatBuffer;
   TErrorHistory = array[0..1] of Single; 
   TFilterMode   = (fmBrickwall, fmGentle);
+
+  { PFFFT Kerntypen - JETZT GLOBAL FÜR ALLE SYSTEME ERREICHBAR }
+  PPFFFT_Setup = Pointer;
+  TPFFFT_Transform = (PFFFT_REAL = 0, PFFFT_COMPLEX = 1);
 
   TWavHeader = packed record
     RIFFID: array[0..3] of Char; Size: LongInt; WavID: array[0..3] of Char;
@@ -43,7 +49,7 @@ type
   TIRConvolverApp = class(TCustomApplication)
   private
     FErrorMem: array of TErrorHistory;
-    FArtist: string; 
+    FArtist: string;
     procedure LoadConfig;
     
     { I/O }
@@ -106,26 +112,75 @@ function soxr_process(resampler: Pointer; in_buf: PSingle; in_len: Cardinal; don
 procedure soxr_delete(resampler: Pointer); cdecl; external LIB_SOXR;
 {$ENDIF}
 
+{ --- Externe Bibliothekseinbindung (PFFFT FFT Engine) --- }
+
+{$IFDEF DARWIN}
+type
+  TFuncPffftNewSetup    = function(N: Integer; transform: TPFFFT_Transform): PPFFFT_Setup; cdecl;
+  TFuncPffftDestroy     = procedure(setup: PPFFFT_Setup); cdecl;
+  TFuncPffftTransform   = procedure(setup: PPFFFT_Setup; const input: PSingle; output: PSingle; work: PSingle; direction: Integer); cdecl;
+  TFuncPffftZConvolve   = procedure(setup: Pointer; const dft_a, dft_b: PSingle; dft_ab: PSingle; scaling: Single); cdecl;
+  TFuncPffftAlignedMalloc= function(nb_bytes: NativeUInt): Pointer; cdecl;
+  TFuncPffftAlignedFree  = procedure(p: Pointer); cdecl;
+
+var
+  PffftLibHandle: TLibHandle = NilHandle;
+  pffft_new_setup: TFuncPffftNewSetup = nil;
+  pffft_destroy_setup: TFuncPffftDestroy = nil;
+  pffft_transform_ordered: TFuncPffftTransform = nil;
+  pffft_zconvolve_accumulate: TFuncPffftZConvolve = nil;
+  pffft_aligned_malloc: TFuncPffftAlignedMalloc = nil;
+  pffft_aligned_free: TFuncPffftAlignedFree = nil;
+
+procedure InitPffftMacOS;
+begin
+  if PffftLibHandle = NilHandle then begin
+    PffftLibHandle := LoadLibrary('libpffft.dylib');
+    if PffftLibHandle = NilHandle then PffftLibHandle := LoadLibrary('./libpffft.dylib');
+    
+    if PffftLibHandle <> NilHandle then begin
+      pffft_new_setup            := TFuncPffftNewSetup(GetProcAddress(PffftLibHandle, 'pffft_new_setup'));
+      pffft_destroy_setup        := TFuncPffftDestroy(GetProcAddress(PffftLibHandle, 'pffft_destroy_setup'));
+      pffft_transform_ordered    := TFuncPffftTransform(GetProcAddress(PffftLibHandle, 'pffft_transform_ordered'));
+      pffft_zconvolve_accumulate := TFuncPffftZConvolve(GetProcAddress(PffftLibHandle, 'pffft_zconvolve_accumulate'));
+      pffft_aligned_malloc       := TFuncPffftAlignedMalloc(GetProcAddress(PffftLibHandle, 'pffft_aligned_malloc'));
+      pffft_aligned_free         := TFuncPffftAlignedFree(GetProcAddress(PffftLibHandle, 'pffft_aligned_free'));
+    end;
+  end;
+end;
+{$ENDIF}
+
+{$IFDEF WINDOWS}
+  const LIB_PFFFT = 'libpffft.dll';
+  function pffft_new_setup(N: Integer; transform: TPFFFT_Transform): PPFFFT_Setup; cdecl; external LIB_PFFFT;
+  procedure pffft_destroy_setup(setup: PPFFFT_Setup); cdecl; external LIB_PFFFT;
+  procedure pffft_transform_ordered(setup: PPFFFT_Setup; const input: PSingle; output: PSingle; work: PSingle; direction: Integer); cdecl; external LIB_PFFFT;
+  procedure pffft_zconvolve_accumulate(setup: Pointer; const dft_a, dft_b: PSingle; dft_ab: PSingle; scaling: Single); cdecl; external LIB_PFFFT;
+  function pffft_aligned_malloc(nb_bytes: NativeUInt): Pointer; cdecl; external LIB_PFFFT;
+  procedure pffft_aligned_free(p: Pointer); cdecl; external LIB_PFFFT;
+{$ENDIF}
+
+{$IFDEF LINUX}
+  function pffft_new_setup(N: Integer; transform: TPFFFT_Transform): PPFFFT_Setup; cdecl; external;
+  procedure pffft_destroy_setup(setup: PPFFFT_Setup); cdecl; external;
+  procedure pffft_transform_ordered(setup: PPFFFT_Setup; const input: PSingle; output: PSingle; work: PSingle; direction: Integer); cdecl; external;
+  procedure pffft_zconvolve_accumulate(setup: Pointer; const dft_a, dft_b: PSingle; dft_ab: PSingle; scaling: Single); cdecl; external;
+  function pffft_aligned_malloc(nb_bytes: NativeUInt): Pointer; cdecl; external;
+  procedure pffft_aligned_free(p: Pointer); cdecl; external;
+{$ENDIF}
+
+{ --- Implementation --- }
+
 constructor TIRConvolverApp.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   Randomize;
   {$IFDEF DARWIN}
   InitSoxrMacOS;
-  InitPffftMacOS; // Lädt die FFT-Funktionen absolut sicher zur Laufzeit
+  InitPffftMacOS;
   {$ENDIF}
 end;
 
-{ --- Implementierung --- }
-
-constructor TIRConvolverApp.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-  Randomize;
-  {$IFDEF DARWIN}
-  InitSoxrMacOS; // Lädt die Funktionspointer auf dem Mac sicher beim Start
-  {$ENDIF}
-end;
 
 
 procedure TIRConvolverApp.LoadConfig;
