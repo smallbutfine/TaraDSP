@@ -82,13 +82,19 @@ jobs:
       run: ./build.bat
       shell: cmd
 
+    # === AUTOMATISCHE TESTDATEN-GENERIERUNG + TESTS ===
     - name: Run TaraDSP Test Suite (Windows)
       if: matrix.os == 'windows-latest'
       run: |
-        # Falls du deine Test-WAVs (source.wav, cab_ir.wav) im Repo unter .\Test_Data\ hast,
-        # läuft das Skript jetzt vollautomatisch im PowerShell-Modus des Windows-Runners:
+        # 1. Erstellt den Ordner und die WAV-Dateien live auf dem Server
+        ./create_test_data.ps1
+        
+        # 2. Führt deine eigentliche Test-Suite aus
         ./tests.ps1
       shell: powershell
+
+    - name: Prepare Artifacts
+      shell: bash
    
     - name: Prepare Artifacts
       shell: bash
