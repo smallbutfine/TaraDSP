@@ -1,16 +1,31 @@
 # TaraDSP Test Suite
-# Tests CLI functionality, Hardware Truncation, and Mastering Mode
-
 $Exe = ".\taradsp.exe"
 $TestData = ".\Test_Data"
 $Results = ".\Test_Results"
 
 Write-Host "[*] Starting TaraDSP Test Suite..." -ForegroundColor Cyan
 
+# === NEU: SANITY CHECK FÜR DIE PIPELINE ===
+Write-Host "[*] Verifying Executable Integrity..." -NoNewline
+try {
+    # Führt die Exe testweise aus, um Windows-Ladefehler abzufangen
+    $testRun = Start-Process -FilePath $Exe -ArgumentList "-h" -NoNewWindow -PassThru -Wait
+    if ($testRun.ExitCode -ne 0 -and $testRun.ExitCode -ne 1) {
+        Write-Host " CRASHED (Exit Code: $($testRun.ExitCode))" -ForegroundColor Red
+        Write-Host "[!] Windows konnte die Anwendung nicht laden. Mögliche Ursachen:" -ForegroundColor Yellow
+        Write-Host "    1. libpffft.dll oder libsoxr.dll fehlt im selben Ordner." -ForegroundColor Yellow
+        Write-Host "    2. Die CPU des GitHub-Servers unterstützt das kompilierte AVX2 nicht." -ForegroundColor Yellow
+        exit 1
+    }
+    Write-Host " OK" -ForegroundColor Green
+} catch {
+    Write-Host " UNABLE TO LAUNCH ($_)" -ForegroundColor Red
+    exit 1
+}
+
 if (Test-Path $Results) { Remove-Item -Recurse -Force $Results }
 New-Item -ItemType Directory -Path $Results | Out-Null
 
-$GlobalPass = $true
 
 # TEST 1: Basic Convolution & 24-bit Output
 Write-Host "[Test 1] Standard Convolution (24-bit)... " -NoNewline
