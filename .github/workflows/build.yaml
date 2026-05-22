@@ -82,21 +82,16 @@ jobs:
       run: |
         mkdir -p dist
         
-        echo "=== Inhalt des Arbeitsverzeichnisses vor dem Kopieren ==="
-        ls -la
-        
-        # Kopiere die kompilierten Binaries (fängt alle denkbaren Namensmuster ab)
+        # Kopiere Binaries
         cp IRConvolverPro.exe dist/ 2>/dev/null || true
         cp IRConvolverPro dist/ 2>/dev/null || true
-        cp IRConvolverPro-CLI* dist/ 2>/dev/null || true
-        cp IRConvolverPro-GUI* dist/ 2>/dev/null || true
+        
+        # Kopiere die universelle Mac-Dylib mit in den dist-Ordner
+        [ -f libpffft.dylib ] && cp libpffft.dylib dist/ || true
         
         # Einstellungen und Lizenz sichern
         [ -f settings.ini ] && cp settings.ini dist/ || true
         [ -f LICENSE ] && cp LICENSE dist/ || true
-        
-        echo "=== Inhalt des dist/ Ordners ==="
-        ls -la dist/
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
