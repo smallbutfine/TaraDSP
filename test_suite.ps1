@@ -1,11 +1,11 @@
 # IRConvolverPro Test Suite
 # Tests CLI functionality, Hardware Truncation, and Mastering Mode
 
-$Exe = ".\IRConvolverPro-CLI.exe"
+$Exe = ".\TaraDSP.exe"
 $TestData = ".\Test_Data"
 $Results = ".\Test_Results"
 
-Write-Host "[*] Starting IRConvolverPro Test Suite..." -ForegroundColor Cyan
+Write-Host "[*] Starting TaraDSP Test Suite..." -ForegroundColor Cyan
 
 # Ensure clean test environment
 if (Test-Path $Results) { Remove-Item -Recurse -Force $Results }
