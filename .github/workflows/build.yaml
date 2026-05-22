@@ -104,20 +104,18 @@ jobs:
     - name: Build Application (Windows)
       if: matrix.os == 'windows-latest'
       run: |
-        # 1. AVX2 bauen (nutzt deine build.bat)
-        ./build.bat
+        # 1. AVX2 Version bauen (Wir übergeben die Hardware-Optimierung direkt per Kommandozeile)
+        lazbuild -B --build-mode=Release --compiler-options="-CfAVX2 -CpCOREAVX2" TaraDSP.lpi
         
         # Sicherstellen, dass das Hauptbinary ohne Zusatz exakt geschrieben ist
         if exist taradsp.exe move taradsp.exe TaraDSP.exe
         
-        # 2. No-AVX2-Version bauen
-        set PROJECT_FILE=TaraDSP.lpi
-        if exist taradsp.lpi set PROJECT_FILE=taradsp.lpi
-        lazbuild -B --build-mode=Release-NoAVX2 %PROJECT_FILE%
+        # 2. No-AVX2-Version bauen (Baut vollkommen ohne AVX2-Befehlssatz)
+        lazbuild -B --build-mode=Release-NoAVX2 TaraDSP.lpi
         
-        # 3. Dynamische Suche nach der NoAVX2-Datei über PowerShell
-        # FPC legt die Exe je nach Cache in .\lib\x86_64-win64\ ab. Wir holen sie vor!
-        powershell -Command "$f = Get-ChildItem -Recurse -Include *noAVX2.exe | Select-Object -First 1; if ($f) { Copy-Item $f.FullName -Destination '.\TaraDSP-noAVX2.exe' -Force; Write-Host 'Found and moved NoAVX2 Exe!' } else { Write-Host 'NoAVX2 Exe not found in build tree' }"
+        # Holt die erzeugte NoAVX2-Datei aus dem Compiler-Verzeichnis vor ins Hauptverzeichnis
+        if exist taradsp-noAVX2.exe move taradsp-noAVX2.exe TaraDSP-noAVX2.exe
+        powershell -Command "$f = Get-ChildItem -Recurse -Include *noAVX2.exe | Select-Object -First 1; if ($f -and $f.FullName -ne '$(Get-Location)\TaraDSP-noAVX2.exe') { Copy-Item $f.FullName -Destination '.\TaraDSP-noAVX2.exe' -Force }"
       shell: cmd
 
     - name: Run TaraDSP Test Suite (Windows)
