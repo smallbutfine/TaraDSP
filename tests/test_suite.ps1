@@ -1,7 +1,7 @@
 # IRConvolverPro Test Suite
 # Tests CLI functionality, Hardware Truncation, and Mastering Mode
 
-$Exe = ".\IRConvolverPro-CLI.exe"
+$Exe = ".\TaraDSP.exe"
 $TestData = ".\Test_Data"
 $Results = ".\Test_Results"
 
