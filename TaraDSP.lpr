@@ -104,7 +104,10 @@ var
   _pffft_aligned_free: TFuncPffftAlignedFree = nil;
 
 {$IFDEF LINUX}
-  { Statische C-Funktions-Deklarationen für Linux }
+  { Statische C-Funktions-Deklarationen und Linker-Direktiven für Linux }
+  {$LINKLIB c}
+  {$LINKLIB m}
+  {$L pffft.o}
   function soxr_create(in_rate, out_rate: Double; num_chans: Cardinal; error: PInteger; io_spec, q_spec, runtime_spec: Pointer): Pointer; cdecl; external LIB_SOXR;
   function soxr_process(resampler: Pointer; in_buf: PSingle; in_len: Cardinal; done_in: PCardinal; out_buf: PSingle; out_len: Cardinal; done_out: PCardinal): Integer; cdecl; external LIB_SOXR;
   procedure soxr_delete(resampler: Pointer); cdecl; external LIB_SOXR;
@@ -114,22 +117,24 @@ var
   procedure pffft_zconvolve_accumulate(setup: Pointer; const dft_a, dft_b: PSingle; dft_ab: PSingle; scaling: Single); cdecl; external;
   function pffft_aligned_malloc(nb_bytes: NativeUInt): Pointer; cdecl; external;
   procedure pffft_aligned_free(p: Pointer); cdecl; external;
+{$ELSE}
+  { Mocks für fehlende Windows/macOS-DLLs im GitHub-Testlauf (Verhindert Linux-Hints) }
+  function MockPffftNew(N: Integer; transform: TPFFFT_Transform): PPFFFT_Setup; cdecl; begin Result := Pointer(1); end;
+  procedure MockPffftDst(setup: PPFFFT_Setup); cdecl; begin end;
+  procedure MockPffftTrf(setup: PPFFFT_Setup; const input: PSingle; output: PSingle; work: PSingle; direction: Integer); cdecl; begin if (input <> nil) and (output <> nil) then Move(input^, output^, 1024 * 4); end;
+  procedure MockPffftZCn(setup: Pointer; const dft_a, dft_b: PSingle; dft_ab: PSingle; scaling: Single); cdecl; begin if (dft_a <> nil) and (dft_ab <> nil) then Move(dft_a^, dft_ab^, 1024 * 4); end;
+  function MockPffftMal(nb_bytes: NativeUInt): Pointer; cdecl; begin GetMem(Result, nb_bytes); FillChar(Result^, nb_bytes, 0); end;
+  procedure MockPffftFre(p: Pointer); cdecl; begin if p <> nil then FreeMem(p); end;
+  function MockSoxrCreate(in_rate, out_rate: Double; num_chans: Cardinal; error: PInteger; io_spec, q_spec, runtime_spec: Pointer): Pointer; cdecl; begin Result := Pointer(1); end;
+  function MockSoxrProcess(resampler: Pointer; in_buf: PSingle; in_len: Cardinal; done_in: PCardinal; out_buf: PSingle; out_len: Cardinal; done_out: PCardinal): Integer; cdecl; begin if done_in <> nil then done_in^ := in_len; if done_out <> nil then done_out^ := in_len; Result := 0; end;
+  procedure MockSoxrDelete(resampler: Pointer); cdecl; begin end;
 {$ENDIF}
 
-{ Mocks für fehlende Windows-DLLs im GitHub-Testlauf }
-function MockPffftNew(N: Integer; transform: TPFFFT_Transform): PPFFFT_Setup; cdecl; begin Result := Pointer(1); end;
-procedure MockPffftDst(setup: PPFFFT_Setup); cdecl; begin end;
-procedure MockPffftTrf(setup: PPFFFT_Setup; const input: PSingle; output: PSingle; work: PSingle; direction: Integer); cdecl; begin if (input <> nil) and (output <> nil) then Move(input^, output^, 1024 * 4); end;
-procedure MockPffftZCn(setup: Pointer; const dft_a, dft_b: PSingle; dft_ab: PSingle; scaling: Single); cdecl; begin if (dft_a <> nil) and (dft_ab <> nil) then Move(dft_a^, dft_ab^, 1024 * 4); end;
-function MockPffftMal(nb_bytes: NativeUInt): Pointer; cdecl; begin GetMem(Result, nb_bytes); FillChar(Result^, nb_bytes, 0); end;
-procedure MockPffftFre(p: Pointer); cdecl; begin if p <> nil then FreeMem(p); end;
-function MockSoxrCreate(in_rate, out_rate: Double; num_chans: Cardinal; error: PInteger; io_spec, q_spec, runtime_spec: Pointer): Pointer; cdecl; begin Result := Pointer(1); end;
-function MockSoxrProcess(resampler: Pointer; in_buf: PSingle; in_len: Cardinal; done_in: PCardinal; out_buf: PSingle; out_len: Cardinal; done_out: PCardinal): Integer; cdecl; begin if done_in <> nil then done_in^ := in_len; if done_out <> nil then done_out^ := in_len; Result := 0; end;
-procedure MockSoxrDelete(resampler: Pointer); cdecl; begin end;
-
 procedure InitDynamicLibraries;
+{$IFNDEF LINUX}
 var
   SoxrLibHandle, PffftLibHandle: TLibHandle;
+{$ENDIF}
 begin
   {$IFDEF LINUX}
   { Unter Linux mappen wir die Pointer direkt auf die statisch gelinkten C-Funktionen }
