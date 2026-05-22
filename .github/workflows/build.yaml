@@ -74,7 +74,7 @@ jobs:
         fi
         
         # Zwingt lazbuild mit -B alles absolut frisch zu übersetzen
-        lazbuild -B --build-mode=Release IRConvolverPro.lpi
+        lazbuild -B --build-mode=Release TaraDSP.lpi
       shell: bash
       
     - name: Prepare Artifacts
