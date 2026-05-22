@@ -53,8 +53,8 @@ jobs:
         if [ "${{ matrix.os }}" = "windows-latest" ]; then
           gcc -O3 -c pffft.c -o pffft.obj -msse -mfpmath=sse
         elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-          # Erzwingt x86_64 Architektur für den Intel-Pascal-Compiler auf macOS
-          gcc -O3 -arch x86_64 -c pffft.c -o pffft.o
+          # Erzwingt x86_64 und setzt das minimale OS-Target auf ein modernes Level (11.0 Big Sur)
+          gcc -O3 -arch x86_64 -mmacosx-version-min=11.0 -c pffft.c -o pffft.o
         else
           gcc -O3 -fPIC -c pffft.c -o pffft.o
         fi
