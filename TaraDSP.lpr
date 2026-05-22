@@ -434,10 +434,10 @@ begin
 end;
 
 { Interne DSP-Hilfsfunktion zur Vermeidung von ln(0) Abstürzen }
-function LogExtract(Value: Single): Single; inline;
+function TTaraDSPApp.LogExtract(Value: Single): Single; inline;
 begin
   if Value < 1e-10 then Value := 1e-10;
-  Result := LogN(Value);
+  Result := Ln(Value); // FEHLER BEHOBEN: Nutzen von Ln statt LogN
 end;
 
 procedure TTaraDSPApp.ApplyFades(var Data: TAudioData; SR: Integer; InMS, OutMS: Single); begin end;
