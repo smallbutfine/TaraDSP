@@ -488,7 +488,11 @@ begin
 
     { Optionale Stille-Kürzung (Trim) VOR dem Resampling anwenden }
     if HasOption('t') then 
-      TrimSilence(A2, StrToFloatDef(GetOptionValue('t'), -70.0, DefaultFormatSettings));
+    begin
+      // Absicherung: Wir machen den Wert mathematisch IMMER negativ,
+      // um den Windows-Minuszeichen-Parserfehler im GitHub-Runner zu umgehen!
+      TrimSilence(A2, -Abs(StrToFloatDef(GetOptionValue('t'), -70.0, DefaultFormatSettings)));
+    end;
 
     { Optionales Ein- und Ausblenden (Fades) VOR dem Resampling anwenden }
     if HasOption('f') then
