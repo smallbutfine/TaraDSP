@@ -310,9 +310,9 @@ if "%T_OS%"=="win64" (
 ) else if "%T_OS%"=="darwin" (
     set "SDK_ROOT=C:/fpcupdeluxe/cross/lib/all-darwin/MacOSX12.3.sdk"
     if "%T_CPU%"=="x86_64" (
-        "%CROSS_BIN_DIR%/all-apple/bin/x86_64-apple-darwin19-clang.exe" -O3 -dynamiclib -arch x86_64 -isysroot "%SDK_ROOT%" -o "%TD%\libpffft.dylib" "%ROOT%/pffft.c" "%ROOT%/fftpack.c" 2>&1
+        "C:/msys2/mingw64/bin/clang.exe" -target x86_64-apple-darwin -O3 -dynamiclib -arch x86_64 -isysroot "C:/fpcupdeluxe/cross/lib/all-darwin/MacOSX12.3.sdk" -B"%CROSS_BIN_DIR%/all-apple/bin" -o "%TD%\libpffft.dylib" "%ROOT%/pffft.c" "%ROOT%/fftpack.c" 2>&1
     ) else (
-        "%CROSS_BIN_DIR%/all-apple/bin/aarch64-apple-darwin19-clang.exe" -O3 -dynamiclib -arch arm64 -isysroot "%SDK_ROOT%" -o "%TD%\libpffft.dylib" "%ROOT%/pffft.c" "%ROOT%/fftpack.c" 2>&1
+        "C:/msys2/mingw64/bin/clang.exe" -target aarch64-apple-darwin -O3 -dynamiclib -arch arm64 -isysroot "C:/fpcupdeluxe/cross/lib/all-darwin/MacOSX12.3.sdk" -B"%CROSS_BIN_DIR%/all-apple/bin" -o "%TD%\libpffft.dylib" "%ROOT%/pffft.c" "%ROOT%/fftpack.c" 2>&1
     )
     if errorlevel 1 set "C_ERR=1"
     if !C_ERR! equ 0 echo   OK: libpffft.dylib
@@ -366,8 +366,11 @@ if "%T_OS%"=="darwin" (
     if exist "%ROOT%\%APP_NAME%.app" (
         move /y "%ROOT%\%APP_NAME%.app" "%TD%\" >nul 2>&1
         echo   moved %APP_NAME%.app
+    ) else if exist "%ROOT%\%APP_NAME%" (
+        move /y "%ROOT%\%APP_NAME%" "%TD%\" >nul 2>&1
+        echo   moved %APP_NAME%
     ) else (
-        echo   WARNING: %APP_NAME%.app not found at expected locations
+        echo   WARNING: %APP_NAME% not found at expected locations
     )
 ) else if exist "%ROOT%\%APP_NAME%.exe" (
     move /y "%ROOT%\%APP_NAME%.exe" "%TD%\" >nul 2>&1
