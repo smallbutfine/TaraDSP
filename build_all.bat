@@ -159,6 +159,40 @@ if /i "%~1"=="--check" (
 
 if not exist "%OUT_ROOT%" mkdir "%OUT_ROOT%"
 
+
+REM --- Ensure zig is available (for Linux C cross-compilation) ---
+where zig >nul 2>&1
+if errorlevel 1 (
+    if exist "%ROOT%\tools\zig\zig.exe" (
+        set "PATH=%ROOT%\tools\zig;%PATH%"
+        echo   zig found at tools\zig
+    ) else (
+        echo   zig not found - downloading...
+        set "ZIG_VER=0.17.1"
+        set "ZIG_URL=https://ziglang.org/download/!ZIG_VER!/zig-x86_64-windows-!ZIG_VER!.zip"
+        set "ZIG_ZIP=%ROOT%\tools\zig.zip"
+        set "ZIG_DIR=%ROOT%\tools\zig"
+        if not exist "%ROOT%\tools" mkdir "%ROOT%\tools"
+        curl -L -o "!ZIG_ZIP!" "!ZIG_URL!" 2>nul
+        if not errorlevel 1 (
+            powershell -Command "Expand-Archive -Path '!ZIG_ZIP!' -DestinationPath '%ROOT%\tools\zig-temp' -Force" 2>nul
+            for /d %%D in ("%ROOT%\tools\zig-temp\*") do move "%%D" "!ZIG_DIR!" >nul 2>&1
+            rmdir /s /q "%ROOT%\tools\zig-temp" 2>nul
+            del "!ZIG_ZIP!" 2>nul
+            if exist "!ZIG_DIR!\zig.exe" (
+                set "PATH=!ZIG_DIR!;%PATH%"
+                echo   zig installed to !ZIG_DIR!
+            ) else (
+                echo   WARNING: zig installation failed - Linux C compilation will be skipped
+            )
+        ) else (
+            echo   WARNING: failed to download zig - Linux C compilation will be skipped
+        )
+    )
+) else (
+    echo   zig found in PATH
+)
+
 REM ============================================================
 REM Target definitions: NAME|OS|CPU|WS|COMPILER|EXTRA_FLAGS|XP_PREFIX
 REM COMPILER: "native" = fpc.exe, "cross" = ppcross*.exe
