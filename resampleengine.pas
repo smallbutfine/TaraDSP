@@ -9,6 +9,16 @@ uses
 
 type
   TSRC_Engine = (engLinear, engSoxr, engR8Brain, engFinalCD);
+
+  TWavHeader = packed record
+    RIFFID, WavID, FmtID: array[0..3] of Char;
+    Size, FmtSize: LongInt;
+    FormatTag, Channels: Word;
+    SampleRate, BytesPerSec: LongInt;
+    BlockAlign, BitsPerSample: Word;
+    DataID: array[0..3] of Char;
+    DataSize: LongInt;
+  end;
   
   { REPARIERT: Eine normale prozedurale Signatur ohne 'of object' 
     verhindert jegliche Type-Casting-Fehler unter Linux! }
@@ -23,6 +33,7 @@ var
   _r8b_delete: Pointer = nil;
 
 function GetAvailableEngine: TSRC_Engine;
+function LoadWavFromFile(const FileName: string; out SR: Integer): TAudioData;
 function ResampleAudio(const Data: TAudioData; InSR, OutSR: Integer; SaveWavProc: TSaveWavCall): TAudioData;
 
 implementation
@@ -70,6 +81,59 @@ begin
   end;
   DeleteFile(TmpIn);
   Result := ResampleLinear(Channel, InSR, OutSR);
+end;
+
+function LoadWavFromFile(const FileName: string; out SR: Integer): TAudioData;
+var FS: TFileStream; H: TWavHeader; i, c, Samples, BytesPerSample: Integer;
+    s16: SmallInt; b24: array[0..2] of Byte; s32: LongInt; f32: Single; b8: Byte;
+begin
+  Result := nil;
+  FS := TFileStream.Create(FileName, fmOpenRead or fmShareDenyWrite);
+  try
+    FS.Read(H, SizeOf(H));
+    SR := H.SampleRate;
+    BytesPerSample := H.BitsPerSample div 8;
+    if (BytesPerSample = 0) or (H.Channels = 0) then Exit;
+    Samples := H.DataSize div (H.Channels * BytesPerSample);
+    SetLength(Result, H.Channels);
+    for c := 0 to H.Channels - 1 do
+      SetLength(Result[c], Samples);
+    for i := 0 to Samples - 1 do
+    begin
+      for c := 0 to H.Channels - 1 do
+      begin
+        case H.BitsPerSample of
+          8:
+          begin
+            FS.Read(b8, 1);
+            Result[c][i] := (b8 - 128) / 128.0;
+          end;
+          16:
+          begin
+            FS.Read(s16, 2);
+            Result[c][i] := s16 / 32768.0;
+          end;
+          24:
+          begin
+            FS.Read(b24, 3);
+            s32 := b24[0] or (b24[1] shl 8) or (b24[2] shl 16);
+            if (s32 and $800000) <> 0 then
+              s32 := s32 or $FF000000;
+            Result[c][i] := s32 / 8388608.0;
+          end;
+          32:
+          begin
+            FS.Read(f32, 4);
+            Result[c][i] := f32;
+          end;
+        else
+          Result[c][i] := 0.0;
+        end;
+      end;
+    end;
+  finally
+    FS.Free;
+  end;
 end;
 
 function ResampleAudio(const Data: TAudioData; InSR, OutSR: Integer; SaveWavProc: TSaveWavCall): TAudioData;

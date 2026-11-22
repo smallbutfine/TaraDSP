@@ -134,7 +134,17 @@ begin
 end;
 
 procedure TTaraDSPApp.LoadConfig;
-begin FArtist := GetOptionValue('x', 'in1'); end;
+var Ini: TIniFile; IniPath: string;
+begin
+  IniPath := ExtractFilePath(ParamStr(0)) + 'settings.ini';
+  if not FileExists(IniPath) then IniPath := 'settings.ini';
+  Ini := TIniFile.Create(IniPath);
+  try
+    FArtist := Ini.ReadString('Metadata', 'Artist', '');
+  finally
+    Ini.Free;
+  end;
+end;
 
 function TTaraDSPApp.LogExtract(Value: Single): Single; inline;
 begin if Value < 1e-10 then Value := 1e-10; Result := Ln(Value); end;
@@ -388,7 +398,7 @@ procedure TTaraDSPApp.DoRun;
 var StartTime: Int64; f1, f2, fOut, Msg: string; A1, A2, Res: TAudioData; SR1, SR2, bOut, c, TargetSR, TruncLen: Integer;
 begin
   LoadConfig; 
-  Msg := CheckOptions('x:y:o:b:r:l:f:t:h m', 'help mono min in1 in2');
+  Msg := CheckOptions('x:y:o:b:r:l:f:t:hm', 'help mono min in1 in2');
   if (Msg <> '') or HasOption('h', 'help') or (ParamCount < 2) then 
   begin 
     ShowUsage; ExitCode := 1; Terminate; Exit; 
