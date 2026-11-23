@@ -62,6 +62,7 @@ type
   TPffftNew = function(N: Integer; t: Integer): Pointer; cdecl;
   TPffftDst = procedure(s: Pointer); cdecl;
   TPffftTrf = procedure(s: Pointer; input, output, work: PSingle; d: Integer); cdecl;
+  TPffftTrfOrd = procedure(s: Pointer; input, output, work: PSingle; d: Integer); cdecl;
   TPffftZCn = procedure(s: Pointer; a, b, ab: PSingle; scaling: Single); cdecl;
   TPffftMal = function(b: NativeUInt): Pointer; cdecl;
   TPffftFre = procedure(p: Pointer); cdecl;
@@ -69,7 +70,8 @@ type
 var
   _pffft_new_setup: TPffftNew = nil;
   _pffft_destroy_setup: TPffftDst = nil;
-  _pffft_transform_ordered: TPffftTrf = nil;
+  _pffft_transform_ordered: TPffftTrfOrd = nil;
+  _pffft_transform: TPffftTrf = nil;
   _pffft_zconvolve_accumulate: TPffftZCn = nil;
   _pffft_aligned_malloc: TPffftMal = nil;
   _pffft_aligned_free: TPffftFre = nil;
@@ -77,6 +79,7 @@ var
 function MockPffftNew(N: Integer; t: Integer): Pointer; cdecl; begin Result := Pointer(1); end;
 procedure MockPffftDst(s: Pointer); cdecl; begin end;
 procedure MockPffftTrf(s: Pointer; input, output, work: PSingle; d: Integer); cdecl; begin if output <> nil then FillChar(output^, 4096, 0); end;
+procedure MockPffftTrfOrd(s: Pointer; input, output, work: PSingle; d: Integer); cdecl; begin if output <> nil then FillChar(output^, 4096, 0); end;
 procedure MockPffftZCn(s: Pointer; a, b, ab: PSingle; scaling: Single); cdecl; begin if ab <> nil then FillChar(ab^, 4096, 0); end;
 function MockPffftMal(b: NativeUInt): Pointer; cdecl; begin GetMem(Result, b); FillChar(Result^, b, 0); end;
 procedure MockPffftFre(p: Pointer); cdecl; begin if p <> nil then FreeMem(p); end;
@@ -113,10 +116,22 @@ begin
   if PHandle <> NilHandle then begin
     _pffft_new_setup := TPffftNew(GetProcAddress(PHandle, 'pffft_new_setup'));
     _pffft_destroy_setup := TPffftDst(GetProcAddress(PHandle, 'pffft_destroy_setup'));
-    _pffft_transform_ordered := TPffftTrf(GetProcAddress(PHandle, 'pffft_transform_ordered'));
+    _pffft_transform_ordered := TPffftTrfOrd(GetProcAddress(PHandle, 'pffft_transform_ordered'));
+    _pffft_transform := TPffftTrf(GetProcAddress(PHandle, 'pffft_transform'));
     _pffft_zconvolve_accumulate := TPffftZCn(GetProcAddress(PHandle, 'pffft_zconvolve_accumulate'));
     _pffft_aligned_malloc := TPffftMal(GetProcAddress(PHandle, 'pffft_aligned_malloc'));
     _pffft_aligned_free := TPffftFre(GetProcAddress(PHandle, 'pffft_aligned_free'));
+  end;
+
+  // Fallback to mocks if library not loaded
+  if not Assigned(_pffft_new_setup) then begin
+    _pffft_new_setup := @MockPffftNew;
+    _pffft_destroy_setup := @MockPffftDst;
+    _pffft_transform_ordered := @MockPffftTrfOrd;
+    _pffft_transform := @MockPffftTrf;
+    _pffft_zconvolve_accumulate := @MockPffftZCn;
+    _pffft_aligned_malloc := @MockPffftMal;
+    _pffft_aligned_free := @MockPffftFre;
   end;
 end;
 
@@ -300,6 +315,8 @@ begin
   L2 := Length(Ker); 
   n := 1; 
   while n < (L1 + L2 - 1) do n := n shl 1;
+  // PFFFT requires N to be a multiple of 2*SIMD_SZ^2 (32 for SSE/NEON)
+  while n mod 32 <> 0 do n := n + 1;
   
   setup := _pffft_new_setup(n, 0); 
   in1 := _pffft_aligned_malloc(n * SizeOf(Single)); 
@@ -320,11 +337,13 @@ begin
     if L2 > 0 then 
       for i := 0 to L2 - 1 do (in2 + i)^ := Ker[i];
     
-    _pffft_transform_ordered(setup, in1, f1, work, PFFFT_FORWARD); 
-    _pffft_transform_ordered(setup, in2, f2, work, PFFFT_FORWARD);
+    _pffft_transform(setup, in1, f1, work, PFFFT_FORWARD); 
+    _pffft_transform(setup, in2, f2, work, PFFFT_FORWARD);
     
+    FillChar(fRes^, n * SizeOf(Single), 0);
+    // Debug: print first few freq bins
     _pffft_zconvolve_accumulate(setup, f1, f2, fRes, 1.0); 
-    _pffft_transform_ordered(setup, fRes, in1, work, PFFFT_BACKWARD);
+    _pffft_transform(setup, fRes, in1, work, PFFFT_BACKWARD);
     
     SetLength(Result, L1 + L2 - 1); 
     for i := 0 to High(Result) do 
@@ -345,17 +364,18 @@ end;
 function TTaraDSPApp.ConvertToMinimumPhase(const Data: TFloatBuffer): TFloatBuffer;
 var setup: Pointer; n, i, HalfN: Integer; inOut, spec, work: PSingle; Mag, Phase: Single;
 begin
-  if Length(Data) = 0 then Exit(nil); n := 1; while n < (Length(Data) * 2) do n := n shl 1; HalfN := n div 2;
+  if Length(Data) = 0 then Exit(nil); n := 1; while n < (Length(Data) * 2) do n := n shl 1;
+  while n mod 32 <> 0 do n := n + 1; HalfN := n div 2;
   setup := _pffft_new_setup(n, 0); inOut := _pffft_aligned_malloc(n * 4); spec := _pffft_aligned_malloc(n * 4); work := _pffft_aligned_malloc(n * 4);
   try
-    FillChar(inOut^, n * 4, 0); Move(Data, inOut^, Length(Data) * 4); _pffft_transform_ordered(setup, inOut, spec, work, PFFFT_FORWARD);
+    FillChar(inOut^, n * 4, 0); Move(Data, inOut^, Length(Data) * 4); _pffft_transform(setup, inOut, spec, work, PFFFT_FORWARD);
     spec[0] := LogExtract(Abs(spec[0])); spec[1] := LogExtract(Abs(spec[1]));
     for i := 1 to HalfN - 1 do 
     begin 
       Mag := Sqrt(Sqr(spec[2*i]) + Sqr(spec[2*i+1])); Mag := LogExtract(Mag); 
       spec[2*i] := Mag; spec[2*i+1] := 0.0; 
     end;
-    _pffft_transform_ordered(setup, spec, inOut, work, PFFFT_BACKWARD); 
+    _pffft_transform(setup, spec, inOut, work, PFFFT_BACKWARD); 
     for i := 0 to n - 1 do 
     begin
       inOut[i] := inOut[i] / n;
@@ -364,14 +384,14 @@ begin
     begin 
       inOut[i] := inOut[i] * 2.0; inOut[n-i] := 0.0; 
     end;
-    _pffft_transform_ordered(setup, inOut, spec, work, PFFFT_FORWARD); 
+    _pffft_transform(setup, inOut, spec, work, PFFFT_FORWARD); 
     spec[0] := Exp(spec[0]); spec[1] := Exp(spec[1]);
     for i := 1 to HalfN - 1 do 
     begin 
       Mag := Exp(spec[2*i]); Phase := spec[2*i+1]; 
       spec[2*i] := Mag * Cos(Phase); spec[2*i+1] := Mag * Sin(Phase); 
     end;
-    _pffft_transform_ordered(setup, spec, inOut, work, PFFFT_BACKWARD); 
+    _pffft_transform(setup, spec, inOut, work, PFFFT_BACKWARD); 
     SetLength(Result, Length(Data)); 
     for i := 0 to High(Result) do 
     begin
