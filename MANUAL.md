@@ -17,8 +17,9 @@ Written for musicians, audio engineers, mastering engineers, and producers.
 7. [Resampling](#7-resampling)
 8. [Fades and Trimming](#8-fades-and-trimming)
 9. [Practical Workflows](#9-practical-workflows)
-10. [Tips from the Trenches](#10-tips-from-the-trenches)
-11. [Technical Reference](#11-technical-reference)
+10. [Combining Two IRs](#10-combining-two-irs)
+11. [Tips from the Trenches](#11-tips-from-the-trenches)
+12. [Technical Reference](#12-technical-reference)
 
 ---
 

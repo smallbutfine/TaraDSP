@@ -39,6 +39,7 @@
       <li><a href="#resample">Resampling</a></li>
       <li><a href="#fades">Fades and Trimming</a></li>
       <li><a href="#workflows">Practical Workflows</a></li>
+      <li><a href="#combine">Combining Two IRs</a></li>
       <li><a href="#tips">Tips from the Trenches</a></li>
       <li><a href="#reference">Technical Reference</a></li>
     </ol>
@@ -153,7 +154,37 @@
     <h4>Batch Processing</h4>
     <pre>for %f in (*.wav) do TaraDSP -x "%f" -y cab_ir.wav -o "processed_%f" --min -b 24</pre>
 
-    <h3 id="tips">10. Tips from the Trenches</h3>
+    <h3 id="combine">10. Combining Two IRs</h3>
+    <p>TaraDSP can merge two impulse responses into a single new IR. This is useful for:</p>
+    <ul>
+      <li><strong>Cab + Mic blend</strong>: Combine a close-miked IR with a room-miked IR to create a custom blend</li>
+      <li><strong>Cab + EQ</strong>: Convolve a cab IR with an EQ curve IR to bake the EQ into the cab</li>
+      <li><strong>Two cabs blended</strong>: Mix two different speakers (e.g. 4x12 + 2x12) into one IR</li>
+      <li><strong>IR + Reverb</strong>: Combine a cab IR with a short room IR for a "cabinet in a room" sound</li>
+    </ul>
+    <p><strong>How it works:</strong> Convolution is associative — convolving signal A with IR X, then with IR Y, is the same as convolving A with a single IR that is X convolved with Y. So to combine two IRs:</p>
+    <ol>
+      <li>Run TaraDSP with IR X as input and IR Y as the impulse response</li>
+      <li>The output is a new WAV that is the combined IR</li>
+      <li>Use that combined WAV as a normal IR in any convolution</li>
+    </ol>
+    <h4>Example: Blend two cabinet IRs</h4>
+    <pre>TaraDSP -x cab_close.wav -y cab_room.wav -o cab_blend.wav -b 32 --min</pre>
+    <p>This convolves <code>cab_close.wav</code> with <code>cab_room.wav</code>, producing <code>cab_blend.wav</code> — a new IR that sounds like the close-miked cab played in the room. Use <code>--min</code> to keep it minimum phase, and <code>-b 32</code> for float output (no quality loss).</p>
+    <h4>Example: Bake EQ into a cab IR</h4>
+    <pre>TaraDSP -x cab_ir.wav -y eq_curve.wav -o cab_eq.wav -b 32 --min</pre>
+    <p>Convolves the cab IR with an EQ curve (as an IR), baking the EQ into the cab. The result is a new cab IR with the EQ applied.</p>
+    <h4>Example: Two-cab blend with level control</h4>
+    <pre>TaraDSP -x cab_a.wav -y cab_b.wav -o cab_ab.wav -b 32 --min -l 2048</pre>
+    <p>Combines two cab IRs and truncates to 2048 samples for use in modelers. The relative loudness of the two cabs depends on their original levels — normalize the input IRs first if needed.</p>
+    <div class="note">
+      <strong>Tip:</strong> Always use <code>-b 32</code> (32-bit float) for IR combination — it preserves the full dynamic range without quantization. Only reduce to 16/24-bit for the final output after all processing is done.
+    </div>
+    <div class="note">
+      <strong>Tip:</strong> Use <code>--min</code> when combining IRs for cabinet simulation — it removes pre-ringing at each stage and keeps the result tight.
+    </div>
+
+    <h3 id="tips">11. Tips from the Trenches</h3>
     <h4>IR Selection</h4>
     <ul>
       <li><strong>Shorter = tighter</strong>: 0.5s IR has less low-end rumble than 2s</li>
@@ -175,7 +206,7 @@
       <li><strong>16-bit for intermediate files</strong> — use 24-bit or 32-bit</li>
     </ul>
 
-    <h3 id="reference">11. Technical Reference</h3>
+    <h3 id="reference">12. Technical Reference</h3>
     <table>
       <thead><tr><th>Option</th><th>Long form</th><th>Value</th><th>Description</th></tr></thead>
       <tbody>
