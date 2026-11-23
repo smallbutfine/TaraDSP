@@ -1,2 +1,5 @@
 tools/zig/
 tools/zig.zip
+dist/
+Deploy/
+lib/
