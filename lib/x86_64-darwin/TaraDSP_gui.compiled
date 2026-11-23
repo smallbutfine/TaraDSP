@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Compiler Value="C:\fpcupdeluxe\fpc\bin\i386-win32\fpc.exe" Date="1567273253"/>
+  <Params Value="-Tdarwin -Px86_64 -MObjFPC -Scgi -O1 -k-weak_framework -kAppKit -k-weak_framework -kUserNotifications -l -vewnhibq -FiB:\dev\github\TaraDSP\lib\x86_64-darwin -FuB:\dev\github\TaraDSP\ -FuB:\dev\github\tools -FuC:\fpcupdeluxe\lazarus\lcl\units\x86_64-darwin\cocoa -FuC:\fpcupdeluxe\lazarus\lcl\units\x86_64-darwin -FuC:\fpcupdeluxe\lazarus\components\freetype\lib\x86_64-darwin -FuC:\fpcupdeluxe\lazarus\components\lazutils\lib\x86_64-darwin -FuC:\fpcupdeluxe\lazarus\packager\units\x86_64-darwin -FUB:\dev\github\TaraDSP\lib\x86_64-darwin\ -FEB:\dev\github\TaraDSP\ -oB:\dev\github\TaraDSP\TaraDSP_gui -dLCL -dLCLcocoa TaraDSP_gui.lpr"/>
+</CONFIG>

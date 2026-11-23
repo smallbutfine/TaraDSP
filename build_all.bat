@@ -383,10 +383,19 @@ if "%T_OS%"=="win64" (
 
 REM --- GUI: %APP_NAME% ---
 echo.
-echo [Build] %APP_NAME%...
+echo [Build] %APP_NAME% (CLI)...
 "%LAZBUILD%" --os=%T_OS% --cpu=%T_CPU% --ws=%T_WS% --build-all "%ROOT%\%APP_NAME%.lpi"
 if errorlevel 1 (
-    echo   ERROR: %APP_NAME% build failed
+    echo   ERROR: %APP_NAME% CLI build failed
+    goto :target_failed
+)
+echo   OK
+
+echo.
+echo [Build] %APP_NAME%_gui (GUI)...
+"%LAZBUILD%" --os=%T_OS% --cpu=%T_CPU% --ws=%T_WS% --build-all "%ROOT%\%APP_NAME%_gui.lpi"
+if errorlevel 1 (
+    echo   ERROR: %APP_NAME%_gui build failed
     goto :target_failed
 )
 echo   OK
@@ -420,6 +429,30 @@ if "%T_OS%"=="darwin" (
     echo   moved %APP_NAME%
 ) else (
     echo   WARNING: %APP_NAME% not found at expected locations
+)
+
+REM --- Move GUI executable ---
+if "%T_OS%"=="darwin" (
+    if exist "%ROOT%\%APP_NAME%_gui.app" (
+        move /y "%ROOT%\%APP_NAME%_gui.app" "%TD%\" >nul 2>&1
+        echo   moved %APP_NAME%_gui.app
+    ) else if exist "%ROOT%\%APP_NAME%_gui" (
+        move /y "%ROOT%\%APP_NAME%_gui" "%TD%\" >nul 2>&1
+        echo   moved %APP_NAME%_gui
+    ) else (
+        echo   WARNING: %APP_NAME%_gui not found
+    )
+) else if exist "%ROOT%\%APP_NAME%_gui.exe" (
+    move /y "%ROOT%\%APP_NAME%_gui.exe" "%TD%\" >nul 2>&1
+    echo   moved %APP_NAME%_gui.exe
+) else if exist "%ROOT%\gui\%APP_NAME%_gui.exe" (
+    move /y "%ROOT%\gui\%APP_NAME%_gui.exe" "%TD%\" >nul 2>&1
+    echo   moved gui\%APP_NAME%_gui.exe
+) else if exist "%ROOT%\gui\%APP_NAME%_gui" (
+    move /y "%ROOT%\gui\%APP_NAME%_gui" "%TD%\" >nul 2>&1
+    echo   moved gui\%APP_NAME%_gui
+) else (
+    echo   WARNING: %APP_NAME%_gui not found
 )
 
 REM ============================================================
