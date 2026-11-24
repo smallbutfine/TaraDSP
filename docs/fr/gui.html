@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaraDSP — GUI Reference</title>
+<link rel="stylesheet" href="../style.css">
+  <style>
+.crossbar {
+  background: #0d1117;
+  border-bottom: 1px solid #30363d;
+  padding: 10px 20px;
+  text-align: center;
+  font-size: 0.85em;
+  letter-spacing: 0.5px;
+}
+.crossbar a {
+  color: #8b949e;
+  text-decoration: none;
+  padding: 4px 10px;
+  transition: color 0.2s;
+  font-weight: 500;
+}
+.crossbar a:hover {
+  color: #58a6ff;
+}
+.crossbar-sep {
+  color: #30363d;
+  margin: 0 6px;
+}
+</style>
+</head>
+<body>
+<div class="crossbar">
+  <a href="https://smallbutfine.github.io/ChameleonTools/">ChameleonTools</a>
+  <span class="crossbar-sep">|</span>
+  <a href="https://smallbutfine.github.io/ChameleonDrummer/">Drummer</a>
+  <span class="crossbar-sep">|</span>
+  <a href="https://smallbutfine.github.io/TaraDSP/">TaraDSP</a>
+  <span class="crossbar-sep">|</span>
+  <a href="https://smallbutfine.github.io/stringselectorapp/">StringSelector</a>
+  <span class="crossbar-sep">|</span>
+  <a href="https://smallbutfine.github.io/ChameleonRecorder/">Recorder</a>
+</div>
+
+
+<header>
+  <div class="container">
+    <h1>TARA<span class="accent">DSP</span></h1>
+    <nav>
+      <a href="index.html">Accueil</a>
+      <a href="concepts.html">Concepts</a>
+      <a href="cli.html">Référence CLI</a>
+      <a href="gui.html">IUG</a>
+      <a href="docs.html">Documentation</a>
+      <a href="manual.html">Manuel</a>
+      <a href="download.html">Télécharger</a>
+      <a href="de/index.html">DE</a>
+      <a href="es/index.html">ES</a>
+      <a href="fr/index.html">FR</a>
+      <a href="pt/index.html">PT</a>
+      <a href="ru/index.html">RU</a>
+      <a href="zh/index.html">ZH</a>
+    </nav>
+  </div>
+</header>
+
+<section>
+  <div class="container">
+    <h2>Graphical User Interface</h2>
+    <p>The TaraDSP GUI provides the same professional audio processing as the
+    CLI in an easy-to-use window. It is the recommended way to process files
+    interactively.</p>
+
+    <h3>Controls</h3>
+    <table>
+      <thead>
+        <tr><th>Control</th><th>Type</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Source File</td>
+          <td>File picker</td>
+          <td>The input WAV file to process. Click to browse for a file.</td>
+        </tr>
+        <tr>
+          <td>Impulse Response</td>
+          <td>File picker</td>
+          <td>The IR WAV file to convolve with. Leave empty for passthrough
+          mode (mastering only: dither, normalize, fades).</td>
+        </tr>
+        <tr>
+          <td>Output File</td>
+          <td>Text + browse</td>
+          <td>The output WAV file path. Click "..." to browse for a location.</td>
+        </tr>
+        <tr>
+          <td>Bit Depth</td>
+          <td>Combo: 16 / 24 / 32</td>
+          <td>Output bit depth. 24 is recommended for studio quality.
+          16 applies TPDF dithering. 32 outputs IEEE float.</td>
+        </tr>
+        <tr>
+          <td>Sample Rate</td>
+          <td>Combo</td>
+          <td>Target sample rate: 0 (keep original), 44100, 48000, 88200,
+          96000, 176400, 192000. Both input and IR are resampled if needed.</td>
+        </tr>
+        <tr>
+          <td>Truncate Length</td>
+          <td>Spin edit</td>
+          <td>Maximum output samples. 0 = no limit. Useful for guitar modelers
+          (e.g. 1024 for GP-200). A short fade-out is applied at the truncation
+          point to prevent clicks.</td>
+        </tr>
+        <tr>
+          <td>Fade-Out</td>
+          <td>Spin edit (ms)</td>
+          <td>Duration of fade-out applied to the IR before convolution.
+          A 1ms fade-in is always applied to prevent start clicks.</td>
+        </tr>
+        <tr>
+          <td>Trim Silence</td>
+          <td>Spin edit (dB)</td>
+          <td>Threshold below which samples are considered silence and removed
+          from the IR. Set to 0 to disable. Typical: -60 to -80.</td>
+        </tr>
+        <tr>
+          <td>Mono Output</td>
+          <td>Checkbox</td>
+          <td>Downmix the output to a single channel.</td>
+        </tr>
+        <tr>
+          <td>Minimum Phase</td>
+          <td>Checkbox</td>
+          <td>Convert the convolved output to minimum phase. Removes pre-ringing
+          and reduces latency.</td>
+        </tr>
+        <tr>
+          <td>PROCESS</td>
+          <td>Button</td>
+          <td>Run the processing pipeline. Progress is shown in the log.</td>
+        </tr>
+        <tr>
+          <td>Log</td>
+          <td>Read-only memo</td>
+          <td>Shows per-step progress: loading, resampling, convolving,
+          normalizing, saving. Errors are shown in red text.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Processing Pipeline</h3>
+    <p>When you click PROCESS, the GUI runs the following steps in order:</p>
+    <ol>
+      <li><strong>Load input</strong> — Read the source WAV file (8/16/24/32-bit PCM or float)</li>
+      <li><strong>Load IR</strong> — Read the impulse response (if specified)</li>
+      <li><strong>Trim silence</strong> — Remove silence below threshold from IR (if set)</li>
+      <li><strong>Apply fade</strong> — Apply fade-out to IR (if set)</li>
+      <li><strong>Resample</strong> — Resample input and IR to target rate (if set)</li>
+      <li><strong>Convolve</strong> — FFT convolution per channel</li>
+      <li><strong>Minimum phase</strong> — Convert to minimum phase (if checked)</li>
+      <li><strong>Normalize</strong> — Peak normalize to 1.0</li>
+      <li><strong>Truncate</strong> — Truncate to max length (if set)</li>
+      <li><strong>Save</strong> — Write output WAV with dithering (16-bit) or float (32-bit)</li>
+    </ol>
+
+    <h3>Tips</h3>
+    <div class="note">
+      <strong>Tip 1:</strong> Leave the IR field empty to use the GUI as a
+      mastering tool — it will apply dither, normalize, and fades without
+      convolution.
+    </div>
+    <div class="note">
+      <strong>Tip 2:</strong> For guitar cabinet simulation, set the truncate
+      length to 1024 or 2048 samples and enable minimum phase for the tightest,
+      lowest-latency sound.
+    </div>
+    <div class="note">
+      <strong>Tip 3:</strong> Use 24-bit output for the best balance of quality
+      and file size. 16-bit is only needed for CD compatibility.
+    </div>
+    <div class="note">
+      <strong>Tip 4:</strong> The GUI reads <code>settings.ini</code> from the
+      same directory as the executable for default values (artist name, bit depth,
+      dither amount, truncate length).
+    </div>
+
+    <h3>Configuration File</h3>
+    <p>The GUI reads a <code>settings.ini</code> file for default values:</p>
+    <pre>; settings.ini
+[Metadata]
+Artist=Your Studio Name
+
+[Audio]
+TargetBits=24
+DitherAmount=1.0
+
+[Hardware]
+TruncateLen=0</pre>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>TaraDSP — Released under the BSD-3-Clause License.</p>
+    <p><a href="https://github.com/smallbutfine/TaraDSP">GitHub Repository</a></p>
+  </div>
+</footer>
+
+</body>
+</html>
