@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaraDSP — GUI-Referenz</title>
+<link rel="stylesheet" href="../style.css">
+<style>
+.crossbar { background: #0d1117; border-bottom: 1px solid #30363d; padding: 10px 20px; text-align: center; font-size: 0.85em; letter-spacing: 0.5px; }
+.crossbar a { color: #8b949e; text-decoration: none; padding: 4px 10px; transition: color 0.2s; font-weight: 500; }
+.crossbar a:hover { color: #58a6ff; }
+.crossbar-sep { color: #30363d; margin: 0 6px; }
+</style>
+
+</head>
+<body>
+<div class="crossbar">
+  <a href="https://smallbutfine.github.io/ChameleonTools/">ChameleonTools</a>
+  <span class="crossbar-sep">|</span>
+  <a href="https://smallbutfine.github.io/ChameleonDrummer/">Drummer</a>
+  <span class="crossbar-sep">|</span>
+  <a href="https://smallbutfine.github.io/TaraDSP/">TaraDSP</a>
+  <span class="crossbar-sep">|</span>
+  <a href="https://smallbutfine.github.io/stringselectorapp/">StringSelector</a>
+  <span class="crossbar-sep">|</span>
+  <a href="https://smallbutfine.github.io/ChameleonRecorder/">Recorder</a>
+</div>
+
+
+<header>
+  <div class="container">
+    <h1>TARA<span class="accent">DSP</span></h1>
+    <nav>
+      <a href="index.html">Start</a>
+      <a href="cli.html">CLI-Referenz</a>
+      <a href="gui.html">GUI</a>
+      <a href="docs.html">Dokumentation</a>
+      <a href="manual.html">Handbuch</a>
+      <a href="download.html">Herunterladen</a>
+      <a href="../index.html">EN</a>
+      <a href="../de/index.html">DE</a>
+      <a href="../es/index.html">ES</a>
+      <a href="../fr/index.html">FR</a>
+      <a href="../pt/index.html">PT</a>
+      <a href="../ru/index.html">RU</a>
+      <a href="../zh/index.html">ZH</a>
+    </nav>
+  </div>
+</header>
+
+<section>
+  <div class="container">
+    <h2>Grafische Oberfläche</h2>
+    <p>Die TaraDSP-GUI bietet dieselbe professionelle Audio-Verarbeitung wie die
+    CLI in einem einfach zu bedienenden Fenster. Sie ist die empfohlene Methode
+    zur interaktiven Dateiverarbeitung.</p>
+
+    <h3>Bedienelemente</h3>
+    <table>
+      <thead>
+        <tr><th>Bedienelement</th><th>Typ</th><th>Beschreibung</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Quelldatei</td>
+          <td>Dateiauswahl</td>
+          <td>Die zu verarbeitende Eingabe-WAV-Datei. Klicken, um eine Datei zu suchen.</td>
+        </tr>
+        <tr>
+          <td>Impulsantwort</td>
+          <td>Dateiauswahl</td>
+          <td>Die IR-WAV-Datei zum Falten. Leer lassen für Durchgangmodus
+          (nur Mastering: Dither, Normalisieren, Fades).</td>
+        </tr>
+        <tr>
+          <td>Ausgabedatei</td>
+          <td>Text + Durchsuchen</td>
+          <td>Der Pfad zur Ausgabe-WAV-Datei. Auf "..." klicken, um einen Speicherort zu suchen.</td>
+        </tr>
+        <tr>
+          <td>Bittiefe</td>
+          <td>Combo: 16 / 24 / 32</td>
+          <td>Ausgabe-Bittiefe. 24 wird für Studio-Qualität empfohlen.
+          16 wendet TPDF-Dithering an. 32 gibt IEEE-Float aus.</td>
+        </tr>
+        <tr>
+          <td>Samplerate</td>
+          <td>Combo</td>
+          <td>Ziel-Samplerate: 0 (Original beibehalten), 44100, 48000, 88200,
+          96000, 176400, 192000. Sowohl Eingabe als auch IR werden bei Bedarf resampelt.</td>
+        </tr>
+        <tr>
+          <td>Länge kürzen</td>
+          <td>Spin-Edit</td>
+          <td>Maximale Ausgabe-Samples. 0 = kein Limit. Nützlich für Gitarrenmodeler
+          (z. B. 1024 für GP-200). Ein kurzer Fade-Out wird an der Kürzungsstelle
+          angewendet, um Klicks zu verhindern.</td>
+        </tr>
+        <tr>
+          <td>Fade-Out</td>
+          <td>Spin-Edit (ms)</td>
+          <td>Dauer des auf die IR vor der Faltung angewendeten Fade-Outs.
+          Ein 1ms Fade-In wird immer angewendet, um Startklicks zu verhindern.</td>
+        </tr>
+        <tr>
+          <td>Stille schneiden</td>
+          <td>Spin-Edit (dB)</td>
+          <td>Schwellenwert, unter dem Samples als Stille betrachtet und aus
+          der IR entfernt werden. Auf 0 setzen, um zu deaktivieren. Typisch: -60 bis -80.</td>
+        </tr>
+        <tr>
+          <td>Mono-Ausgabe</td>
+          <td>Checkbox</td>
+          <td>Ausgabe auf einen einzelnen Kanal downmixen.</td>
+        </tr>
+        <tr>
+          <td>Minimum Phase</td>
+          <td>Checkbox</td>
+          <td>Die gefaltete Ausgabe zu Minimum Phase konvertieren. Entfernt
+          Pre-Ringing und reduziert Latenz.</td>
+        </tr>
+        <tr>
+          <td>PROCESS</td>
+          <td>Schaltfläche</td>
+          <td>Startet die Verarbeitungspipeline. Fortschritt wird im Log angezeigt.</td>
+        </tr>
+        <tr>
+          <td>Log</td>
+          <td>Schreibgeschütztes Memo</td>
+          <td>Zeigt Fortschritt pro Schritt: Laden, Resampling, Falten,
+          Normalisieren, Speichern. Fehler werden in rotem Text angezeigt.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Verarbeitungspipeline</h3>
+    <p>Wenn du auf PROCESS klickst, führt die GUI die folgenden Schritte der Reihe nach aus:</p>
+    <ol>
+      <li><strong>Eingabe laden</strong> — Quelldatei lesen (8/16/24/32-Bit PCM oder Float)</li>
+      <li><strong>IR laden</strong> — Impulsantwort lesen (falls angegeben)</li>
+      <li><strong>Stille schneiden</strong> — Stille unter Schwellenwert aus IR entfernen (falls gesetzt)</li>
+      <li><strong>Fade anwenden</strong> — Fade-Out auf IR anwenden (falls gesetzt)</li>
+      <li><strong>Resamplen</strong> — Eingabe und IR auf Zielrate resamplen (falls gesetzt)</li>
+      <li><strong>Falten</strong> — FFT-Faltung pro Kanal</li>
+      <li><strong>Minimum Phase</strong> — Zu Minimum Phase konvertieren (falls aktiviert)</li>
+      <li><strong>Normalisieren</strong> — Peak auf 1.0 normalisieren</li>
+      <li><strong>Kürzen</strong> — Auf Maximallänge kürzen (falls gesetzt)</li>
+      <li><strong>Speichern</strong> — Ausgabe-WAV mit Dithering (16-Bit) oder Float (32-Bit) schreiben</li>
+    </ol>
+
+    <h3>Tipps</h3>
+    <div class="note">
+      <strong>Tipp 1:</strong> IR-Feld leer lassen, um die GUI als
+      Mastering-Werkzeug zu verwenden — es wendet Dither, Normalisierung und
+      Fades ohne Faltung an.
+    </div>
+    <div class="note">
+      <strong>Tipp 2:</strong> Für Gitarrenbox-Simulation die Kürzungslänge auf
+      1024 oder 2048 Samples setzen und Minimum Phase für den kompaktesten,
+      latenzärmsten Klang aktivieren.
+    </div>
+    <div class="note">
+      <strong>Tipp 3:</strong> 24-Bit-Ausgabe für die beste Balance aus Qualität
+      und Dateigröße verwenden. 16-Bit wird nur für CD-Kompatibilität benötigt.
+    </div>
+    <div class="note">
+      <strong>Tipp 4:</strong> Die GUI liest <code>settings.ini</code> aus dem
+      Verzeichnis der ausführbaren Datei für Standardwerte (Künstlername, Bittiefe,
+      Dither-Menge, Kürzungslänge).
+    </div>
+
+    <h3>Konfigurationsdatei</h3>
+    <p>Die GUI liest eine <code>settings.ini</code>-Datei für Standardwerte:</p>
+    <pre>; settings.ini
+[Metadata]
+Artist=Your Studio Name
+
+[Audio]
+TargetBits=24
+DitherAmount=1.0
+
+[Hardware]
+TruncateLen=0</pre>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>TaraDSP — Veröffentlicht unter der BSD-3-Clause-Lizenz.</p>
+    <p><a href="https://github.com/smallbutfine/TaraDSP">GitHub Repository</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

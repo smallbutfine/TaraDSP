@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaraDSP — Home</title>
+<link rel="stylesheet" href="../style.css">
+<style>
+.crossbar { background: #0d1117; border-bottom: 1px solid #30363d; padding: 10px 20px; text-align: center; font-size: 0.85em; letter-spacing: 0.5px; }
+.crossbar a { color: #8b949e; text-decoration: none; padding: 4px 10px; transition: color 0.2s; font-weight: 500; }
+.crossbar a:hover { color: #58a6ff; }
+.crossbar-sep { color: #30363d; margin: 0 6px; }
+</style>
+
+</head>
+<body>
+<div class="crossbar">
+  <a href="https://smallbutfine.github.io/ChameleonTools/">ChameleonTools</a>
+  <span class="crossbar-sep">|</span>
+  <a href="https://smallbutfine.github.io/ChameleonDrummer/">Drummer</a>
+  <span class="crossbar-sep">|</span>
+  <a href="https://smallbutfine.github.io/TaraDSP/">TaraDSP</a>
+  <span class="crossbar-sep">|</span>
+  <a href="https://smallbutfine.github.io/stringselectorapp/">StringSelector</a>
+  <span class="crossbar-sep">|</span>
+  <a href="https://smallbutfine.github.io/ChameleonRecorder/">Recorder</a>
+</div>
+
+
+<header>
+  <div class="container">
+    <h1>TARA<span class="accent">DSP</span></h1>
+    <nav>
+      <a href="index.html">Start</a>
+      <a href="cli.html">CLI-Referenz</a>
+      <a href="gui.html">GUI</a>
+      <a href="docs.html">Dokumentation</a>
+      <a href="manual.html">Handbuch</a>
+      <a href="download.html">Herunterladen</a>
+      <a href="../index.html">EN</a>
+      <a href="../de/index.html">DE</a>
+      <a href="../es/index.html">ES</a>
+      <a href="../fr/index.html">FR</a>
+      <a href="../pt/index.html">PT</a>
+      <a href="../ru/index.html">RU</a>
+      <a href="../zh/index.html">ZH</a>
+    </nav>
+  </div>
+</header>
+
+<section>
+  <div class="container">
+    <h2>Was ist TaraDSP?</h2>
+    <p>TaraDSP ist ein professionelles Audio-Verarbeitungswerkzeug, das eine
+    Sache außergewöhnlich gut kann: <strong>FFT-basierte Faltung</strong>.
+    Wenn du schon einmal einen Gitarrenbox-Simulator, ein Faltungshall oder
+    eine Mastering-Kette mit analogem EQ verwendet hast, hast du Faltung
+    benutzt.</p>
+
+    <p>TaraDSP gibt dir diese Leistung in einem schlanken, plattformübergreifenden
+    Paket. Windows, macOS, Linux. CLI für Stapelverarbeitung, GUI für
+    interaktive Arbeit.</p>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <h3>FFT-Faltung</h3>
+        <p>PFFFT-beschleunigte Faltung mit Impulsantworten für
+        Boxensimulation, Faltungshall und analoge Gear-Emulation.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Mastering-Dither</h3>
+        <p>TPDF-Dithering mit Fehlerrückführung für 16-Bit-Ausgabe.
+        Reduziert Quantisierungsverzerrungen auf ein Minimum.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Minimum Phase</h3>
+        <p>Konvertierung linearphasiger IRs zu minimalphasig — entfernt
+        Pre-Ringing und reduziert Latenz.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Resampling</h3>
+        <p>SoX (libsoxr), R8Brain, FinalCD oder lineare Interpolation.
+        Automatische Auswahl der besten verfügbaren Engine.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Cross-Platform</h3>
+        <p>Vorkompilierte Binaries für Windows, macOS (Intel &amp; Apple
+        Silicon) und Linux (x86_64 &amp; ARM).</p>
+      </div>
+      <div class="feature-card">
+        <h3>CLI &amp; GUI</h3>
+        <p>Kommandozeilenwerkzeug für Skripte und Stapelverarbeitung,
+        grafische Oberfläche für interaktives Arbeiten.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <h2>Downloads</h2>
+    <p>Vorkompilierte Binaries sind an jedem
+    <a href="https://github.com/smallbutfine/TaraDSP/releases">GitHub Release</a>
+    angehängt:</p>
+    <table class="download-table">
+      <thead><tr><th>Plattform</th><th>Artifact</th><th>Hinweise</th></tr></thead>
+      <tbody>
+        <tr><td>Windows 64-bit</td><td><code>TaraDSP_&lt;version&gt;_Setup.exe</code></td><td>Inno Setup Installer</td></tr>
+        <tr><td>macOS Intel</td><td><code>TaraDSP&lt;version&gt;-macos-intel.zip</code></td><td>Universelles App-Bundle</td></tr>
+        <tr><td>macOS Apple Silicon</td><td><code>TaraDSP&lt;version&gt;-macos-aarch64.zip</code></td><td>Universelles App-Bundle</td></tr>
+        <tr><td>Linux x86_64</td><td><code>TaraDSP&lt;version&gt;-linux-x64.tar.gz</code></td><td>Entpacken und ausführen</td></tr>
+        <tr><td>Linux ARM</td><td><code>TaraDSP&lt;version&gt;-linux-arm.tar.gz</code></td><td>Entpacken und ausführen</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <h2>Systemanforderungen</h2>
+    <table>
+      <thead><tr><th>Komponente</th><th>Anforderung</th></tr></thead>
+      <tbody>
+        <tr><td>OS</td><td>Windows 10+, macOS 10.13+, oder Linux (x86_64/ARM)</td></tr>
+        <tr><td>CPU</td><td>x86_64 oder ARM</td></tr>
+        <tr><td>RAM</td><td>512 MB Minimum</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>TaraDSP — Veröffentlicht unter der BSD-3-Clause-Lizenz.</p>
+    <p><a href="https://github.com/smallbutfine/TaraDSP">GitHub Repository</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

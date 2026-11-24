@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaraDSP — CLI-Referenz</title>
+<link rel="stylesheet" href="../style.css">
+<style>
+.crossbar { background: #0d1117; border-bottom: 1px solid #30363d; padding: 10px 20px; text-align: center; font-size: 0.85em; letter-spacing: 0.5px; }
+.crossbar a { color: #8b949e; text-decoration: none; padding: 4px 10px; transition: color 0.2s; font-weight: 500; }
+.crossbar a:hover { color: #58a6ff; }
+.crossbar-sep { color: #30363d; margin: 0 6px; }
+</style>
+
+</head>
+<body>
+<div class="crossbar">
+  <a href="https://smallbutfine.github.io/ChameleonTools/">ChameleonTools</a>
+  <span class="crossbar-sep">|</span>
+  <a href="https://smallbutfine.github.io/ChameleonDrummer/">Drummer</a>
+  <span class="crossbar-sep">|</span>
+  <a href="https://smallbutfine.github.io/TaraDSP/">TaraDSP</a>
+  <span class="crossbar-sep">|</span>
+  <a href="https://smallbutfine.github.io/stringselectorapp/">StringSelector</a>
+  <span class="crossbar-sep">|</span>
+  <a href="https://smallbutfine.github.io/ChameleonRecorder/">Recorder</a>
+</div>
+
+
+<header>
+  <div class="container">
+    <h1>TARA<span class="accent">DSP</span></h1>
+    <nav>
+      <a href="index.html">Start</a>
+      <a href="cli.html">CLI-Referenz</a>
+      <a href="gui.html">GUI</a>
+      <a href="docs.html">Dokumentation</a>
+      <a href="manual.html">Handbuch</a>
+      <a href="download.html">Herunterladen</a>
+      <a href="../index.html">EN</a>
+      <a href="../de/index.html">DE</a>
+      <a href="../es/index.html">ES</a>
+      <a href="../fr/index.html">FR</a>
+      <a href="../pt/index.html">PT</a>
+      <a href="../ru/index.html">RU</a>
+      <a href="../zh/index.html">ZH</a>
+    </nav>
+  </div>
+</header>
+
+<section class="docs-section">
+  <div class="container">
+    <h2>CLI-Referenz</h2>
+    <p>Das <code>TaraDSP</code>-Programm ist ein Kommandozeilen-Audio-Verarbeitungswerkzeug.
+    Es wendet FFT-Faltung mit Impulsantworten an, resampelt Audio und
+    wendet Mastering-Dithering und Fades an.</p>
+
+    <div class="quick-reference">
+      <h3>Schnellstart</h3>
+      <pre>TaraDSP -x input.wav -y impulse.wav -o output.wav
+TaraDSP -x input.wav -o output.wav -b 24 -r 48000
+TaraDSP -x input.wav -y ir.wav -o output.wav -f 50 -t -60 --min</pre>
+    </div>
+
+    <h3>Optionen</h3>
+    <table>
+      <thead>
+        <tr><th>Option</th><th>Langform</th><th>Wert</th><th>Beschreibung</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>-x</code></td>
+          <td><code>--in1</code></td>
+          <td><code>&lt;file&gt;</code></td>
+          <td>Eingabe-WAV-Datei (das zu verarbeitende Audiosignal)</td>
+        </tr>
+        <tr>
+          <td><code>-y</code></td>
+          <td><code>--in2</code></td>
+          <td><code>&lt;file&gt;</code></td>
+          <td>Impulsantwort-WAV-Datei (optional — wenn weggelassen, wird eine Einheitsimpuls verwendet, was einem Durchgang mit Mastering entspricht)</td>
+        </tr>
+        <tr>
+          <td><code>-o</code></td>
+          <td><code>--output</code></td>
+          <td><code>&lt;file&gt;</code></td>
+          <td>Ausgabe-WAV-Datei</td>
+        </tr>
+        <tr>
+          <td><code>-b</code></td>
+          <td><code>--bits</code></td>
+          <td><code>16|24|32</code></td>
+          <td>Ausgabe-Bittiefe (Standard: 24)</td>
+        </tr>
+        <tr>
+          <td><code>-r</code></td>
+          <td><code>--rate</code></td>
+          <td><code>&lt;Hz&gt;</code></td>
+          <td>Ziel-Samplerate (z. B. 44100, 48000, 96000). Wenn gesetzt, werden sowohl Eingabe als auch IR auf diese Rate resampelt.</td>
+        </tr>
+        <tr>
+          <td><code>-l</code></td>
+          <td><code>--length</code></td>
+          <td><code>&lt;samples&gt;</code></td>
+          <td>Ausgabe auf diese Anzahl von Samples kürzen (0 = keine Kürzung)</td>
+        </tr>
+        <tr>
+          <td><code>-t</code></td>
+          <td><code>--trim</code></td>
+          <td><code>&lt;dB&gt;</code></td>
+          <td>Schneidet Stille unter diesem Schwellenwert (z. B. -60). Wird auf die IR vor der Faltung angewendet.</td>
+        </tr>
+        <tr>
+          <td><code>-f</code></td>
+          <td><code>--fade</code></td>
+          <td><code>&lt;ms&gt;</code></td>
+          <td>Wendet einen Fade-Out dieser Dauer in Millisekunden auf die IR an. Ein 1ms Fade-In wird immer angewendet.</td>
+        </tr>
+        <tr>
+          <td><code>-m</code></td>
+          <td><code>--mono</code></td>
+          <td>(Flag)</td>
+          <td>Erzwingt Mono-Ausgabe (Downmix auf einen Kanal)</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td><code>--min</code></td>
+          <td>(Flag)</td>
+          <td>Konvertiert die gefaltete Ausgabe zu Minimum Phase</td>
+        </tr>
+        <tr>
+          <td><code>-h</code></td>
+          <td><code>--help</code></td>
+          <td>(Flag)</td>
+          <td>Zeigt Hilfe und Verwendungsinformationen</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Beispiele</h3>
+
+    <h4>Einfache Faltung</h4>
+    <p>Ein Gitarrensignal mit einer Box-Impulsantwort falten:</p>
+    <div class="command-block">
+      <span class="option">TaraDSP</span> -x guitar.wav -y cab_ir.wav -o guitar_amped.wav
+    </div>
+
+    <h4>Mastering mit Dithering</h4>
+    <p>Mastering auf einen Mix ohne Faltung anwenden (keine IR), 16-Bit-Ausgabe mit Dithering:</p>
+    <div class="command-block">
+      <span class="option">TaraDSP</span> -x mix.wav -o master.wav -b 16
+    </div>
+
+    <h4>Resampling</h4>
+    <p>Eine 44,1kHz-Datei mit Faltung auf 48kHz konvertieren:</p>
+    <div class="command-block">
+      <span class="option">TaraDSP</span> -x input.wav -y ir.wav -o output.wav -r 48000
+    </div>
+
+    <h4>Minimum-Phase-Konvertierung</h4>
+    <p>Eine linearphasige IR zu Minimum Phase für geringere Latenz konvertieren:</p>
+    <div class="command-block">
+      <span class="option">TaraDSP</span> -x input.wav -y linear_ir.wav -o output.wav --min
+    </div>
+
+    <h4>Stille schneiden und Fade anwenden</h4>
+    <p>Stille unter -60dB aus der IR schneiden, einen 50ms Fade-Out anwenden:</p>
+    <div class="command-block">
+      <span class="option">TaraDSP</span> -x input.wav -y ir.wav -o output.wav -t -60 -f 50
+    </div>
+
+    <h4>Mono-Ausgabe</h4>
+    <p>Stereo auf Mono downmixen:</p>
+    <div class="command-block">
+      <span class="option">TaraDSP</span> -x stereo.wav -y ir.wav -o mono.wav -m
+    </div>
+
+    <h4>Für Modeler kürzen</h4>
+    <p>Auf 1024 Samples kürzen (für Gitarrenmodeler wie GP-200):</p>
+    <div class="command-block">
+      <span class="option">TaraDSP</span> -x input.wav -y ir.wav -o output.wav -l 1024
+    </div>
+
+    <h3>Eingabeformate</h3>
+    <table>
+      <thead>
+        <tr><th>Format</th><th>Bittiefe</th><th>Kanäle</th><th>Hinweise</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>WAV (PCM)</td><td>8, 16, 24, 32-bit</td><td>Mono, Stereo, Multichannel</td><td>Alle Standard-WAV-Formate unterstützt</td></tr>
+        <tr><td>WAV (IEEE Float)</td><td>32-bit float</td><td>Mono, Stereo</td><td>Vollständiger Dynamikbereich, kein Clipping</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Ausgabeformate</h3>
+    <table>
+      <thead>
+        <tr><th>Bittiefe</th><th>Format</th><th>Dithering</th><th>Hinweise</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>16-bit</td><td>WAV (PCM)</td><td>TPDF mit Fehlerrückführung</td><td>CD-Qualität, universell kompatibel</td></tr>
+        <tr><td>24-bit</td><td>WAV (PCM)</td><td>Kein (native Auflösung)</td><td>Studio-Qualität, empfohlen</td></tr>
+        <tr><td>32-bit</td><td>WAV (IEEE Float)</td><td>Kein</td><td>Maximaler Dynamikbereich, für weitere Verarbeitung</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note">
+      <strong>Tipp:</strong> Für die besten Ergebnisse 24-Bit-Ausgabe verwenden.
+      Sie bietet mehr Headroom als 16-Bit und ist kleiner als 32-Bit-Float.
+      Das Mastering-Dither wird nur für 16-Bit-Ausgabe angewendet.
+    </div>
+
+    <h3>Konfigurationsdatei</h3>
+    <p>TaraDSP liest eine <code>settings.ini</code>-Datei aus demselben Verzeichnis
+    wie die ausführbare Datei (oder dem aktuellen Arbeitsverzeichnis). Diese Datei kann
+    Standardwerte für Künstlermetadaten, Bittiefe, Dither-Menge und mehr setzen.</p>
+    <pre>; settings.ini
+[Metadata]
+Artist=Your Studio Name
+
+[Audio]
+TargetBits=24
+DitherAmount=1.0
+
+[Hardware]
+TruncateLen=0</pre>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>TaraDSP — Veröffentlicht unter der BSD-3-Clause-Lizenz.</p>
+    <p><a href="https://github.com/smallbutfine/TaraDSP">GitHub Repository</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

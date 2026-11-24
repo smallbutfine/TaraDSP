@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaraDSP — Konzepte</title>
+<link rel="stylesheet" href="../style.css">
+<style>
+.crossbar { background: #0d1117; border-bottom: 1px solid #30363d; padding: 10px 20px; text-align: center; font-size: 0.85em; letter-spacing: 0.5px; }
+.crossbar a { color: #8b949e; text-decoration: none; padding: 4px 10px; transition: color 0.2s; font-weight: 500; }
+.crossbar a:hover { color: #58a6ff; }
+.crossbar-sep { color: #30363d; margin: 0 6px; }
+</style>
+
+</head>
+<body>
+<div class="crossbar">
+  <a href="https://smallbutfine.github.io/ChameleonTools/">ChameleonTools</a>
+  <span class="crossbar-sep">|</span>
+  <a href="https://smallbutfine.github.io/ChameleonDrummer/">Drummer</a>
+  <span class="crossbar-sep">|</span>
+  <a href="https://smallbutfine.github.io/TaraDSP/">TaraDSP</a>
+  <span class="crossbar-sep">|</span>
+  <a href="https://smallbutfine.github.io/stringselectorapp/">StringSelector</a>
+  <span class="crossbar-sep">|</span>
+  <a href="https://smallbutfine.github.io/ChameleonRecorder/">Recorder</a>
+</div>
+
+
+<header>
+  <div class="container">
+    <h1>TARA<span class="accent">DSP</span></h1>
+    <nav>
+      <a href="index.html">Start</a>
+      <a href="cli.html">CLI-Referenz</a>
+      <a href="gui.html">GUI</a>
+      <a href="docs.html">Dokumentation</a>
+      <a href="manual.html">Handbuch</a>
+      <a href="download.html">Herunterladen</a>
+      <a href="../index.html">EN</a>
+      <a href="../de/index.html">DE</a>
+      <a href="../es/index.html">ES</a>
+      <a href="../fr/index.html">FR</a>
+      <a href="../pt/index.html">PT</a>
+      <a href="../ru/index.html">RU</a>
+      <a href="../zh/index.html">ZH</a>
+    </nav>
+  </div>
+</header>
+
+<section>
+  <div class="container">
+    <h2>Die Prinzipien hinter TaraDSP</h2>
+    <p>TaraDSP basiert auf einem einfachen, aber leistungsstarken Konzept:
+    <strong>FFT-basierte Faltung</strong>. Dieser Abschnitt erklärt die
+    technischen Grundlagen.</p>
+
+    <h3>Was ist Faltung?</h3>
+    <p>Faltung ist ein mathematischer Prozess, der die klanglichen
+    Eigenschaften eines Signals (der Impulsantwort) auf ein anderes Signal
+    (dein Audio) anwendet. Das Ergebnis klingt, als wäre dein Audio durch
+    das System gelaufen, das die IR erfasst hat.</p>
+
+    <p>Typische Anwendungen:</p>
+    <ul>
+      <li><strong>Gitarrenbox-Simulation</strong> — Lass deine trockene
+      Gitarre durch eine gerenderte Box klingen</li>
+      <li><strong>Faltungshall</strong> — Füge einem trockenen Signal die
+      Akustik eines Konzertsaals hinzu</li>
+      <li><strong>Analog-Gear-Emulation</strong> — Verwende die IR eines
+      Vintage-Kompressors oder Bandgeräts</li>
+    </ul>
+
+    <h3>Warum FFT?</h3>
+    <p>Direkte Faltung ist O(n²) — für eine 1-Sekunden-Datei bei 48kHz
+    bedeutet das ~2,3 Milliarden Operationen. Die FFT reduziert dies auf
+    O(n log n) durch den <strong>Faltungssatz</strong>:</p>
+
+    <blockquote>Faltung im Zeitbereich = Multiplikation im Frequenzbereich</blockquote>
+
+    <p>Der Prozess:</p>
+    <ol>
+      <li>FFT beider Signale → Frequenzbereich</li>
+      <li>Multiplizieren → eine Multiplikation pro Frequenz-Bin</li>
+      <li>Inverse FFT → zurück in den Zeitbereich</li>
+    </ol>
+
+    <p><strong>5000× schneller.</strong> PFFFT (Pretty Fast FFT) beschleunigt
+    weiter mit SIMD-Instruktionen (SSE/NEON) — 4-8 Samples pro Instruktion.</p>
+
+    <h3>Impulsantworten (IRs)</h3>
+    <p>Eine IR ist eine Aufnahme eines Klicks durch ein System. Sie erfasst
+    den vollständigen klanglichen Fingerabdruck — Frequenzgang, Resonanzen,
+    Abklingverhalten und Phase.</p>
+
+    <table>
+    <tr><td>Typ</td><td>Erfasst</td><td>Länge</td><td>Anwendungsfall</td></tr>
+    <tr><td>Box-IR</td><td>Lautsprecher + Box + Mikrofon</td><td>0,5–2s</td><td>Gitarren-/Bass-Box-Simulation</td></tr>
+    <tr><td>Raum-IR</td><td>Raumakustik</td><td>1–4s</td><td>Faltungshall</td></tr>
+    <tr><td>Hardware-IR</td><td>EQ, Kompressor, Band</td><td>0,1–1s</td><td>Analog-Gear-Emulation</td></tr>
+    <tr><td>Plate/Spring-IR</td><td>Mechanischer Hall</td><td>1–3s</td><td>Vintage-Hall</td></tr>
+    </table>
+
+    <h3>Die Verarbeitungskette</h3>
+    <p>Wenn du TaraDSP ausführst, durchläuft das Audio diese Kette:</p>
+    <ol>
+      <li><strong>Eingabe laden</strong> — WAV lesen (8/16/24/32-Bit PCM oder Float)</li>
+      <li><strong>IR laden</strong> — Impulsantwort lesen (optional)</li>
+      <li><strong>Stille schneiden</strong> — Stille unter Schwellenwert aus IR entfernen</li>
+      <li><strong>Fades anwenden</strong> — Fade-Out auf IR anwenden</li>
+      <li><strong>Resamplen</strong> — Eingabe und IR auf Zielrate resamplen</li>
+      <li><strong>Falten</strong> — FFT-Faltung pro Kanal</li>
+      <li><strong>Minimum Phase</strong> — Zu Minimum Phase konvertieren (optional)</li>
+      <li><strong>Normalisieren</strong> — Peak auf 1.0 normalisieren</li>
+      <li><strong>Kürzen</strong> — Auf Maximallänge kürzen (optional)</li>
+      <li><strong>Dithern und Speichern</strong> — Ausgabe-WAV schreiben</li>
+    </ol>
+
+    <h3>Minimum Phase vs. Linear Phase</h3>
+    <p>Linearphasige IRs haben symmetrisches Pre-Ringing — Energie vor UND
+    nach dem Hauptimpuls. Das klingt unnatürlich, da in der Natur Schall
+    nach dem Ereignis kommt, nie davor.</p>
+
+    <p>Minimum Phase entfernt Pre-Ringing:</p>
+    <ul>
+      <li>Kein Pre-Ringing</li>
+      <li>Niedrigere Latenz</li>
+      <li>Gleicher Frequenzgang</li>
+    </ul>
+
+    <p>Verwende <code>--min</code> für Boxensimulation und Echtzeit-Anwendungen.</p>
+
+    <h3>Mastering-Dither</h3>
+    <p>Bei der Ausgabe von 16-Bit-Audio wendet TaraDSP TPDF-Dithering mit
+    Fehlerrückführung an. Dies wandelt Quantisierungsverzerrungen in einen
+    konstanten, weniger hörbaren Pegelboden um.</p>
+
+    <p><strong>Wann dithern:</strong></p>
+    <ul>
+      <li><strong>Immer für 16-Bit</strong> — besser als Kürzung</li>
+      <li><strong>Niemals für 24/32-Bit</strong> — Fehler liegt unter dem Pegelboden</li>
+      <li><strong>Einmal dithern</strong> — nur in der finalen Ausgabestufe</li>
+    </ul>
+
+    <h3>Resampling</h3>
+    <p>TaraDSP unterstützt mehrere Resampling-Engines:</p>
+    <ol>
+      <li><strong>SoX Resampler (libsoxr)</strong> — höchste Qualität</li>
+      <li><strong>R8Brain</strong> — hohe Qualität</li>
+      <li><strong>FinalCD</strong> — externes Tool</li>
+      <li><strong>Lineare Interpolation</strong> — Fallback</li>
+    </ol>
+
+    <p>Für beste Ergebnisse libsoxr installieren (<code>libsoxr.dll</code> /
+    <code>.dylib</code> / <code>.so.0</code>).</p>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>TaraDSP — Veröffentlicht unter der BSD-3-Clause-Lizenz.</p>
+    <p><a href="https://github.com/smallbutfine/TaraDSP">GitHub Repository</a></p>
+  </div>
+</footer>
+
+</body>
+</html>
