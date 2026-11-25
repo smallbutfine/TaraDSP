@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TaraDSP — The Producer's Manual</title>
+<title>TaraDSP — Le Manuel du Producteur</title>
 <link rel="stylesheet" href="../style.css">
   <style>
 .crossbar {
@@ -47,226 +47,226 @@
 <header>
   <div class="container">
     <h1>TARA<span class="accent">DSP</span></h1>
-    <p class="subtitle">The Producer's Manual</p>
+    <p class="subtitle">Le Manuel du Producteur</p>
     <nav>
       <a href="index.html">Accueil</a>
       <a href="concepts.html">Concepts</a>
       <a href="cli.html">Référence CLI</a>
-      <a href="gui.html">IUG</a>
+      <a href="gui.html">GUI</a>
       <a href="docs.html">Documentation</a>
       <a href="manual.html">Manuel</a>
       <a href="download.html">Télécharger</a>
-      <a href="de/index.html">DE</a>
-      <a href="es/index.html">ES</a>
-      <a href="fr/index.html">FR</a>
-      <a href="pt/index.html">PT</a>
-      <a href="ru/index.html">RU</a>
-      <a href="zh/index.html">ZH</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/de/">DE</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/es/">ES</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/fr/">FR</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/pt/">PT</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/ru/">RU</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/zh/">ZH</a>
     </nav>
   </div>
 </header>
 
 <section>
   <div class="container">
-    <h2>The Producer's Manual</h2>
-    <p>A comprehensive guide to convolution, impulse responses, and mastering-grade audio processing with TaraDSP. Written for musicians, audio engineers, mastering engineers, and producers.</p>
+    <h2>Le Manuel du Producteur</h2>
+    <p>Un guide complet sur la convolution, les réponses impulsionnelles et le traitement audio de qualité mastering avec TaraDSP. Écrit pour les musiciens, ingénieurs du son, ingénieurs de mastering et producteurs.</p>
 
-    <h3>Table of Contents</h3>
+    <h3>Table des Matières</h3>
     <ol>
-      <li><a href="#what">What is TaraDSP?</a></li>
-      <li><a href="#science">The Science of Convolution</a></li>
-      <li><a href="#ir">Impulse Responses: The Sonic DNA</a></li>
-      <li><a href="#chain">The Processing Chain</a></li>
-      <li><a href="#dither">Mastering Dither</a></li>
-      <li><a href="#minphase">Minimum Phase</a></li>
-      <li><a href="#resample">Resampling</a></li>
-      <li><a href="#fades">Fades and Trimming</a></li>
-      <li><a href="#workflows">Practical Workflows</a></li>
-      <li><a href="#combine">Combining Two IRs</a></li>
-      <li><a href="#tips">Tips from the Trenches</a></li>
-      <li><a href="#reference">Technical Reference</a></li>
+      <li><a href="#what">Qu'est-ce que TaraDSP ?</a></li>
+      <li><a href="#science">La Science de la Convolution</a></li>
+      <li><a href="#ir">Réponses Impulsionnelles : l'ADN Sonore</a></li>
+      <li><a href="#chain">La Chaîne de Traitement</a></li>
+      <li><a href="#dither">Dither de Mastering</a></li>
+      <li><a href="#minphase">Phase Minimale</a></li>
+      <li><a href="#resample">Rééchantillonnage</a></li>
+      <li><a href="#fades">Fondus et Découpe</a></li>
+      <li><a href="#workflows">Flux de Travail Pratiques</a></li>
+      <li><a href="#combine">Combiner Deux IR</a></li>
+      <li><a href="#tips">Conseils du Terrain</a></li>
+      <li><a href="#reference">Référence Technique</a></li>
     </ol>
 
-    <h3 id="what">1. What is TaraDSP?</h3>
-    <p>TaraDSP is a professional audio processing tool that does one thing exceptionally well: <strong>FFT-based convolution</strong>. If you've ever used a guitar cabinet simulator, a convolution reverb, or a mastering chain with analog-modeled EQ, you've used convolution.</p>
-    <p>TaraDSP gives you that power in a lightweight, cross-platform package. Windows, macOS, Linux. CLI for batch processing, GUI for interactive work.</p>
+    <h3 id="what">1. Qu'est-ce que TaraDSP ?</h3>
+    <p>TaraDSP est un outil professionnel de traitement audio qui fait une chose exceptionnellement bien : la <strong>convolution basée sur la FFT</strong>. Si vous avez déjà utilisé un simulateur de haut-parleur de guitare, une réverbération par convolution ou une chaîne de mastering avec EQ modélisé analogique, vous avez utilisé la convolution.</p>
+    <p>TaraDSP vous donne cette puissance dans un paquet léger et multiplateforme. Windows, macOS, Linux. CLI pour le traitement par lots, GUI pour le travail interactif.</p>
 
-    <h3 id="science">2. The Science of Convolution</h3>
-    <p>Convolution applies the sonic characteristics of one signal (the <strong>impulse response</strong>) to another (your audio). When you play a dry guitar through a cabinet, the cabinet colors the sound — resonances, frequency response, decay. Convolution mathematically applies that coloring.</p>
-    <p><strong>Why FFT?</strong> Direct convolution is O(n²) — billions of operations for a 1-second file. The FFT reduces this to O(n log n) via the <strong>convolution theorem</strong>:</p>
-    <blockquote>Convolution in time = Multiplication in frequency</blockquote>
+    <h3 id="science">2. La Science de la Convolution</h3>
+    <p>La convolution applique les caractéristiques sonores d'un signal (la <strong>réponse impulsionnelle</strong>) à un autre (votre audio). Lorsque vous jouez une guitare sèche à travers un haut-parleur, celui-ci colore le son — résonances, réponse en fréquence, décroissance. La convolution applique mathématiquement cette coloration.</p>
+    <p><strong>Pourquoi la FFT ?</strong> La convolution directe est en O(n²) — des milliards d'opérations pour un fichier d'une seconde. La FFT réduit cela à O(n log n) via le <strong>théorème de convolution</strong> :</p>
+    <blockquote>Convolution dans le temps = Multiplication en fréquence</blockquote>
     <ol>
-      <li>FFT both signals → frequency domain</li>
-      <li>Multiply them → one multiply per bin</li>
-      <li>Inverse FFT → back to time domain</li>
+      <li>FFT des deux signaux → domaine fréquentiel</li>
+      <li>Les multiplier → une multiplication par bin</li>
+      <li>FFT inverse → retour au domaine temporel</li>
     </ol>
-    <p><strong>5000× speedup.</strong> PFFFT further accelerates with SIMD (SSE/NEON) — 4-8 samples per instruction.</p>
+    <p><strong>Accélération de 5000×.</strong> PFFFT accélère encore avec le SIMD (SSE/NEON) — 4-8 échantillons par instruction.</p>
 
-    <h3 id="ir">3. Impulse Responses: The Sonic DNA</h3>
-    <p>An impulse response is a recording of a click through a system, capturing its complete sonic fingerprint.</p>
+    <h3 id="ir">3. Réponses Impulsionnelles : l'ADN Sonore</h3>
+    <p>Une réponse impulsionnelle est un enregistrement d'un clic à travers un système, capturant son empreinte sonore complète.</p>
     <table>
-      <thead><tr><th>Type</th><th>Captures</th><th>Length</th><th>Use case</th></tr></thead>
+      <thead><tr><th>Type</th><th>Capture</th><th>Durée</th><th>Cas d'usage</th></tr></thead>
       <tbody>
-        <tr><td>Cabinet IR</td><td>Speaker + cab + mic</td><td>0.5–2s</td><td>Guitar/bass cab sim</td></tr>
-        <tr><td>Room IR</td><td>Room acoustics</td><td>1–4s</td><td>Convolution reverb</td></tr>
-        <tr><td>Hardware IR</td><td>EQ, compressor, tape</td><td>0.1–1s</td><td>Analog gear emulation</td></tr>
-        <tr><td>Plate/Spring IR</td><td>Mechanical reverb</td><td>1–3s</td><td>Vintage reverb</td></tr>
+        <tr><td>IR de Haut-Parleur</td><td>Haut-parleur + cab + micro</td><td>0,5–2s</td><td>Simulation de cab guitare/basse</td></tr>
+        <tr><td>IR de Pièce</td><td>Acoustique de pièce</td><td>1–4s</td><td>Réverbération par convolution</td></tr>
+        <tr><td>IR de Matériel</td><td>EQ, compresseur, bande</td><td>0,1–1s</td><td>Émulation de matériel analogique</td></tr>
+        <tr><td>IR de Plaque/Ressort</td><td>Réverbération mécanique</td><td>1–3s</td><td>Reverb vintage</td></tr>
       </tbody>
     </table>
-    <p><strong>Where to find them:</strong> Free IR libraries (Guitar Hack, God's Cab, Seacow), commercial (Celestion, Redwirez, York Audio), or DIY (click through your cab, record with a mic).</p>
+    <p><strong>Où les trouver :</strong> Bibliothèques d'IR gratuites (Guitar Hack, God's Cab, Seacow), commerciales (Celestion, Redwirez, York Audio), ou DIY (un clic à travers votre cab, enregistré avec un micro).</p>
 
-    <h3 id="chain">4. The Processing Chain</h3>
-    <p>When you run TaraDSP, audio passes through this chain. Each step is optional.</p>
+    <h3 id="chain">4. La Chaîne de Traitement</h3>
+    <p>Lorsque vous lancez TaraDSP, l'audio traverse cette chaîne. Chaque étape est facultative.</p>
     <table>
-      <thead><tr><th>Step</th><th>What</th><th>CLI flag</th></tr></thead>
+      <thead><tr><th>Étape</th><th>Quoi</th><th>Flag CLI</th></tr></thead>
       <tbody>
-        <tr><td>1</td><td>Load Input (8/16/24/32-bit WAV → float)</td><td><code>-x</code></td></tr>
-        <tr><td>2</td><td>Load IR (optional — passthrough if empty)</td><td><code>-y</code></td></tr>
-        <tr><td>3</td><td>Trim Silence from IR</td><td><code>-t &lt;dB&gt;</code></td></tr>
-        <tr><td>4</td><td>Apply Fades (1ms in always, optional out)</td><td><code>-f &lt;ms&gt;</code></td></tr>
-        <tr><td>5</td><td>Resample (SoX → R8Brain → FinalCD → linear)</td><td><code>-r &lt;Hz&gt;</code></td></tr>
-        <tr><td>6</td><td>FFT Convolve (PFFFT)</td><td>(automatic)</td></tr>
-        <tr><td>7</td><td>Minimum Phase (remove pre-ringing)</td><td><code>--min</code></td></tr>
-        <tr><td>8</td><td>Normalize (peak → 0 dBFS)</td><td>(automatic)</td></tr>
-        <tr><td>9</td><td>Truncate length</td><td><code>-l &lt;samples&gt;</code></td></tr>
-        <tr><td>10</td><td>Dither + Save</td><td><code>-b &lt;16|24|32&gt;</code></td></tr>
+        <tr><td>1</td><td>Charger l'entrée (WAV 8/16/24/32 bits → float)</td><td><code>-x</code></td></tr>
+        <tr><td>2</td><td>Charger l'IR (facultatif — passage direct si vide)</td><td><code>-y</code></td></tr>
+        <tr><td>3</td><td>Couper le silence de l'IR</td><td><code>-t &lt;dB&gt;</code></td></tr>
+        <tr><td>4</td><td>Appliquer les fondus (1ms d'entrée toujours, sortie facultative)</td><td><code>-f &lt;ms&gt;</code></td></tr>
+        <tr><td>5</td><td>Rééchantillonner (SoX → R8Brain → FinalCD → linéaire)</td><td><code>-r &lt;Hz&gt;</code></td></tr>
+        <tr><td>6</td><td>Convolution FFT (PFFFT)</td><td>(automatique)</td></tr>
+        <tr><td>7</td><td>Phase minimale (supprimer le pre-ringing)</td><td><code>--min</code></td></tr>
+        <tr><td>8</td><td>Normaliser (pic → 0 dBFS)</td><td>(automatique)</td></tr>
+        <tr><td>9</td><td>Longueur de troncature</td><td><code>-l &lt;échantillons&gt;</code></td></tr>
+        <tr><td>10</td><td>Dither + Sauver</td><td><code>-b &lt;16|24|32&gt;</code></td></tr>
       </tbody>
     </table>
 
-    <h3 id="dither">5. Mastering Dither</h3>
-    <p><strong>The problem:</strong> Quantizing 24-bit to 16-bit without dither creates harmonic distortion at low levels.</p>
-    <p><strong>The solution: TPDF</strong> — adds 2 LSB of triangular noise before quantization. Converts distortion to a constant noise floor — less audible, more natural.</p>
-    <p>TaraDSP's implementation:</p>
+    <h3 id="dither">5. Dither de Mastering</h3>
+    <p><strong>Le problème :</strong> Quantifier du 24 bits vers 16 bits sans dither crée une distorsion harmonique à bas niveaux.</p>
+    <p><strong>La solution : TPDF</strong> — ajoute 2 LSB de bruit triangulaire avant la quantification. Convertit la distorsion en un plancher de bruit constant — moins audible, plus naturel.</p>
+    <p>L'implémentation de TaraDSP :</p>
     <ul>
-      <li><strong>TPDF noise</strong>: Two random values summed (triangular distribution)</li>
-      <li><strong>Error feedback</strong>: Quantization error fed back, shaping the noise spectrum</li>
-      <li><strong>Signal-dependent scaling</strong>: 70% dither at very low levels (&lt; -90 dBFS)</li>
+      <li><strong>Bruit TPDF</strong> : Deux valeurs aléatoires sommées (distribution triangulaire)</li>
+      <li><strong>Rétroaction d'erreur</strong> : L'erreur de quantification est réinjectée, mettant en forme le spectre du bruit</li>
+      <li><strong>Mise à l'échelle dépendante du signal</strong> : 70 % de dither à très bas niveaux (&lt; -90 dBFS)</li>
     </ul>
     <div class="note">
-      <strong>When to use:</strong> Always dither for 16-bit. Never dither for 24/32-bit. Dither once, at the final output stage only.
+      <strong>Quand l'utiliser :</strong> Faites toujours du dither pour le 16 bits. Ne faites jamais de dither pour le 24/32 bits. Faites du dither une fois, à la toute fin.
     </div>
 
-    <h3 id="minphase">6. Minimum Phase</h3>
-    <p><strong>Pre-ringing:</strong> Linear-phase IRs have symmetric energy — before AND after the main impulse. The energy before is <em>pre-ringing</em>, which sounds unnatural (in nature, sound arrives after, never before).</p>
-    <p><strong>What minimum phase does:</strong> Transforms a linear-phase IR into minimum phase:</p>
+    <h3 id="minphase">6. Phase Minimale</h3>
+    <p><strong>Pre-ringing :</strong> Les IR à phase linéaire ont une énergie symétrique — avant ET après l'impulsion principale. L'énergie avant est le <em>pre-ringing</em>, qui sonne non naturel (dans la nature, le son arrive après, jamais avant).</p>
+    <p><strong>Ce que fait la phase minimale :</strong> Transforme une IR à phase linéaire en phase minimale :</p>
     <ul>
-      <li>No pre-ringing</li>
-      <li>Lower latency</li>
-      <li>Same frequency response (magnitude unchanged)</li>
+      <li>Pas de pre-ringing</li>
+      <li>Latence plus faible</li>
+      <li>Même réponse en fréquence (magnitude inchangée)</li>
     </ul>
-    <p><strong>Algorithm:</strong> Real cepstrum method — FFT → log magnitude → inverse FFT (cepstrum) → fold → FFT → complex spectrum → inverse FFT.</p>
+    <p><strong>Algorithme :</strong> Méthode du cepstre réel — FFT → log magnitude → FFT inverse (cepstre) → repli → FFT → spectre complexe → FFT inverse.</p>
     <div class="note">
-      <strong>When to use:</strong> Always for cabinet simulation. Always for real-time. Optional for reverb (some prefer linear-phase spaciousness).
+      <strong>Quand l'utiliser :</strong> Toujours pour la simulation de haut-parleur. Toujours pour le temps réel. Facultatif pour la reverb (certains préfèrent l'ampleur de la phase linéaire).
     </div>
 
-    <h3 id="resample">7. Resampling</h3>
-    <p><strong>Why:</strong> Mismatched rates (44.1k IR, 48k project), target device expects specific rate, CD release (44.1k).</p>
-    <p><strong>Aliasing:</strong> Downsampling without filtering causes frequencies above Nyquist to fold back as metallic artifacts.</p>
-    <p><strong>Engine priority:</strong></p>
+    <h3 id="resample">7. Rééchantillonnage</h3>
+    <p><strong>Pourquoi :</strong> Fréquences incompatibles (IR 44,1k, projet 48k), l'appareil cible attend une fréquence spécifique, sortie CD (44,1k).</p>
+    <p><strong>Aliasing :</strong> Le sous-échantillonnage sans filtrage fait que les fréquences au-dessus de Nyquist se replient en artefacts métalliques.</p>
+    <p><strong>Priorité du moteur :</strong></p>
     <ol>
-      <li><strong>SoX Resampler (libsoxr)</strong> — VHQ, proper anti-aliasing. Best option.</li>
-      <li><strong>R8Brain</strong> — VHQ, used when libsoxr unavailable.</li>
-      <li><strong>FinalCD</strong> — external tool.</li>
-      <li><strong>Linear interpolation</strong> — fallback, no anti-aliasing.</li>
+      <li><strong>SoX Resampler (libsoxr)</strong> — VHQ, anti-aliasing approprié. La meilleure option.</li>
+      <li><strong>R8Brain</strong> — VHQ, utilisé lorsque libsoxr est indisponible.</li>
+      <li><strong>FinalCD</strong> — outil externe.</li>
+      <li><strong>Interpolation linéaire</strong> — repli, sans anti-aliasing.</li>
     </ol>
-    <p>Install libsoxr for best results. Ships as <code>libsoxr.dll</code> / <code>.dylib</code> / <code>.so.0</code>.</p>
+    <p>Installez libsoxr pour de meilleurs résultats. Livré en tant que <code>libsoxr.dll</code> / <code>.dylib</code> / <code>.so.0</code>.</p>
 
-    <h3 id="fades">8. Fades and Trimming</h3>
-    <p><strong>Trim silence:</strong> IRs often have silence at start/end. Trim removes it:</p>
+    <h3 id="fades">8. Fondus et Découpe</h3>
+    <p><strong>Couper le silence :</strong> Les IR ont souvent du silence au début/fin. La découpe le supprime :</p>
     <ul>
-      <li><code>-60</code> — typical for IRs</li>
-      <li><code>-80</code> — aggressive</li>
-      <li><code>0</code> — disabled</li>
+      <li><code>-60</code> — typique pour les IR</li>
+      <li><code>-80</code> — agressif</li>
+      <li><code>0</code> — désactivé</li>
     </ul>
-    <p><strong>Fades:</strong></p>
+    <p><strong>Fondus :</strong></p>
     <ul>
-      <li><strong>Fade-in</strong>: Always 1ms (automatic) — prevents start clicks</li>
-      <li><strong>Fade-out</strong>: User-specified (<code>-f &lt;ms&gt;</code>) — prevents end clicks</li>
+      <li><strong>Fondu d'entrée</strong> : Toujours 1ms (automatique) — empêche les clics de début</li>
+      <li><strong>Fondu de sortie</strong> : Spécifié par l'utilisateur (<code>-f &lt;ms&gt;</code>) — empêche les clics de fin</li>
     </ul>
-    <p>Linear gain ramp: 1.0 → 0.0 (fade-out) or 0.0 → 1.0 (fade-in).</p>
+    <p>Rampe de gain linéaire : 1.0 → 0.0 (fondu de sortie) ou 0.0 → 1.0 (fondu d'entrée).</p>
 
-    <h3 id="workflows">9. Practical Workflows</h3>
-    <h4>Guitar Cabinet Simulation</h4>
+    <h3 id="workflows">9. Flux de Travail Pratiques</h3>
+    <h4>Simulation de Haut-Parleur de Guitare</h4>
     <pre>TaraDSP -x guitar_di.wav -y cab_57.wav -o guitar_amped.wav --min -l 2048 -b 24</pre>
-    <h4>Convolution Reverb</h4>
+    <h4>Réverbération par Convolution</h4>
     <pre>TaraDSP -x vocal_dry.wav -y concert_hall.wav -o vocal_reverb.wav -f 100 -b 24</pre>
-    <h4>Mastering with Dither</h4>
+    <h4>Mastering avec Dither</h4>
     <pre>TaraDSP -x mix_24bit.wav -o master_16bit.wav -b 16</pre>
-    <h4>Sample Rate Conversion</h4>
+    <h4>Conversion de Fréquence d'Échantillonnage</h4>
     <pre>TaraDSP -x recording_96k.wav -o master_44k1.wav -r 44100 -b 16</pre>
-    <h4>Batch Processing</h4>
+    <h4>Traitement par Lots</h4>
     <pre>for %f in (*.wav) do TaraDSP -x "%f" -y cab_ir.wav -o "processed_%f" --min -b 24</pre>
 
-    <h3 id="combine">10. Combining Two IRs</h3>
-    <p>TaraDSP can merge two impulse responses into a single new IR. This is useful for:</p>
+    <h3 id="combine">10. Combiner Deux IR</h3>
+    <p>TaraDSP peut fusionner deux réponses impulsionnelles en une seule nouvelle IR. C'est utile pour :</p>
     <ul>
-      <li><strong>Cab + Mic blend</strong>: Combine a close-miked IR with a room-miked IR to create a custom blend</li>
-      <li><strong>Cab + EQ</strong>: Convolve a cab IR with an EQ curve IR to bake the EQ into the cab</li>
-      <li><strong>Two cabs blended</strong>: Mix two different speakers (e.g. 4x12 + 2x12) into one IR</li>
-      <li><strong>IR + Reverb</strong>: Combine a cab IR with a short room IR for a "cabinet in a room" sound</li>
+      <li><strong>Mélange Cab + Micro</strong> : Combinez une IR microphonée de près avec une IR microphonée de pièce pour créer un mélange personnalisé</li>
+      <li><strong>Cab + EQ</strong> : Convoluez une IR de cab avec une IR de courbe EQ pour intégrer l'EQ au cab</li>
+      <li><strong>Deux cabs mélangés</strong> : Mélangez deux haut-parleurs différents (p. ex. 4x12 + 2x12) en une IR</li>
+      <li><strong>IR + Reverb</strong> : Combinez une IR de cab avec une IR de pièce courte pour un son de « haut-parleur dans une pièce »</li>
     </ul>
-    <p><strong>How it works:</strong> Convolution is associative — convolving signal A with IR X, then with IR Y, is the same as convolving A with a single IR that is X convolved with Y. So to combine two IRs:</p>
+    <p><strong>Comment ça marche :</strong> La convolution est associative — convoluer le signal A avec l'IR X, puis avec l'IR Y, revient à convoluer A avec une seule IR qui est X convoluée avec Y. Donc pour combiner deux IR :</p>
     <ol>
-      <li>Run TaraDSP with IR X as input and IR Y as the impulse response</li>
-      <li>The output is a new WAV that is the combined IR</li>
-      <li>Use that combined WAV as a normal IR in any convolution</li>
+      <li>Lancez TaraDSP avec l'IR X en entrée et l'IR Y comme réponse impulsionnelle</li>
+      <li>La sortie est un nouveau WAV qui est l'IR combinée</li>
+      <li>Utilisez ce WAV combiné comme une IR normale dans n'importe quelle convolution</li>
     </ol>
-    <h4>Example: Blend two cabinet IRs</h4>
+    <h4>Exemple : Mélanger deux IR de cabinet</h4>
     <pre>TaraDSP -x cab_close.wav -y cab_room.wav -o cab_blend.wav -b 32 --min</pre>
-    <p>This convolves <code>cab_close.wav</code> with <code>cab_room.wav</code>, producing <code>cab_blend.wav</code> — a new IR that sounds like the close-miked cab played in the room. Use <code>--min</code> to keep it minimum phase, and <code>-b 32</code> for float output (no quality loss).</p>
-    <h4>Example: Bake EQ into a cab IR</h4>
+    <p>Ceci convolue <code>cab_close.wav</code> avec <code>cab_room.wav</code>, produisant <code>cab_blend.wav</code> — une nouvelle IR qui sonne comme le cab microphoné de près joué dans la pièce. Utilisez <code>--min</code> pour la garder en phase minimale, et <code>-b 32</code> pour une sortie float (sans perte de qualité).</p>
+    <h4>Exemple : Intégrer un EQ dans une IR de cab</h4>
     <pre>TaraDSP -x cab_ir.wav -y eq_curve.wav -o cab_eq.wav -b 32 --min</pre>
-    <p>Convolves the cab IR with an EQ curve (as an IR), baking the EQ into the cab. The result is a new cab IR with the EQ applied.</p>
-    <h4>Example: Two-cab blend with level control</h4>
+    <p>Convolue l'IR du cab avec une courbe EQ (en tant qu'IR), intégrant l'EQ au cab. Le résultat est une nouvelle IR de cab avec l'EQ appliqué.</p>
+    <h4>Exemple : Mélange de deux cabs avec contrôle du niveau</h4>
     <pre>TaraDSP -x cab_a.wav -y cab_b.wav -o cab_ab.wav -b 32 --min -l 2048</pre>
-    <p>Combines two cab IRs and truncates to 2048 samples for use in modelers. The relative loudness of the two cabs depends on their original levels — normalize the input IRs first if needed.</p>
+    <p>Combine deux IR de cab et tronque à 2048 échantillons pour une utilisation dans les modéliseurs. La sonorité relative des deux cabs dépend de leurs niveaux d'origine — normalisez d'abord les IR d'entrée si nécessaire.</p>
     <div class="note">
-      <strong>Tip:</strong> Always use <code>-b 32</code> (32-bit float) for IR combination — it preserves the full dynamic range without quantization. Only reduce to 16/24-bit for the final output after all processing is done.
+      <strong>Astuce :</strong> Utilisez toujours <code>-b 32</code> (32 bits flottant) pour la combinaison d'IR — cela préserve la plage dynamique complète sans quantification. Ne réduisez à 16/24 bits que pour la sortie finale, une fois tout le traitement terminé.
     </div>
     <div class="note">
-      <strong>Tip:</strong> Use <code>--min</code> when combining IRs for cabinet simulation — it removes pre-ringing at each stage and keeps the result tight.
+      <strong>Astuce :</strong> Utilisez <code>--min</code> lors de la combinaison d'IR pour la simulation de haut-parleur — cela supprime le pre-ringing à chaque étape et garde le résultat serré.
     </div>
 
-    <h3 id="tips">11. Tips from the Trenches</h3>
-    <h4>IR Selection</h4>
+    <h3 id="tips">11. Conseils du Terrain</h3>
+    <h4>Sélection de l'IR</h4>
     <ul>
-      <li><strong>Shorter = tighter</strong>: 0.5s IR has less low-end rumble than 2s</li>
-      <li><strong>Mic position matters</strong>: on-axis = bright, off-axis = dark</li>
-      <li><strong>Distance adds room</strong>: close-miked = dry, room-miked = spacious</li>
-      <li><strong>Minimum phase is almost always better for cabs</strong></li>
+      <li><strong>Plus court = plus serré</strong> : une IR de 0,5s a moins de grondement grave qu'une de 2s</li>
+      <li><strong>La position du micro compte</strong> : sur l'axe = brillant, hors axe = sombre</li>
+      <li><strong>La distance ajoute de la pièce</strong> : microphoné de près = sec, microphoné de pièce = spacieux</li>
+      <li><strong>La phase minimale est presque toujours meilleure pour les cabs</strong></li>
     </ul>
-    <h4>Level Management</h4>
+    <h4>Gestion des Niveaux</h4>
     <ul>
-      <li><strong>Normalize after convolution</strong>, not before</li>
-      <li><strong>Use 24-bit throughout</strong> — dither only at final output</li>
-      <li><strong>Check mono compatibility</strong> — stereo IRs can have phase issues</li>
+      <li><strong>Normalisez après la convolution</strong>, pas avant</li>
+      <li><strong>Utilisez le 24 bits partout</strong> — dithering seulement à la sortie finale</li>
+      <li><strong>Vérifiez la compatibilité mono</strong> — les IR stéréo peuvent avoir des problèmes de phase</li>
     </ul>
-    <h4>Common Mistakes</h4>
+    <h4>Erreurs Courantes</h4>
     <ul>
-      <li><strong>Linear-phase IRs for cabs</strong> — always use <code>--min</code></li>
-      <li><strong>Dithering multiple times</strong> — dither once, at the end</li>
-      <li><strong>Forgetting to normalize</strong> — convolution can boost 6-12 dB</li>
-      <li><strong>16-bit for intermediate files</strong> — use 24-bit or 32-bit</li>
+      <li><strong>IR à phase linéaire pour les cabs</strong> — utilisez toujours <code>--min</code></li>
+      <li><strong>Faire du dither plusieurs fois</strong> — faites du dither une fois, à la fin</li>
+      <li><strong>Oublier de normaliser</strong> — la convolution peut booster de 6-12 dB</li>
+      <li><strong>16 bits pour les fichiers intermédiaires</strong> — utilisez 24 ou 32 bits</li>
     </ul>
 
-    <h3 id="reference">12. Technical Reference</h3>
+    <h3 id="reference">12. Référence Technique</h3>
     <table>
-      <thead><tr><th>Option</th><th>Long form</th><th>Value</th><th>Description</th></tr></thead>
+      <thead><tr><th>Option</th><th>Forme longue</th><th>Valeur</th><th>Description</th></tr></thead>
       <tbody>
-        <tr><td><code>-x</code></td><td><code>--in1</code></td><td><code>&lt;file&gt;</code></td><td>Input WAV file</td></tr>
-        <tr><td><code>-y</code></td><td><code>--in2</code></td><td><code>&lt;file&gt;</code></td><td>IR WAV (optional)</td></tr>
-        <tr><td><code>-o</code></td><td><code>--output</code></td><td><code>&lt;file&gt;</code></td><td>Output WAV</td></tr>
-        <tr><td><code>-b</code></td><td><code>--bits</code></td><td><code>16|24|32</code></td><td>Bit depth (default: 24)</td></tr>
-        <tr><td><code>-r</code></td><td><code>--rate</code></td><td><code>&lt;Hz&gt;</code></td><td>Target sample rate</td></tr>
-        <tr><td><code>-l</code></td><td><code>--length</code></td><td><code>&lt;samples&gt;</code></td><td>Truncate length</td></tr>
-        <tr><td><code>-t</code></td><td><code>--trim</code></td><td><code>&lt;dB&gt;</code></td><td>Trim silence threshold</td></tr>
-        <tr><td><code>-f</code></td><td><code>--fade</code></td><td><code>&lt;ms&gt;</code></td><td>Fade-out duration</td></tr>
-        <tr><td><code>-m</code></td><td><code>--mono</code></td><td>(flag)</td><td>Mono output</td></tr>
-        <tr><td></td><td><code>--min</code></td><td>(flag)</td><td>Minimum phase</td></tr>
+        <tr><td><code>-x</code></td><td><code>--in1</code></td><td><code>&lt;fichier&gt;</code></td><td>Fichier WAV d'entrée</td></tr>
+        <tr><td><code>-y</code></td><td><code>--in2</code></td><td><code>&lt;fichier&gt;</code></td><td>WAV IR (facultatif)</td></tr>
+        <tr><td><code>-o</code></td><td><code>--output</code></td><td><code>&lt;fichier&gt;</code></td><td>WAV de sortie</td></tr>
+        <tr><td><code>-b</code></td><td><code>--bits</code></td><td><code>16|24|32</code></td><td>Profondeur de bits (par défaut : 24)</td></tr>
+        <tr><td><code>-r</code></td><td><code>--rate</code></td><td><code>&lt;Hz&gt;</code></td><td>Fréquence d'échantillonnage cible</td></tr>
+        <tr><td><code>-l</code></td><td><code>--length</code></td><td><code>&lt;échantillons&gt;</code></td><td>Longueur de troncature</td></tr>
+        <tr><td><code>-t</code></td><td><code>--trim</code></td><td><code>&lt;dB&gt;</code></td><td>Seuil de découpe du silence</td></tr>
+        <tr><td><code>-f</code></td><td><code>--fade</code></td><td><code>&lt;ms&gt;</code></td><td>Durée du fondu de sortie</td></tr>
+        <tr><td><code>-m</code></td><td><code>--mono</code></td><td>(drapeau)</td><td>Sortie mono</td></tr>
+        <tr><td></td><td><code>--min</code></td><td>(drapeau)</td><td>Phase minimale</td></tr>
       </tbody>
     </table>
 
-    <h4>Configuration File</h4>
+    <h4>Fichier de Configuration</h4>
     <pre>; settings.ini
 [Metadata]
 Artist=Your Studio Name
@@ -278,23 +278,23 @@ DitherAmount=1.0
 [Hardware]
 TruncateLen=0</pre>
 
-    <h4>Glossary</h4>
+    <h4>Glossaire</h4>
     <table>
-      <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+      <thead><tr><th>Terme</th><th>Définition</th></tr></thead>
       <tbody>
-        <tr><td>Convolution</td><td>Applying one signal's characteristics to another</td></tr>
-        <tr><td>IR</td><td>Impulse response — sonic fingerprint of a system</td></tr>
-        <tr><td>FFT</td><td>Fast Fourier Transform</td></tr>
-        <tr><td>PFFFT</td><td>Pretty Fast FFT — audio-optimized FFT library</td></tr>
-        <tr><td>Minimum Phase</td><td>No pre-ringing, energy at and after impulse</td></tr>
-        <tr><td>Linear Phase</td><td>Symmetric pre- and post-ringing</td></tr>
-        <tr><td>Pre-ringing</td><td>Energy before the main impulse</td></tr>
-        <tr><td>TPDF</td><td>Triangular PDF dither — converts distortion to noise</td></tr>
-        <tr><td>Error Feedback</td><td>Feeding quantization error back to shape noise</td></tr>
-        <tr><td>Aliasing</td><td>High frequencies folding back as artifacts</td></tr>
-        <tr><td>Nyquist</td><td>Half the sample rate — highest representable frequency</td></tr>
-        <tr><td>Normalization</td><td>Scaling peak to 0 dBFS</td></tr>
-        <tr><td>Cepstrum</td><td>Inverse FFT of log magnitude — for minimum phase</td></tr>
+        <tr><td>Convolution</td><td>Appliquer les caractéristiques d'un signal à un autre</td></tr>
+        <tr><td>IR</td><td>Réponse impulsionnelle — empreinte sonore d'un système</td></tr>
+        <tr><td>FFT</td><td>Transformée de Fourier Rapide</td></tr>
+        <tr><td>PFFFT</td><td>Pretty Fast FFT — bibliothèque FFT optimisée pour l'audio</td></tr>
+        <tr><td>Phase Minimale</td><td>Pas de pre-ringing, énergie à et après l'impulsion</td></tr>
+        <tr><td>Phase Linéaire</td><td>Pre- et post-ringing symétriques</td></tr>
+        <tr><td>Pre-ringing</td><td>Énergie avant l'impulsion principale</td></tr>
+        <tr><td>TPDF</td><td>Dither PDF triangulaire — convertit la distorsion en bruit</td></tr>
+        <tr><td>Rétroaction d'Erreur</td><td>Réinjecter l'erreur de quantification pour mettre en forme le bruit</td></tr>
+        <tr><td>Aliasing</td><td>Hautes fréquences se repliant en artefacts</td></tr>
+        <tr><td>Nyquist</td><td>La moitié de la fréquence d'échantillonnage — la plus haute fréquence représentable</td></tr>
+        <tr><td>Normalisation</td><td>Mettre le pic à l'échelle vers 0 dBFS</td></tr>
+        <tr><td>Cepstre</td><td>FFT inverse du log magnitude — pour la phase minimale</td></tr>
       </tbody>
     </table>
   </div>
@@ -302,8 +302,8 @@ TruncateLen=0</pre>
 
 <footer>
   <div class="container">
-    <p>TaraDSP — Released under the BSD-3-Clause License.</p>
-    <p><a href="https://github.com/smallbutfine/TaraDSP">GitHub Repository</a></p>
+    <p>TaraDSP — Publié sous licence BSD-3-Clause.</p>
+    <p><a href="https://github.com/smallbutfine/TaraDSP">Dépôt GitHub</a></p>
   </div>
 </footer>
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TaraDSP — Professional Audio Convolution & Mastering</title>
+<title>TaraDSP — Профессиональная аудио-конволюция и мастеринг</title>
 <link rel="stylesheet" href="../style.css">
   <style>
 .crossbar {
@@ -46,67 +46,67 @@
 
 <header>
   <div class="container">
-    <h1>TARA<span class="accent">DSP</span></h1>
-    <p class="subtitle">Professional Audio Convolution & Mastering — FreePascal / Lazarus</p>
-    <p class="tagline">Studio-quality impulse response convolution, resampling, and mastering — in a single command-line tool.</p>
+    <h1><img src="../chameleon.jpg" alt="Хамелеон" style="width:48px; height:48px; border-radius:50%; vertical-align:middle; margin-right:10px; border:2px solid #30363d;" />TARA<span class="accent">DSP</span></h1>
+    <p class="subtitle">Профессиональная аудио-конволюция и мастеринг — FreePascal / Lazarus</p>
+    <p class="tagline">Конволюция импульсных характеристик студийного качества, ресемплинг и мастеринг — в одном инструменте командной строки.</p>
     <nav>
       <a href="index.html">Главная</a>
       <a href="concepts.html">Концепции</a>
-      <a href="cli.html">CLI-справочник</a>
+      <a href="cli.html">Справка CLI</a>
       <a href="gui.html">GUI</a>
       <a href="docs.html">Документация</a>
       <a href="manual.html">Руководство</a>
       <a href="download.html">Скачать</a>
-      <a href="de/index.html">DE</a>
-      <a href="es/index.html">ES</a>
-      <a href="fr/index.html">FR</a>
-      <a href="pt/index.html">PT</a>
-      <a href="ru/index.html">RU</a>
-      <a href="zh/index.html">ZH</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/de/">DE</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/es/">ES</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/fr/">FR</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/pt/">PT</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/ru/">RU</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/zh/">ZH</a>
     </nav>
   </div>
 </header>
 
 <section>
   <div class="container">
-    <h2>What is TaraDSP?</h2>
-    <p>TaraDSP is a professional audio processing tool that applies
-    <strong>FFT-based convolution</strong> with impulse responses, resamples audio,
-    and applies mastering-grade dithering and fades. It is designed for
-    musicians, audio engineers, and developers who need studio-quality results
-    from a lightweight, cross-platform command-line tool.</p>
+    <h2>Что такое TaraDSP?</h2>
+    <p>TaraDSP — это профессиональный инструмент обработки аудио, который применяет
+    <strong>конволюцию на основе БПФ</strong> с импульсными характеристиками, выполняет
+    ресемплинг аудио и применяет дизеринг и фейды мастеринг-класса. Он предназначен для
+    музыкантов, звукоинженеров и разработчиков, которым нужны результаты студийного
+    качества от лёгкого кроссплатформенного инструмента командной строки.</p>
 
     <div class="feature-grid">
       <div class="feature-card">
-        <h3>FFT Convolution</h3>
-        <p>High-speed convolution using the PFFFT library (Pretty Fast FFT).
-        Convolve any audio signal with cabinet impulse responses, reverb IRs,
-        or custom filters in seconds.</p>
+        <h3>БПФ-конволюция</h3>
+        <p>Высокоскоростная конволюция с использованием библиотеки PFFFT (Pretty Fast FFT).
+        Сверните любой аудиосигнал с импульсными характеристиками кабинета,
+        IR реверберации или пользовательскими фильтрами за считанные секунды.</p>
       </div>
       <div class="feature-card">
-        <h3>Multi-Platform</h3>
-        <p>Native binaries for Windows (x86_64), macOS (Intel + Apple Silicon),
-        and Linux (x86_64 + ARM). One tool, every platform.</p>
+        <h3>Мультиплатформенность</h3>
+        <p>Нативные бинарники для Windows (x86_64), macOS (Intel + Apple Silicon)
+        и Linux (x86_64 + ARM). Один инструмент для всех платформ.</p>
       </div>
       <div class="feature-card">
-        <h3>Mastering Dither</h3>
-        <p>TPDF (Triangular Probability Density Function) dithering with
-        error feedback for transparent 16-bit and 24-bit output.</p>
+        <h3>Мастеринг-дизеринг</h3>
+        <p>Дизеринг TPDF (Треугольная функция плотности вероятности) с
+        обратной связью по ошибке для прозрачного вывода 16 и 24 бита.</p>
       </div>
       <div class="feature-card">
-        <h3>Resampling</h3>
-        <p>High-quality sample rate conversion via SoX Resampler (libsoxr)
-          with fallback to linear interpolation. Convert between any rates.</p>
+        <h3>Ресемплинг</h3>
+        <p>Высококачественное преобразование частоты дискретизации через SoX Resampler (libsoxr)
+          с резервной линейной интерполяцией. Конвертируйте между любыми частотами.</p>
       </div>
       <div class="feature-card">
-        <h3>Minimum Phase</h3>
-        <p>Convert linear-phase impulse responses to minimum phase for
-        lower latency and more natural sound.</p>
+        <h3>Минимальная фаза</h3>
+        <p>Преобразуйте импульсные характеристики с линейной фазой в минимальную фазу для
+        меньшей задержки и более естественного звучания.</p>
       </div>
       <div class="feature-card">
-        <h3>Cross-Platform Build</h3>
-        <p>Automated CI/CD with GitHub Actions. fpcupdeluxe-based toolchain
-        installs FPC, Lazarus, and all cross-compilers automatically.</p>
+        <h3>Кроссплатформенная сборка</h3>
+        <p>Автоматизированный CI/CD с GitHub Actions. Цепочка инструментов на основе
+        fpcupdeluxe автоматически устанавливает FPC, Lazarus и все кросс-компиляторы.</p>
       </div>
     </div>
   </div>
@@ -114,16 +114,16 @@
 
 <section>
   <div class="container">
-    <h2>Quick Start</h2>
-    <p>Apply an impulse response to an audio file:</p>
+    <h2>Быстрый старт</h2>
+    <p>Примените импульсную характеристику к аудиофайлу:</p>
     <div class="command-block">
       <span class="option">TaraDSP</span> -x input.wav -y impulse_response.wav -o output.wav
     </div>
-    <p>Convert to 24-bit with resampling:</p>
+    <p>Конвертируйте в 24 бита с ресемплингом:</p>
     <div class="command-block">
       <span class="option">TaraDSP</span> -x input.wav -y ir.wav -o output.wav -b 24 -r 48000
     </div>
-    <p>Apply fades and trim silence:</p>
+    <p>Примените фейды и обрежьте тишину:</p>
     <div class="command-block">
       <span class="option">TaraDSP</span> -x input.wav -y ir.wav -o output.wav -f 50 -t -60
     </div>
@@ -132,16 +132,16 @@
 
 <section>
   <div class="container">
-    <h2>System Requirements</h2>
+    <h2>Системные требования</h2>
     <table>
       <thead>
-        <tr><th>Component</th><th>Requirement</th></tr>
+        <tr><th>Компонент</th><th>Требование</th></tr>
       </thead>
       <tbody>
-        <tr><td>OS</td><td>Windows 10+, macOS 10.13+, or Linux (x86_64/ARM)</td></tr>
-        <tr><td>CPU</td><td>x86_64 or ARM (Intel/AMD/Apple Silicon)</td></tr>
-        <tr><td>RAM</td><td>1 GB minimum (4 GB recommended for long files)</td></tr>
-        <tr><td>Shared Library</td><td><code>libpffft.dll</code> / <code>libpffft.dylib</code> / <code>libpffft.so</code> (included)</td></tr>
+        <tr><td>ОС</td><td>Windows 10+, macOS 10.13+ или Linux (x86_64/ARM)</td></tr>
+        <tr><td>CPU</td><td>x86_64 или ARM (Intel/AMD/Apple Silicon)</td></tr>
+        <tr><td>ОЗУ</td><td>минимум 1 ГБ (рекомендуется 4 ГБ для длинных файлов)</td></tr>
+        <tr><td>Общая библиотека</td><td><code>libpffft.dll</code> / <code>libpffft.dylib</code> / <code>libpffft.so</code> (включена)</td></tr>
       </tbody>
     </table>
   </div>
@@ -149,8 +149,8 @@
 
 <footer>
   <div class="container">
-    <p>TaraDSP — Released under the BSD-3-Clause License.</p>
-    <p><a href="https://github.com/smallbutfine/TaraDSP">GitHub Repository</a></p>
+    <p>TaraDSP — Выпущено под лицензией BSD-3-Clause.</p>
+    <p><a href="https://github.com/smallbutfine/TaraDSP">Репозиторий GitHub</a></p>
   </div>
 </footer>
 

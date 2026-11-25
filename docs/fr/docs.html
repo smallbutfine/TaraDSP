@@ -51,16 +51,16 @@
       <a href="index.html">Accueil</a>
       <a href="concepts.html">Concepts</a>
       <a href="cli.html">Référence CLI</a>
-      <a href="gui.html">IUG</a>
+      <a href="gui.html">GUI</a>
       <a href="docs.html">Documentation</a>
       <a href="manual.html">Manuel</a>
       <a href="download.html">Télécharger</a>
-      <a href="de/index.html">DE</a>
-      <a href="es/index.html">ES</a>
-      <a href="fr/index.html">FR</a>
-      <a href="pt/index.html">PT</a>
-      <a href="ru/index.html">RU</a>
-      <a href="zh/index.html">ZH</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/de/">DE</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/es/">ES</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/fr/">FR</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/pt/">PT</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/ru/">RU</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/zh/">ZH</a>
     </nav>
   </div>
 </header>
@@ -69,176 +69,189 @@
   <div class="container">
     <h2>Documentation</h2>
 
-    <h3>Table of Contents</h3>
+    <h3>Table des Matières</h3>
     <ol>
-      <li><a href="#convolution">FFT Convolution</a></li>
-      <li><a href="#resampling">Resampling</a></li>
-      <li><a href="#dithering">Mastering Dither</a></li>
-      <li><a href="#minimum-phase">Minimum Phase Conversion</a></li>
-      <li><a href="#fades">Fades and Trimming</a></li>
-      <li><a href="#formats">Audio Formats</a></li>
-      <li><a href="#gui">GUI Overview</a></li>
-      <li><a href="#building">Building from Source</a></li>
-      <li><a href="#ci">CI/CD Pipeline</a></li>
+      <li><a href="#convolution">Convolution FFT</a></li>
+      <li><a href="#resampling">Rééchantillonnage</a></li>
+      <li><a href="#dithering">Dither de Mastering</a></li>
+      <li><a href="#minimum-phase">Conversion en Phase Minimale</a></li>
+      <li><a href="#fades">Fondus et Découpe</a></li>
+      <li><a href="#formats">Formats Audio</a></li>
+      <li><a href="#gui">Aperçu de la GUI</a></li>
+      <li><a href="#building">Compilation depuis les Sources</a></li>
+      <li><a href="#ci">Pipeline CI/CD</a></li>
     </ol>
 
-    <h3 id="convolution">1. FFT Convolution</h3>
-    <p>TaraDSP uses the PFFFT (Pretty Fast FFT) library for high-speed
-    convolution. The process works as follows:</p>
+    <h3 id="convolution">1. Convolution FFT</h3>
+    <p>TaraDSP utilise la bibliothèque PFFFT (Pretty Fast FFT) pour une convolution
+    à haute vitesse. Le processus fonctionne comme suit :</p>
     <ol>
-      <li>The input signal and impulse response are zero-padded to the next
-      power of 2 (minimum 32 samples for PFFFT alignment).</li>
-      <li>Both signals are transformed to the frequency domain via forward FFT
-      (<code>pffft_transform</code> with <code>PFFFT_FORWARD</code>).</li>
-      <li>The frequency-domain signals are multiplied (convolution theorem)
+      <li>Le signal d'entrée et la réponse impulsionnelle sont complétés par des zéros
+      jusqu'à la puissance de 2 suivante (minimum 32 échantillons pour l'alignement PFFFT).</li>
+      <li>Les deux signaux sont transformés dans le domaine fréquentiel via FFT directe
+      (<code>pffft_transform</code> avec <code>PFFFT_FORWARD</code>).</li>
+      <li>Les signaux dans le domaine fréquentiel sont multipliés (théorème de convolution)
       via <code>pffft_zconvolve_accumulate</code>.</li>
-      <li>The result is transformed back to the time domain via inverse FFT
-      (<code>pffft_transform</code> with <code>PFFFT_BACKWARD</code>).</li>
-      <li>The output is scaled by 1/N and normalized to peak 1.0.</li>
+      <li>Le résultat est transformé dans le domaine temporel via FFT inverse
+      (<code>pffft_transform</code> avec <code>PFFFT_BACKWARD</code>).</li>
+      <li>La sortie est mise à l'échelle par 1/N et normalisée à un pic de 1.0.</li>
     </ol>
     <div class="note">
-      <strong>Why PFFFT?</strong> PFFFT is specifically designed for audio
-      applications. It supports real FFT (not just complex), which is twice
-      as fast for real-valued audio signals. It also handles SIMD instructions
-      (SSE, NEON) for additional speed.
+      <strong>Pourquoi PFFFT ?</strong> PFFFT est conçue spécifiquement pour les
+      applications audio. Elle prend en charge la FFT réelle (pas seulement complexe),
+      qui est deux fois plus rapide pour les signaux audio à valeurs réelles. Elle gère
+      aussi les instructions SIMD (SSE, NEON) pour une vitesse supplémentaire.
     </div>
     <div class="note">
-      <strong>Important:</strong> <code>pffft_transform</code> (internal format)
-      must be used, NOT <code>pffft_transform_ordered</code> (display format).
-      The <code>zconvolve_accumulate</code> function expects internal format.
-      Using the wrong function produces incorrect convolution results.
+      <strong>Important :</strong> <code>pffft_transform</code> (format interne)
+      doit être utilisé, PAS <code>pffft_transform_ordered</code> (format d'affichage).
+      La fonction <code>zconvolve_accumulate</code> attend le format interne.
+      Utiliser la mauvaise fonction produit des résultats de convolution incorrects.
     </div>
 
-    <h3 id="resampling">2. Resampling</h3>
-    <p>TaraDSP can resample audio to a different sample rate. The resampling
-    engine selection follows this priority:</p>
+    <h3 id="resampling">2. Rééchantillonnage</h3>
+    <p>TaraDSP peut rééchantillonner l'audio vers une fréquence d'échantillonnage
+    différente. La sélection du moteur de rééchantillonnage suit cette priorité :</p>
     <ol>
-      <li><strong>SoX Resampler (libsoxr)</strong> — highest quality, used when available</li>
-      <li><strong>R8Brain</strong> — high quality, used when available</li>
-      <li><strong>FinalCD</strong> — external tool, used when available</li>
-      <li><strong>Linear interpolation</strong> — fallback, always available</li>
+      <li><strong>SoX Resampler (libsoxr)</strong> — la plus haute qualité, utilisé lorsqu'il est disponible</li>
+      <li><strong>R8Brain</strong> — haute qualité, utilisé lorsqu'il est disponible</li>
+      <li><strong>FinalCD</strong> — outil externe, utilisé lorsqu'il est disponible</li>
+      <li><strong>Interpolation linéaire</strong> — repli, toujours disponible</li>
     </ol>
-    <p>When resampling is requested (<code>-r</code> option in CLI, or
-    sample rate selector in GUI), both the input signal and the impulse
-    response are resampled to the target rate before convolution.</p>
+    <p>Lorsqu'un rééchantillonnage est demandé (option <code>-r</code> en CLI, ou
+    sélecteur de fréquence d'échantillonnage en GUI), le signal d'entrée et la réponse
+    impulsionnelle sont tous deux rééchantillonnés à la fréquence cible avant la convolution.</p>
 
-    <h3 id="dithering">3. Mastering Dither</h3>
-    <p>When outputting 16-bit audio, TaraDSP applies TPDF (Triangular Probability
-    Density Function) dithering with error feedback. This process:</p>
+    <h3 id="dithering">3. Dither de Mastering</h3>
+    <p>Lors de la sortie audio 16 bits, TaraDSP applique un dithering TPDF (Fonction de
+    Densité de Probabilité Triangulaire) avec rétroaction d'erreur. Ce processus :</p>
     <ol>
-      <li>Adds a small amount of random noise (2 LSB peak-to-peak) to the signal.</li>
-      <li>Quantizes to 16-bit.</li>
-      <li>Computes the quantization error.</li>
-      <li>Feeds the error back into the next sample (error feedback).</li>
+      <li>Ajoute une petite quantité de bruit aléatoire (2 LSB crête à crête) au signal.</li>
+      <li>Quantifie à 16 bits.</li>
+      <li>Calcule l'erreur de quantification.</li>
+      <li>Rétroalimente l'erreur dans l'échantillon suivant (rétroaction d'erreur).</li>
     </ol>
     <div class="note">
-      <strong>Why dither?</strong> Without dithering, quantization to 16-bit
-      produces harmonic distortion at low levels. TPDF dithering converts this
-      distortion into a constant low-level noise floor, which is much less
-      audible and more natural-sounding.
+      <strong>Pourquoi du dither ?</strong> Sans dithering, la quantification à 16 bits
+      produit une distorsion harmonique à bas niveaux. Le dithering TPDF convertit cette
+      distorsion en un plancher de bruit constant à faible niveau, bien moins
+      audible et au son plus naturel.
     </div>
 
-    <h3 id="minimum-phase">4. Minimum Phase Conversion</h3>
-    <p>Linear-phase impulse responses have symmetric pre-ringing, which can
-    sound unnatural. The <code>--min</code> option (CLI) or "Minimum phase"
-    checkbox (GUI) converts the convolved output to minimum phase, which has:</p>
+    <h3 id="minimum-phase">4. Conversion en Phase Minimale</h3>
+    <p>Les réponses impulsionnelles à phase linéaire ont un pre-ringing symétrique, qui peut
+    sembler non naturel. L'option <code>--min</code> (CLI) ou la case « Phase minimale »
+    (GUI) convertit la sortie convoluée en phase minimale, qui a :</p>
     <ul>
-      <li>No pre-ringing (energy only after the main impulse)</li>
-      <li>Lower latency</li>
-      <li>More natural sound for cabinet simulation and reverb</li>
+      <li>Pas de pre-ringing (l'énergie seulement après l'impulsion principale)</li>
+      <li>Latence plus faible</li>
+      <li>Son plus naturel pour la simulation de haut-parleur et la reverb</li>
     </ul>
-    <p>The conversion algorithm:</p>
+    <p>L'algorithme de conversion :</p>
     <ol>
-      <li>Compute the FFT of the signal.</li>
-      <li>Extract the magnitude spectrum.</li>
-      <li>Compute the log magnitude.</li>
-      <li>Compute the real cepstrum (inverse FFT of log magnitude).</li>
-      <li>Fold the cepstrum to create minimum phase.</li>
-      <li>Compute the complex spectrum (magnitude × minimum phase).</li>
-      <li>Inverse FFT to get the minimum phase signal.</li>
+      <li>Calculer la FFT du signal.</li>
+      <li>Extraire le spectre de magnitude.</li>
+      <li>Calculer le log de la magnitude.</li>
+      <li>Calculer le cepstre réel (FFT inverse du log de magnitude).</li>
+      <li>Replier le cepstre pour créer la phase minimale.</li>
+      <li>Calculer le spectre complexe (magnitude × phase minimale).</li>
+      <li>FFT inverse pour obtenir le signal à phase minimale.</li>
     </ol>
 
-    <h3 id="fades">5. Fades and Trimming</h3>
-    <p>TaraDSP can apply fades and trim silence from the impulse response
-    before convolution:</p>
+    <h3 id="fades">5. Fondus et Découpe</h3>
+    <p>TaraDSP peut appliquer des fondus et couper le silence de la réponse impulsionnelle
+    avant la convolution :</p>
     <ul>
-      <li><strong>Trim (<code>-t</code> / GUI spin):</strong> Removes samples
-      below a threshold (in dB) from the start and end of the IR. Useful for
-      cleaning up impulse responses with silence padding.</li>
-      <li><strong>Fade (<code>-f</code> / GUI spin):</strong> Applies a fade-out
-      of the specified duration (in ms) to the end of the IR. A 1ms fade-in is
-      always applied to prevent clicks. Useful for smoothing IR endings.</li>
+      <li><strong>Découpe (<code>-t</code> / spin GUI) :</strong> Supprime les échantillons
+      sous un seuil (en dB) du début et de la fin de l'IR. Utile pour
+      nettoyer les réponses impulsionnelles avec du remplissage de silence.</li>
+      <li><strong>Fondu (<code>-f</code> / spin GUI) :</strong> Applique un fondu de sortie
+      de la durée spécifiée (en ms) à la fin de l'IR. Un fondu d'entrée de 1ms est
+      toujours appliqué pour éviter les clics. Utile pour lisser les fins d'IR.</li>
     </ul>
 
-    <h3 id="formats">6. Audio Formats</h3>
-    <h4>Input</h4>
+    <h3 id="formats">6. Formats Audio</h3>
+    <h4>Entrée</h4>
     <table>
       <thead>
-        <tr><th>Format</th><th>Bit Depth</th><th>Channels</th><th>Notes</th></tr>
+        <tr><th>Format</th><th>Profondeur de Bits</th><th>Canaux</th><th>Notes</th></tr>
       </thead>
       <tbody>
-        <tr><td>WAV (PCM)</td><td>8-bit unsigned</td><td>Any</td><td>Converted to float internally</td></tr>
-        <tr><td>WAV (PCM)</td><td>16-bit signed</td><td>Any</td><td>Most common format</td></tr>
-        <tr><td>WAV (PCM)</td><td>24-bit signed</td><td>Any</td><td>Studio standard</td></tr>
-        <tr><td>WAV (IEEE Float)</td><td>32-bit float</td><td>Any</td><td>Full dynamic range</td></tr>
+        <tr><td>WAV (PCM)</td><td>8 bits non signé</td><td>Tout</td><td>Converti en float en interne</td></tr>
+        <tr><td>WAV (PCM)</td><td>16 bits signé</td><td>Tout</td><td>Format le plus courant</td></tr>
+        <tr><td>WAV (PCM)</td><td>24 bits signé</td><td>Tout</td><td>Standard studio</td></tr>
+        <tr><td>WAV (IEEE Float)</td><td>32 bits flottant</td><td>Tout</td><td>Plage dynamique complète</td></tr>
       </tbody>
     </table>
 
-    <h4>Output</h4>
+    <h4>Sortie</h4>
     <table>
       <thead>
-        <tr><th>Bit Depth</th><th>Format</th><th>Dithering</th><th>Notes</th></tr>
+        <tr><th>Profondeur de Bits</th><th>Format</th><th>Dithering</th><th>Notes</th></tr>
       </thead>
       <tbody>
-        <tr><td>16-bit</td><td>WAV (PCM)</td><td>TPDF + error feedback</td><td>CD quality</td></tr>
-        <tr><td>24-bit</td><td>WAV (PCM)</td><td>None</td><td>Studio quality (recommended)</td></tr>
-        <tr><td>32-bit</td><td>WAV (IEEE Float)</td><td>None</td><td>For further processing</td></tr>
+        <tr><td>16 bits</td><td>WAV (PCM)</td><td>TPDF + rétroaction d'erreur</td><td>Qualité CD</td></tr>
+        <tr><td>24 bits</td><td>WAV (PCM)</td><td>Aucun</td><td>Qualité studio (recommandé)</td></tr>
+        <tr><td>32 bits</td><td>WAV (IEEE Float)</td><td>Aucun</td><td>Pour traitement ultérieur</td></tr>
       </tbody>
     </table>
 
-    <h3 id="gui">7. GUI Overview</h3>
-    <p>The GUI provides the same DSP functionality as the CLI in a window.
-    It is built from <code>gui/TaraDSP_gui.lpi</code> and uses
-    <code>UIRCore.pas</code> for the shared DSP functions.</p>
+    <h3 id="gui">7. Aperçu de la GUI</h3>
+    <p>La GUI fournit la même fonctionnalité DSP que la CLI dans une fenêtre.
+    Elle est construite à partir de <code>gui/TaraDSP_gui.lpi</code> et utilise
+    <code>UIRCore.pas</code> pour les fonctions DSP partagées.</p>
     <table>
       <thead>
-        <tr><th>Control</th><th>Description</th></tr>
+        <tr><th>Contrôle</th><th>Description</th></tr>
       </thead>
       <tbody>
-        <tr><td>Source file</td><td>Input WAV file picker</td></tr>
-        <tr><td>Impulse response</td><td>IR WAV file picker (optional — passthrough if empty)</td></tr>
-        <tr><td>Output file</td><td>Output path with browse button</td></tr>
-        <tr><td>Bit depth</td><td>16, 24, or 32-bit output</td></tr>
-        <tr><td>Sample rate</td><td>0 (keep), 44100, 48000, 88200, 96000, 176400, 192000</td></tr>
-        <tr><td>Truncate length</td><td>Maximum output samples (0 = no limit)</td></tr>
-        <tr><td>Fade-out</td><td>Fade duration in ms applied to IR</td></tr>
-        <tr><td>Trim silence</td><td>Threshold in dB (negative values enable trimming)</td></tr>
-        <tr><td>Mono output</td><td>Downmix to single channel</td></tr>
-        <tr><td>Minimum phase</td><td>Convert output to minimum phase</td></tr>
-        <tr><td>PROCESS button</td><td>Run the processing pipeline</td></tr>
-        <tr><td>Log</td><td>Per-step progress output</td></tr>
+        <tr><td>Fichier source</td><td>Sélecteur de fichier WAV d'entrée</td></tr>
+        <tr><td>Réponse impulsionnelle</td><td>Sélecteur de fichier WAV IR (facultatif — passage direct si vide)</td></tr>
+        <tr><td>Fichier de sortie</td><td>Chemin de sortie avec bouton parcourir</td></tr>
+        <tr><td>Profondeur de bits</td><td>Sortie 16, 24 ou 32 bits</td></tr>
+        <tr><td>Fréquence d'échantillonnage</td><td>0 (garder), 44100, 48000, 88200, 96000, 176400, 192000</td></tr>
+        <tr><td>Longueur de troncature</td><td>Échantillons de sortie maximum (0 = pas de limite)</td></tr>
+        <tr><td>Fondu de sortie</td><td>Durée du fondu en ms appliquée à l'IR</td></tr>
+        <tr><td>Couper le silence</td><td>Seuil en dB (les valeurs négatives activent la découpe)</td></tr>
+        <tr><td>Sortie mono</td><td>Mixage vers un seul canal</td></tr>
+        <tr><td>Phase minimale</td><td>Convertir la sortie en phase minimale</td></tr>
+        <tr><td>Bouton PROCESS</td><td>Exécuter le pipeline de traitement</td></tr>
+        <tr><td>Journal</td><td>Sortie de progression par étape</td></tr>
       </tbody>
     </table>
 
-    <h3 id="building">8. Building from Source</h3>
-    <h4>Prerequisites</h4>
+    <h3 id="building">8. Compilation depuis les Sources</h3>
+    <h4>Prérequis</h4>
     <ul>
-      <li>FreePascal Compiler (FPC) 3.2.2+ or Lazarus IDE 3.0+</li>
-      <li>Lazarus/LCL for the GUI</li>
-      <li>For a full multi-platform build: FPC cross-compilers
+      <li>FreePascal Compiler (FPC) 3.2.2+ ou Lazarus IDE 3.0+</li>
+      <li>Lazarus/LCL pour la GUI</li>
+      <li>Pour une compilation multiplateforme complète : compilateurs croisés FPC
       (<code>ppcrossx64</code>, <code>ppcrossa64</code>, <code>ppcrossarm</code>)
-      and Inno Setup 6</li>
-      <li>Python 3 (for <code>tools/zip_app.py</code>)</li>
-      <li>Zig (auto-downloaded by <code>build_all.bat</code> for Linux C cross-compilation)</li>
+      et Inno Setup 6</li>
+      <li>Python 3 (pour <code>tools/zip_app.py</code>)</li>
+      <li>Zig (téléchargé automatiquement par <code>build_all.bat</code> pour la compilation croisée C sous Linux)</li>
     </ul>
 
-    <h4>Build everything</h4>
-    <pre>./build_all.bat            # all 5 targets + packages into Deploy/
-./build_all.bat --check    # verify the toolchain only</pre>
+    <h4>Tout compiler</h4>
+    <pre>./build_all.bat            # les 5 cibles + paquets dans Deploy/
+./build_all.bat --check    # vérifier la chaîne d'outils uniquement</pre>
 
-    <h4>Build a single program</h4>
+    <h4>Compiler un seul programme</h4>
     <pre># CLI
 fpc -O2 -Fusrc -Sg -Sc TaraDSP.lpr
 
 # GUI
 lazbuild --build-all gui/TaraDSP_gui.lpi
+</pre>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>TaraDSP — Publié sous licence BSD-3-Clause.</p>
+    <p><a href="https://github.com/smallbutfine/TaraDSP">Dépôt GitHub</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

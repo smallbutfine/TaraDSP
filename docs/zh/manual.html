@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TaraDSP — The Producer's Manual</title>
+<title>TaraDSP — 制作人手册</title>
 <link rel="stylesheet" href="../style.css">
   <style>
 .crossbar {
@@ -47,226 +47,226 @@
 <header>
   <div class="container">
     <h1>TARA<span class="accent">DSP</span></h1>
-    <p class="subtitle">The Producer's Manual</p>
+    <p class="subtitle">制作人手册</p>
     <nav>
       <a href="index.html">首页</a>
       <a href="concepts.html">概念</a>
-      <a href="cli.html">CLI参考</a>
-      <a href="gui.html">界面</a>
+      <a href="cli.html">CLI 参考</a>
+      <a href="gui.html">图形界面</a>
       <a href="docs.html">文档</a>
       <a href="manual.html">手册</a>
       <a href="download.html">下载</a>
-      <a href="de/index.html">DE</a>
-      <a href="es/index.html">ES</a>
-      <a href="fr/index.html">FR</a>
-      <a href="pt/index.html">PT</a>
-      <a href="ru/index.html">RU</a>
-      <a href="zh/index.html">ZH</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/de/">DE</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/es/">ES</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/fr/">FR</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/pt/">PT</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/ru/">RU</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/zh/">ZH</a>
     </nav>
   </div>
 </header>
 
 <section>
   <div class="container">
-    <h2>The Producer's Manual</h2>
-    <p>A comprehensive guide to convolution, impulse responses, and mastering-grade audio processing with TaraDSP. Written for musicians, audio engineers, mastering engineers, and producers.</p>
+    <h2>制作人手册</h2>
+    <p>使用 TaraDSP 进行卷积、脉冲响应和母带级音频处理的综合指南。为音乐人、音频工程师、母带工程师和制作人编写。</p>
 
-    <h3>Table of Contents</h3>
+    <h3>目录</h3>
     <ol>
-      <li><a href="#what">What is TaraDSP?</a></li>
-      <li><a href="#science">The Science of Convolution</a></li>
-      <li><a href="#ir">Impulse Responses: The Sonic DNA</a></li>
-      <li><a href="#chain">The Processing Chain</a></li>
-      <li><a href="#dither">Mastering Dither</a></li>
-      <li><a href="#minphase">Minimum Phase</a></li>
-      <li><a href="#resample">Resampling</a></li>
-      <li><a href="#fades">Fades and Trimming</a></li>
-      <li><a href="#workflows">Practical Workflows</a></li>
-      <li><a href="#combine">Combining Two IRs</a></li>
-      <li><a href="#tips">Tips from the Trenches</a></li>
-      <li><a href="#reference">Technical Reference</a></li>
+      <li><a href="#what">什么是 TaraDSP？</a></li>
+      <li><a href="#science">卷积的科学</a></li>
+      <li><a href="#ir">脉冲响应：声音的 DNA</a></li>
+      <li><a href="#chain">处理链</a></li>
+      <li><a href="#dither">母带抖动</a></li>
+      <li><a href="#minphase">最小相位</a></li>
+      <li><a href="#resample">重采样</a></li>
+      <li><a href="#fades">淡入淡出与修剪</a></li>
+      <li><a href="#workflows">实用工作流程</a></li>
+      <li><a href="#combine">组合两个 IR</a></li>
+      <li><a href="#tips">实战技巧</a></li>
+      <li><a href="#reference">技术参考</a></li>
     </ol>
 
-    <h3 id="what">1. What is TaraDSP?</h3>
-    <p>TaraDSP is a professional audio processing tool that does one thing exceptionally well: <strong>FFT-based convolution</strong>. If you've ever used a guitar cabinet simulator, a convolution reverb, or a mastering chain with analog-modeled EQ, you've used convolution.</p>
-    <p>TaraDSP gives you that power in a lightweight, cross-platform package. Windows, macOS, Linux. CLI for batch processing, GUI for interactive work.</p>
+    <h3 id="what">1. 什么是 TaraDSP？</h3>
+    <p>TaraDSP 是一款专业音频处理工具，它做一件事做得非常好：<strong>基于 FFT 的卷积</strong>。如果你曾经用过吉他箱体模拟器、卷积混响，或带模拟建模 EQ 的母带处理链，你就用过卷积。</p>
+    <p>TaraDSP 在轻量、跨平台的包中为您提供这种能力。Windows、macOS、Linux。CLI 用于批处理，图形界面用于交互式工作。</p>
 
-    <h3 id="science">2. The Science of Convolution</h3>
-    <p>Convolution applies the sonic characteristics of one signal (the <strong>impulse response</strong>) to another (your audio). When you play a dry guitar through a cabinet, the cabinet colors the sound — resonances, frequency response, decay. Convolution mathematically applies that coloring.</p>
-    <p><strong>Why FFT?</strong> Direct convolution is O(n²) — billions of operations for a 1-second file. The FFT reduces this to O(n log n) via the <strong>convolution theorem</strong>:</p>
-    <blockquote>Convolution in time = Multiplication in frequency</blockquote>
+    <h3 id="science">2. 卷积的科学</h3>
+    <p>卷积把一个信号（<strong>脉冲响应</strong>）的 sonic 特性应用到另一个（你的音频）。当你把干吉他通过箱体播放时，箱体给声音上色 — 共振、频率响应、衰减。卷积在数学上应用了这种上色。</p>
+    <p><strong>为什么用 FFT？</strong> 直接卷积是 O(n²) — 一秒的文件需要数十亿次运算。FFT 通过<strong>卷积定理</strong>将其减少到 O(n log n)：</p>
+    <blockquote>时域卷积 = 频域乘法</blockquote>
     <ol>
-      <li>FFT both signals → frequency domain</li>
-      <li>Multiply them → one multiply per bin</li>
-      <li>Inverse FFT → back to time domain</li>
+      <li>对两个信号做 FFT → 频域</li>
+      <li>将它们相乘 → 每个 bin 一次乘法</li>
+      <li>逆 FFT → 回到时域</li>
     </ol>
-    <p><strong>5000× speedup.</strong> PFFFT further accelerates with SIMD (SSE/NEON) — 4-8 samples per instruction.</p>
+    <p><strong>5000× 加速。</strong> PFFFT 用 SIMD（SSE/NEON）进一步加速 — 每条指令 4-8 个采样。</p>
 
-    <h3 id="ir">3. Impulse Responses: The Sonic DNA</h3>
-    <p>An impulse response is a recording of a click through a system, capturing its complete sonic fingerprint.</p>
+    <h3 id="ir">3. 脉冲响应：声音的 DNA</h3>
+    <p>脉冲响应是咔哒声通过系统的录音，捕捉其完整的声音指纹。</p>
     <table>
-      <thead><tr><th>Type</th><th>Captures</th><th>Length</th><th>Use case</th></tr></thead>
+      <thead><tr><th>类型</th><th>捕捉</th><th>长度</th><th>用例</th></tr></thead>
       <tbody>
-        <tr><td>Cabinet IR</td><td>Speaker + cab + mic</td><td>0.5–2s</td><td>Guitar/bass cab sim</td></tr>
-        <tr><td>Room IR</td><td>Room acoustics</td><td>1–4s</td><td>Convolution reverb</td></tr>
-        <tr><td>Hardware IR</td><td>EQ, compressor, tape</td><td>0.1–1s</td><td>Analog gear emulation</td></tr>
-        <tr><td>Plate/Spring IR</td><td>Mechanical reverb</td><td>1–3s</td><td>Vintage reverb</td></tr>
+        <tr><td>箱体 IR</td><td>扬声器 + 箱 + 麦克风</td><td>0.5–2秒</td><td>吉他/贝斯箱体模拟</td></tr>
+        <tr><td>房间 IR</td><td>房间声学</td><td>1–4秒</td><td>卷积混响</td></tr>
+        <tr><td>硬件 IR</td><td>EQ、压缩器、磁带</td><td>0.1–1秒</td><td>模拟设备仿真</td></tr>
+        <tr><td>板式/弹簧 IR</td><td>机械混响</td><td>1–3秒</td><td>复古混响</td></tr>
       </tbody>
     </table>
-    <p><strong>Where to find them:</strong> Free IR libraries (Guitar Hack, God's Cab, Seacow), commercial (Celestion, Redwirez, York Audio), or DIY (click through your cab, record with a mic).</p>
+    <p><strong>在哪里找到它们：</strong> 免费 IR 库（Guitar Hack、God's Cab、Seacow）、商业（Celestion、Redwirez、York Audio），或 DIY（通过你的箱体播放咔哒声，用麦克风录制）。</p>
 
-    <h3 id="chain">4. The Processing Chain</h3>
-    <p>When you run TaraDSP, audio passes through this chain. Each step is optional.</p>
+    <h3 id="chain">4. 处理链</h3>
+    <p>当你运行 TaraDSP 时，音频会经过这条链。每一步都是可选的。</p>
     <table>
-      <thead><tr><th>Step</th><th>What</th><th>CLI flag</th></tr></thead>
+      <thead><tr><th>步骤</th><th>内容</th><th>CLI 标志</th></tr></thead>
       <tbody>
-        <tr><td>1</td><td>Load Input (8/16/24/32-bit WAV → float)</td><td><code>-x</code></td></tr>
-        <tr><td>2</td><td>Load IR (optional — passthrough if empty)</td><td><code>-y</code></td></tr>
-        <tr><td>3</td><td>Trim Silence from IR</td><td><code>-t &lt;dB&gt;</code></td></tr>
-        <tr><td>4</td><td>Apply Fades (1ms in always, optional out)</td><td><code>-f &lt;ms&gt;</code></td></tr>
-        <tr><td>5</td><td>Resample (SoX → R8Brain → FinalCD → linear)</td><td><code>-r &lt;Hz&gt;</code></td></tr>
-        <tr><td>6</td><td>FFT Convolve (PFFFT)</td><td>(automatic)</td></tr>
-        <tr><td>7</td><td>Minimum Phase (remove pre-ringing)</td><td><code>--min</code></td></tr>
-        <tr><td>8</td><td>Normalize (peak → 0 dBFS)</td><td>(automatic)</td></tr>
-        <tr><td>9</td><td>Truncate length</td><td><code>-l &lt;samples&gt;</code></td></tr>
-        <tr><td>10</td><td>Dither + Save</td><td><code>-b &lt;16|24|32&gt;</code></td></tr>
+        <tr><td>1</td><td>加载输入（8/16/24/32 位 WAV → float）</td><td><code>-x</code></td></tr>
+        <tr><td>2</td><td>加载 IR（可选 — 为空则直通）</td><td><code>-y</code></td></tr>
+        <tr><td>3</td><td>从 IR 修剪静音</td><td><code>-t &lt;dB&gt;</code></td></tr>
+        <tr><td>4</td><td>应用淡入淡出（始终 1ms 淡入，淡出可选）</td><td><code>-f &lt;ms&gt;</code></td></tr>
+        <tr><td>5</td><td>重采样（SoX → R8Brain → FinalCD → 线性）</td><td><code>-r &lt;Hz&gt;</code></td></tr>
+        <tr><td>6</td><td>FFT 卷积（PFFFT）</td><td>（自动）</td></tr>
+        <tr><td>7</td><td>最小相位（消除预 ringing）</td><td><code>--min</code></td></tr>
+        <tr><td>8</td><td>归一化（峰值 → 0 dBFS）</td><td>（自动）</td></tr>
+        <tr><td>9</td><td>截断长度</td><td><code>-l &lt;采样&gt;</code></td></tr>
+        <tr><td>10</td><td>抖动 + 保存</td><td><code>-b &lt;16|24|32&gt;</code></td></tr>
       </tbody>
     </table>
 
-    <h3 id="dither">5. Mastering Dither</h3>
-    <p><strong>The problem:</strong> Quantizing 24-bit to 16-bit without dither creates harmonic distortion at low levels.</p>
-    <p><strong>The solution: TPDF</strong> — adds 2 LSB of triangular noise before quantization. Converts distortion to a constant noise floor — less audible, more natural.</p>
-    <p>TaraDSP's implementation:</p>
+    <h3 id="dither">5. 母带抖动</h3>
+    <p><strong>问题：</strong> 将 24 位量化为 16 位而不抖动会在低电平产生谐波失真。</p>
+    <p><strong>解决方案：TPDF</strong> — 在量化前添加 2 LSB 的三角噪声。将失真转换为恒定的噪声底 — 更不被人注意，更自然。</p>
+    <p>TaraDSP 的实现：</p>
     <ul>
-      <li><strong>TPDF noise</strong>: Two random values summed (triangular distribution)</li>
-      <li><strong>Error feedback</strong>: Quantization error fed back, shaping the noise spectrum</li>
-      <li><strong>Signal-dependent scaling</strong>: 70% dither at very low levels (&lt; -90 dBFS)</li>
+      <li><strong>TPDF 噪声</strong>：两个随机值相加（三角分布）</li>
+      <li><strong>误差反馈</strong>：量化误差被反馈回来，塑造噪声频谱</li>
+      <li><strong>信号相关缩放</strong>：在非常低的电平（&lt; -90 dBFS）下 70% 抖动</li>
     </ul>
     <div class="note">
-      <strong>When to use:</strong> Always dither for 16-bit. Never dither for 24/32-bit. Dither once, at the final output stage only.
+      <strong>何时使用：</strong> 始终为 16 位抖动。绝不要为 24/32 位抖动。只抖动一次，仅在最终输出阶段。
     </div>
 
-    <h3 id="minphase">6. Minimum Phase</h3>
-    <p><strong>Pre-ringing:</strong> Linear-phase IRs have symmetric energy — before AND after the main impulse. The energy before is <em>pre-ringing</em>, which sounds unnatural (in nature, sound arrives after, never before).</p>
-    <p><strong>What minimum phase does:</strong> Transforms a linear-phase IR into minimum phase:</p>
+    <h3 id="minphase">6. 最小相位</h3>
+    <p><strong>预 ringing：</strong> 线性相位 IR 具有对称的能量 — 在主脉冲之前和之后。之前的能量是<em>预 ringing</em>，听起来不自然（在自然界中，声音在之后到达，从不在之前）。</p>
+    <p><strong>最小相位做什么：</strong> 将线性相位 IR 转换为最小相位：</p>
     <ul>
-      <li>No pre-ringing</li>
-      <li>Lower latency</li>
-      <li>Same frequency response (magnitude unchanged)</li>
+      <li>无预 ringing</li>
+      <li>更低延迟</li>
+      <li>相同频率响应（幅度不变）</li>
     </ul>
-    <p><strong>Algorithm:</strong> Real cepstrum method — FFT → log magnitude → inverse FFT (cepstrum) → fold → FFT → complex spectrum → inverse FFT.</p>
+    <p><strong>算法：</strong> 实数倒谱方法 — FFT → 对数幅度 → 逆 FFT（倒谱）→ 折叠 → FFT → 复数谱 → 逆 FFT。</p>
     <div class="note">
-      <strong>When to use:</strong> Always for cabinet simulation. Always for real-time. Optional for reverb (some prefer linear-phase spaciousness).
+      <strong>何时使用：</strong> 始终用于箱体模拟。始终用于实时。混响可选（有些人更喜欢线性相位的空间感）。
     </div>
 
-    <h3 id="resample">7. Resampling</h3>
-    <p><strong>Why:</strong> Mismatched rates (44.1k IR, 48k project), target device expects specific rate, CD release (44.1k).</p>
-    <p><strong>Aliasing:</strong> Downsampling without filtering causes frequencies above Nyquist to fold back as metallic artifacts.</p>
-    <p><strong>Engine priority:</strong></p>
+    <h3 id="resample">7. 重采样</h3>
+    <p><strong>为什么：</strong> 采样率不匹配（44.1k IR、48k 项目）、目标设备期望特定采样率、CD 发布（44.1k）。</p>
+    <p><strong>混叠：</strong> 降采样而不滤波会使高于奈奎斯特的频率折叠成金属伪影。</p>
+    <p><strong>引擎优先级：</strong></p>
     <ol>
-      <li><strong>SoX Resampler (libsoxr)</strong> — VHQ, proper anti-aliasing. Best option.</li>
-      <li><strong>R8Brain</strong> — VHQ, used when libsoxr unavailable.</li>
-      <li><strong>FinalCD</strong> — external tool.</li>
-      <li><strong>Linear interpolation</strong> — fallback, no anti-aliasing.</li>
+      <li><strong>SoX Resampler（libsoxr）</strong> — VHQ，适当的抗混叠。最佳选项。</li>
+      <li><strong>R8Brain</strong> — VHQ，当 libsoxr 不可用时使用。</li>
+      <li><strong>FinalCD</strong> — 外部工具。</li>
+      <li><strong>线性插值</strong> — 后备，无抗混叠。</li>
     </ol>
-    <p>Install libsoxr for best results. Ships as <code>libsoxr.dll</code> / <code>.dylib</code> / <code>.so.0</code>.</p>
+    <p>安装 libsoxr 以获得最佳结果。以 <code>libsoxr.dll</code> / <code>.dylib</code> / <code>.so.0</code> 形式提供。</p>
 
-    <h3 id="fades">8. Fades and Trimming</h3>
-    <p><strong>Trim silence:</strong> IRs often have silence at start/end. Trim removes it:</p>
+    <h3 id="fades">8. 淡入淡出与修剪</h3>
+    <p><strong>修剪静音：</strong> IR 通常在开头/结尾有静音。修剪会将其移除：</p>
     <ul>
-      <li><code>-60</code> — typical for IRs</li>
-      <li><code>-80</code> — aggressive</li>
-      <li><code>0</code> — disabled</li>
+      <li><code>-60</code> — IR 的典型值</li>
+      <li><code>-80</code> — 激进</li>
+      <li><code>0</code> — 禁用</li>
     </ul>
-    <p><strong>Fades:</strong></p>
+    <p><strong>淡入淡出：</strong></p>
     <ul>
-      <li><strong>Fade-in</strong>: Always 1ms (automatic) — prevents start clicks</li>
-      <li><strong>Fade-out</strong>: User-specified (<code>-f &lt;ms&gt;</code>) — prevents end clicks</li>
+      <li><strong>淡入</strong>：始终 1ms（自动）— 防止开始咔哒声</li>
+      <li><strong>淡出</strong>：用户指定（<code>-f &lt;ms&gt;</code>）— 防止结束咔哒声</li>
     </ul>
-    <p>Linear gain ramp: 1.0 → 0.0 (fade-out) or 0.0 → 1.0 (fade-in).</p>
+    <p>线性增益斜坡：1.0 → 0.0（淡出）或 0.0 → 1.0（淡入）。</p>
 
-    <h3 id="workflows">9. Practical Workflows</h3>
-    <h4>Guitar Cabinet Simulation</h4>
+    <h3 id="workflows">9. 实用工作流程</h3>
+    <h4>吉他箱体模拟</h4>
     <pre>TaraDSP -x guitar_di.wav -y cab_57.wav -o guitar_amped.wav --min -l 2048 -b 24</pre>
-    <h4>Convolution Reverb</h4>
+    <h4>卷积混响</h4>
     <pre>TaraDSP -x vocal_dry.wav -y concert_hall.wav -o vocal_reverb.wav -f 100 -b 24</pre>
-    <h4>Mastering with Dither</h4>
+    <h4>带抖动的母带处理</h4>
     <pre>TaraDSP -x mix_24bit.wav -o master_16bit.wav -b 16</pre>
-    <h4>Sample Rate Conversion</h4>
+    <h4>采样率转换</h4>
     <pre>TaraDSP -x recording_96k.wav -o master_44k1.wav -r 44100 -b 16</pre>
-    <h4>Batch Processing</h4>
+    <h4>批处理</h4>
     <pre>for %f in (*.wav) do TaraDSP -x "%f" -y cab_ir.wav -o "processed_%f" --min -b 24</pre>
 
-    <h3 id="combine">10. Combining Two IRs</h3>
-    <p>TaraDSP can merge two impulse responses into a single new IR. This is useful for:</p>
+    <h3 id="combine">10. 组合两个 IR</h3>
+    <p>TaraDSP 可以把两个脉冲响应合并成一个新的 IR。这适用于：</p>
     <ul>
-      <li><strong>Cab + Mic blend</strong>: Combine a close-miked IR with a room-miked IR to create a custom blend</li>
-      <li><strong>Cab + EQ</strong>: Convolve a cab IR with an EQ curve IR to bake the EQ into the cab</li>
-      <li><strong>Two cabs blended</strong>: Mix two different speakers (e.g. 4x12 + 2x12) into one IR</li>
-      <li><strong>IR + Reverb</strong>: Combine a cab IR with a short room IR for a "cabinet in a room" sound</li>
+      <li><strong>箱 + 麦克风混合</strong>：把近场麦克风拾取的 IR 与房间麦克风拾取的 IR 结合，创建自定义混合</li>
+      <li><strong>箱 + EQ</strong>：把箱体 IR 与 EQ 曲线 IR 卷积，把 EQ 烘焙进箱体</li>
+      <li><strong>两个箱体混合</strong>：把两个不同的扬声器（例如 4x12 + 2x12）混合成一个 IR</li>
+      <li><strong>IR + 混响</strong>：把箱体 IR 与短房间 IR 结合，得到「房间中的箱体」声音</li>
     </ul>
-    <p><strong>How it works:</strong> Convolution is associative — convolving signal A with IR X, then with IR Y, is the same as convolving A with a single IR that is X convolved with Y. So to combine two IRs:</p>
+    <p><strong>工作原理：</strong> 卷积是结合的 — 把信号 A 与 IR X 卷积，再与 IR Y 卷积，等同于把 A 与一个等于 X 与 Y 卷积的单个 IR 卷积。所以要组合两个 IR：</p>
     <ol>
-      <li>Run TaraDSP with IR X as input and IR Y as the impulse response</li>
-      <li>The output is a new WAV that is the combined IR</li>
-      <li>Use that combined WAV as a normal IR in any convolution</li>
+      <li>运行 TaraDSP，以 IR X 作为输入，IR Y 作为脉冲响应</li>
+      <li>输出是一个新的 WAV，即组合后的 IR</li>
+      <li>在任何卷积中把该组合 WAV 用作普通 IR</li>
     </ol>
-    <h4>Example: Blend two cabinet IRs</h4>
+    <h4>示例：混合两个箱体 IR</h4>
     <pre>TaraDSP -x cab_close.wav -y cab_room.wav -o cab_blend.wav -b 32 --min</pre>
-    <p>This convolves <code>cab_close.wav</code> with <code>cab_room.wav</code>, producing <code>cab_blend.wav</code> — a new IR that sounds like the close-miked cab played in the room. Use <code>--min</code> to keep it minimum phase, and <code>-b 32</code> for float output (no quality loss).</p>
-    <h4>Example: Bake EQ into a cab IR</h4>
+    <p>这将 <code>cab_close.wav</code> 与 <code>cab_room.wav</code> 卷积，产生 <code>cab_blend.wav</code> — 一个听起来像在房间中演奏的近场麦克风拾取箱体的新 IR。使用 <code>--min</code> 保持最小相位，使用 <code>-b 32</code> 获得浮点输出（无质量损失）。</p>
+    <h4>示例：把 EQ 烘焙进箱体 IR</h4>
     <pre>TaraDSP -x cab_ir.wav -y eq_curve.wav -o cab_eq.wav -b 32 --min</pre>
-    <p>Convolves the cab IR with an EQ curve (as an IR), baking the EQ into the cab. The result is a new cab IR with the EQ applied.</p>
-    <h4>Example: Two-cab blend with level control</h4>
+    <p>把箱体 IR 与 EQ 曲线（作为 IR）卷积，把 EQ 烘焙进箱体。结果是一个应用了 EQ 的新箱体 IR。</p>
+    <h4>示例：带电平控制的两箱混合</h4>
     <pre>TaraDSP -x cab_a.wav -y cab_b.wav -o cab_ab.wav -b 32 --min -l 2048</pre>
-    <p>Combines two cab IRs and truncates to 2048 samples for use in modelers. The relative loudness of the two cabs depends on their original levels — normalize the input IRs first if needed.</p>
+    <p>组合两个箱体 IR 并截断为 2048 个采样，用于建模器。两个箱体的相对响度取决于其原始电平 — 如有需要，先归一化输入 IR。</p>
     <div class="note">
-      <strong>Tip:</strong> Always use <code>-b 32</code> (32-bit float) for IR combination — it preserves the full dynamic range without quantization. Only reduce to 16/24-bit for the final output after all processing is done.
+      <strong>提示：</strong> 始终使用 <code>-b 32</code>（32 位浮点）进行 IR 组合 — 它保留完整动态范围而无量化。仅在所有处理完成后，才为最终输出降到 16/24 位。
     </div>
     <div class="note">
-      <strong>Tip:</strong> Use <code>--min</code> when combining IRs for cabinet simulation — it removes pre-ringing at each stage and keeps the result tight.
+      <strong>提示：</strong> 为箱体模拟组合 IR 时使用 <code>--min</code> — 它在每个阶段消除预 ringing，保持结果紧凑。
     </div>
 
-    <h3 id="tips">11. Tips from the Trenches</h3>
-    <h4>IR Selection</h4>
+    <h3 id="tips">11. 实战技巧</h3>
+    <h4>IR 选择</h4>
     <ul>
-      <li><strong>Shorter = tighter</strong>: 0.5s IR has less low-end rumble than 2s</li>
-      <li><strong>Mic position matters</strong>: on-axis = bright, off-axis = dark</li>
-      <li><strong>Distance adds room</strong>: close-miked = dry, room-miked = spacious</li>
-      <li><strong>Minimum phase is almost always better for cabs</strong></li>
+      <li><strong>越短 = 越紧凑</strong>：0.5秒的 IR 比 2秒的 IR 低频轰鸣更少</li>
+      <li><strong>麦克风位置很重要</strong>：在轴上 = 明亮，离轴 = 黑暗</li>
+      <li><strong>距离增加房间感</strong>：近场 = 干，房间 = 宽敞</li>
+      <li><strong>最小相位几乎总是对箱体更好</strong></li>
     </ul>
-    <h4>Level Management</h4>
+    <h4>电平管理</h4>
     <ul>
-      <li><strong>Normalize after convolution</strong>, not before</li>
-      <li><strong>Use 24-bit throughout</strong> — dither only at final output</li>
-      <li><strong>Check mono compatibility</strong> — stereo IRs can have phase issues</li>
+      <li><strong>卷积后归一化</strong>，而不是之前</li>
+      <li><strong>全程使用 24 位</strong> — 仅在最终输出时抖动</li>
+      <li><strong>检查单声道兼容性</strong> — 立体声 IR 可能有相位问题</li>
     </ul>
-    <h4>Common Mistakes</h4>
+    <h4>常见错误</h4>
     <ul>
-      <li><strong>Linear-phase IRs for cabs</strong> — always use <code>--min</code></li>
-      <li><strong>Dithering multiple times</strong> — dither once, at the end</li>
-      <li><strong>Forgetting to normalize</strong> — convolution can boost 6-12 dB</li>
-      <li><strong>16-bit for intermediate files</strong> — use 24-bit or 32-bit</li>
+      <li><strong>为箱体使用线性相位 IR</strong> — 始终使用 <code>--min</code></li>
+      <li><strong>多次抖动</strong> — 只抖动一次，在最后</li>
+      <li><strong>忘记归一化</strong> — 卷积可能提升 6-12 dB</li>
+      <li><strong>中间文件用 16 位</strong> — 使用 24 或 32 位</li>
     </ul>
 
-    <h3 id="reference">12. Technical Reference</h3>
+    <h3 id="reference">12. 技术参考</h3>
     <table>
-      <thead><tr><th>Option</th><th>Long form</th><th>Value</th><th>Description</th></tr></thead>
+      <thead><tr><th>选项</th><th>长格式</th><th>值</th><th>说明</th></tr></thead>
       <tbody>
-        <tr><td><code>-x</code></td><td><code>--in1</code></td><td><code>&lt;file&gt;</code></td><td>Input WAV file</td></tr>
-        <tr><td><code>-y</code></td><td><code>--in2</code></td><td><code>&lt;file&gt;</code></td><td>IR WAV (optional)</td></tr>
-        <tr><td><code>-o</code></td><td><code>--output</code></td><td><code>&lt;file&gt;</code></td><td>Output WAV</td></tr>
-        <tr><td><code>-b</code></td><td><code>--bits</code></td><td><code>16|24|32</code></td><td>Bit depth (default: 24)</td></tr>
-        <tr><td><code>-r</code></td><td><code>--rate</code></td><td><code>&lt;Hz&gt;</code></td><td>Target sample rate</td></tr>
-        <tr><td><code>-l</code></td><td><code>--length</code></td><td><code>&lt;samples&gt;</code></td><td>Truncate length</td></tr>
-        <tr><td><code>-t</code></td><td><code>--trim</code></td><td><code>&lt;dB&gt;</code></td><td>Trim silence threshold</td></tr>
-        <tr><td><code>-f</code></td><td><code>--fade</code></td><td><code>&lt;ms&gt;</code></td><td>Fade-out duration</td></tr>
-        <tr><td><code>-m</code></td><td><code>--mono</code></td><td>(flag)</td><td>Mono output</td></tr>
-        <tr><td></td><td><code>--min</code></td><td>(flag)</td><td>Minimum phase</td></tr>
+        <tr><td><code>-x</code></td><td><code>--in1</code></td><td><code>&lt;文件&gt;</code></td><td>输入 WAV 文件</td></tr>
+        <tr><td><code>-y</code></td><td><code>--in2</code></td><td><code>&lt;文件&gt;</code></td><td>IR WAV（可选）</td></tr>
+        <tr><td><code>-o</code></td><td><code>--output</code></td><td><code>&lt;文件&gt;</code></td><td>输出 WAV</td></tr>
+        <tr><td><code>-b</code></td><td><code>--bits</code></td><td><code>16|24|32</code></td><td>位深（默认：24）</td></tr>
+        <tr><td><code>-r</code></td><td><code>--rate</code></td><td><code>&lt;Hz&gt;</code></td><td>目标采样率</td></tr>
+        <tr><td><code>-l</code></td><td><code>--length</code></td><td><code>&lt;采样&gt;</code></td><td>截断长度</td></tr>
+        <tr><td><code>-t</code></td><td><code>--trim</code></td><td><code>&lt;dB&gt;</code></td><td>修剪静音阈值</td></tr>
+        <tr><td><code>-f</code></td><td><code>--fade</code></td><td><code>&lt;ms&gt;</code></td><td>淡出时长</td></tr>
+        <tr><td><code>-m</code></td><td><code>--mono</code></td><td>(标志)</td><td>单声道输出</td></tr>
+        <tr><td></td><td><code>--min</code></td><td>(标志)</td><td>最小相位</td></tr>
       </tbody>
     </table>
 
-    <h4>Configuration File</h4>
+    <h4>配置文件</h4>
     <pre>; settings.ini
 [Metadata]
 Artist=Your Studio Name
@@ -278,23 +278,23 @@ DitherAmount=1.0
 [Hardware]
 TruncateLen=0</pre>
 
-    <h4>Glossary</h4>
+    <h4>术语表</h4>
     <table>
-      <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+      <thead><tr><th>术语</th><th>定义</th></tr></thead>
       <tbody>
-        <tr><td>Convolution</td><td>Applying one signal's characteristics to another</td></tr>
-        <tr><td>IR</td><td>Impulse response — sonic fingerprint of a system</td></tr>
-        <tr><td>FFT</td><td>Fast Fourier Transform</td></tr>
-        <tr><td>PFFFT</td><td>Pretty Fast FFT — audio-optimized FFT library</td></tr>
-        <tr><td>Minimum Phase</td><td>No pre-ringing, energy at and after impulse</td></tr>
-        <tr><td>Linear Phase</td><td>Symmetric pre- and post-ringing</td></tr>
-        <tr><td>Pre-ringing</td><td>Energy before the main impulse</td></tr>
-        <tr><td>TPDF</td><td>Triangular PDF dither — converts distortion to noise</td></tr>
-        <tr><td>Error Feedback</td><td>Feeding quantization error back to shape noise</td></tr>
-        <tr><td>Aliasing</td><td>High frequencies folding back as artifacts</td></tr>
-        <tr><td>Nyquist</td><td>Half the sample rate — highest representable frequency</td></tr>
-        <tr><td>Normalization</td><td>Scaling peak to 0 dBFS</td></tr>
-        <tr><td>Cepstrum</td><td>Inverse FFT of log magnitude — for minimum phase</td></tr>
+        <tr><td>卷积</td><td>把一个信号的特性应用到另一个</td></tr>
+        <tr><td>IR</td><td>脉冲响应 — 系统的声音指纹</td></tr>
+        <tr><td>FFT</td><td>快速傅里叶变换</td></tr>
+        <tr><td>PFFFT</td><td>Pretty Fast FFT — 音频优化的 FFT 库</td></tr>
+        <tr><td>最小相位</td><td>无预 ringing，能量在脉冲处和之后</td></tr>
+        <tr><td>线性相位</td><td>对称的预 ringing 和后 ringing</td></tr>
+        <tr><td>预 ringing</td><td>主脉冲之前的能量</td></tr>
+        <tr><td>TPDF</td><td>三角 PDF 抖动 — 将失真转换为噪声</td></tr>
+        <tr><td>误差反馈</td><td>把量化误差反馈回来以塑造噪声</td></tr>
+        <tr><td>混叠</td><td>高频折叠成伪影</td></tr>
+        <tr><td>奈奎斯特</td><td>采样率的一半 — 可表示的最高频率</td></tr>
+        <tr><td>归一化</td><td>将峰值缩放到 0 dBFS</td></tr>
+        <tr><td>倒谱</td><td>对数幅度的逆 FFT — 用于最小相位</td></tr>
       </tbody>
     </table>
   </div>
@@ -302,8 +302,8 @@ TruncateLen=0</pre>
 
 <footer>
   <div class="container">
-    <p>TaraDSP — Released under the BSD-3-Clause License.</p>
-    <p><a href="https://github.com/smallbutfine/TaraDSP">GitHub Repository</a></p>
+    <p>TaraDSP — 根据 BSD-3-Clause 许可证发布。</p>
+    <p><a href="https://github.com/smallbutfine/TaraDSP">GitHub 仓库</a></p>
   </div>
 </footer>
 

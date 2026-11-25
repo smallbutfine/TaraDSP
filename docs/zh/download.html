@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TaraDSP — Download</title>
+<title>TaraDSP — 下载</title>
 <link rel="stylesheet" href="../style.css">
   <style>
 .crossbar {
@@ -50,89 +50,88 @@
     <nav>
       <a href="index.html">首页</a>
       <a href="concepts.html">概念</a>
-      <a href="cli.html">CLI参考</a>
-      <a href="gui.html">界面</a>
+      <a href="cli.html">CLI 参考</a>
+      <a href="gui.html">图形界面</a>
       <a href="docs.html">文档</a>
       <a href="manual.html">手册</a>
       <a href="download.html">下载</a>
-      <a href="de/index.html">DE</a>
-      <a href="es/index.html">ES</a>
-      <a href="fr/index.html">FR</a>
-      <a href="pt/index.html">PT</a>
-      <a href="ru/index.html">RU</a>
-      <a href="zh/index.html">ZH</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/de/">DE</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/es/">ES</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/fr/">FR</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/pt/">PT</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/ru/">RU</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/zh/">ZH</a>
     </nav>
   </div>
 </header>
 
 <section>
   <div class="container">
-    <h2>Downloads</h2>
-    <p>Prebuilt binaries are attached to every
-    <a href="https://github.com/smallbutfine/TaraDSP/releases">GitHub Release</a>:</p>
+    <h2>下载</h2>
+    <p>预编译二进制文件附加在每个
+    <a href="https://github.com/smallbutfine/TaraDSP/releases">GitHub 发布版</a> 中：</p>
 
     <table class="download-table">
       <thead>
-        <tr><th>Platform</th><th>Artifact</th><th>Notes</th></tr>
+        <tr><th>平台</th><th>产物</th><th>备注</th></tr>
       </thead>
       <tbody>
         <tr>
-          <td>Windows 64-bit</td>
+          <td>Windows 64 位</td>
           <td><code>TaraDSP_&lt;version&gt;_Setup.exe</code></td>
-          <td>Inno Setup installer. Includes GUI, CLI, libpffft.dll, and config.</td>
+          <td>Inno Setup 安装程序。包括图形界面、CLI、libpffft.dll 和配置。</td>
         </tr>
         <tr>
           <td>macOS Intel</td>
           <td><code>TaraDSP_gui&lt;version&gt;-macos-intel.zip</code></td>
-          <td>Universal app bundle. Unzip and drag to /Applications.</td>
+          <td>通用应用包。解压并拖到 /Applications。</td>
         </tr>
         <tr>
           <td>macOS Apple Silicon</td>
           <td><code>TaraDSP_gui&lt;version&gt;-macos-aarch64.zip</code></td>
-          <td>Universal app bundle. Unzip and drag to /Applications.</td>
+          <td>通用应用包。解压并拖到 /Applications。</td>
         </tr>
         <tr>
           <td>Linux x86_64</td>
           <td><code>TaraDSP&lt;version&gt;-linux-x64.tar.gz</code></td>
-          <td>Extract and run. Includes libpffft.so.</td>
+          <td>解压并运行。包括 libpffft.so。</td>
         </tr>
         <tr>
           <td>Linux ARM</td>
           <td><code>TaraDSP&lt;version&gt;-linux-arm.tar.gz</code></td>
-          <td>Extract and run. Includes libpffft.so.</td>
+          <td>解压并运行。包括 libpffft.so。</td>
         </tr>
       </tbody>
     </table>
 
     <div class="note">
-      <strong>macOS:</strong> The app is not code-signed. On first launch,
-      use <strong>right-click → Open</strong> (or
-      <code>xattr -dr com.apple.quarantine</code> in Terminal).
+      <strong>macOS：</strong> 应用未进行代码签名。首次启动时，
+      请使用<strong>右键 → 打开</strong>（或在终端中
+      <code>xattr -dr com.apple.quarantine</code>）。
     </div>
 
     <div class="note">
-      <strong>Linux:</strong> The tarball includes the
-      <code>libpffft.so</code> shared library. Make sure it sits next to
-      the <code>TaraDSP</code> executable, or set
-      <code>LD_LIBRARY_PATH</code> accordingly.
+      <strong>Linux：</strong> 压缩包包括
+      <code>libpffft.so</code> 共享库。确保它与
+      <code>TaraDSP</code> 可执行文件位于同一目录，或相应设置
+      <code>LD_LIBRARY_PATH</code>。
     </div>
 
-    <h3>Building from Source</h3>
-    <p>See the <a href="docs.html#building">文档</a> for build
-    instructions. In short:</p>
-    <pre>./build_all.bat            # all 5 targets + packages into Deploy/
-./build_all.bat --check    # verify the toolchain only</pre>
+    <h3>从源代码构建</h3>
+    <p>构建说明见<a href="docs.html#building">文档</a>。简而言之：</p>
+    <pre>./build_all.bat            # 全部 5 个目标 + 打包到 Deploy/
+./build_all.bat --check    # 仅验证工具链</pre>
 
-    <h3>System Requirements</h3>
+    <h3>系统要求</h3>
     <table>
       <thead>
-        <tr><th>Component</th><th>Requirement</th></tr>
+        <tr><th>组件</th><th>要求</th></tr>
       </thead>
       <tbody>
-        <tr><td>OS</td><td>Windows 10+, macOS 10.13+, or Linux (x86_64/ARM)</td></tr>
-        <tr><td>CPU</td><td>x86_64 or ARM (Intel/AMD/Apple Silicon)</td></tr>
-        <tr><td>RAM</td><td>1 GB minimum (4 GB recommended for long files)</td></tr>
-        <tr><td>Shared Library</td><td><code>libpffft.dll</code> / <code>libpffft.dylib</code> / <code>libpffft.so</code> (included in all releases)</td></tr>
+        <tr><td>操作系统</td><td>Windows 10+、macOS 10.13+ 或 Linux（x86_64/ARM）</td></tr>
+        <tr><td>CPU</td><td>x86_64 或 ARM（Intel/AMD/Apple Silicon）</td></tr>
+        <tr><td>内存</td><td>最低 1 GB（处理长文件推荐 4 GB）</td></tr>
+        <tr><td>共享库</td><td><code>libpffft.dll</code> / <code>libpffft.dylib</code> / <code>libpffft.so</code>（包含在所有发布版中）</td></tr>
       </tbody>
     </table>
   </div>
@@ -140,8 +139,8 @@
 
 <footer>
   <div class="container">
-    <p>TaraDSP — Released under the BSD-3-Clause License.</p>
-    <p><a href="https://github.com/smallbutfine/TaraDSP">GitHub Repository</a></p>
+    <p>TaraDSP — 根据 BSD-3-Clause 许可证发布。</p>
+    <p><a href="https://github.com/smallbutfine/TaraDSP">GitHub 仓库</a></p>
   </div>
 </footer>
 

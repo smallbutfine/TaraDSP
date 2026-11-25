@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TaraDSP — Documentation</title>
+<title>TaraDSP — Документация</title>
 <link rel="stylesheet" href="../style.css">
   <style>
 .crossbar {
@@ -50,17 +50,17 @@
     <nav>
       <a href="index.html">Главная</a>
       <a href="concepts.html">Концепции</a>
-      <a href="cli.html">CLI-справочник</a>
+      <a href="cli.html">Справка CLI</a>
       <a href="gui.html">GUI</a>
       <a href="docs.html">Документация</a>
       <a href="manual.html">Руководство</a>
       <a href="download.html">Скачать</a>
-      <a href="de/index.html">DE</a>
-      <a href="es/index.html">ES</a>
-      <a href="fr/index.html">FR</a>
-      <a href="pt/index.html">PT</a>
-      <a href="ru/index.html">RU</a>
-      <a href="zh/index.html">ZH</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/de/">DE</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/es/">ES</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/fr/">FR</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/pt/">PT</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/ru/">RU</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/zh/">ZH</a>
     </nav>
   </div>
 </header>
@@ -69,176 +69,189 @@
   <div class="container">
     <h2>Документация</h2>
 
-    <h3>Table of Contents</h3>
+    <h3>Оглавление</h3>
     <ol>
-      <li><a href="#convolution">FFT Convolution</a></li>
-      <li><a href="#resampling">Resampling</a></li>
-      <li><a href="#dithering">Mastering Dither</a></li>
-      <li><a href="#minimum-phase">Minimum Phase Conversion</a></li>
-      <li><a href="#fades">Fades and Trimming</a></li>
-      <li><a href="#formats">Audio Formats</a></li>
-      <li><a href="#gui">GUI Overview</a></li>
-      <li><a href="#building">Building from Source</a></li>
-      <li><a href="#ci">CI/CD Pipeline</a></li>
+      <li><a href="#convolution">БПФ-конволюция</a></li>
+      <li><a href="#resampling">Ресемплинг</a></li>
+      <li><a href="#dithering">Мастеринг-дизеринг</a></li>
+      <li><a href="#minimum-phase">Преобразование в минимальную фазу</a></li>
+      <li><a href="#fades">Фейды и обрезка</a></li>
+      <li><a href="#formats">Аудиоформаты</a></li>
+      <li><a href="#gui">Обзор GUI</a></li>
+      <li><a href="#building">Сборка из исходного кода</a></li>
+      <li><a href="#ci">Конвейер CI/CD</a></li>
     </ol>
 
-    <h3 id="convolution">1. FFT Convolution</h3>
-    <p>TaraDSP uses the PFFFT (Pretty Fast FFT) library for high-speed
-    convolution. The process works as follows:</p>
+    <h3 id="convolution">1. БПФ-конволюция</h3>
+    <p>TaraDSP использует библиотеку PFFFT (Pretty Fast FFT) для высокоскоростной
+    свёртки. Процесс работает следующим образом:</p>
     <ol>
-      <li>The input signal and impulse response are zero-padded to the next
-      power of 2 (minimum 32 samples for PFFFT alignment).</li>
-      <li>Both signals are transformed to the frequency domain via forward FFT
-      (<code>pffft_transform</code> with <code>PFFFT_FORWARD</code>).</li>
-      <li>The frequency-domain signals are multiplied (convolution theorem)
-      via <code>pffft_zconvolve_accumulate</code>.</li>
-      <li>The result is transformed back to the time domain via inverse FFT
-      (<code>pffft_transform</code> with <code>PFFFT_BACKWARD</code>).</li>
-      <li>The output is scaled by 1/N and normalized to peak 1.0.</li>
-    </ol>
-    <div class="note">
-      <strong>Why PFFFT?</strong> PFFFT is specifically designed for audio
-      applications. It supports real FFT (not just complex), which is twice
-      as fast for real-valued audio signals. It also handles SIMD instructions
-      (SSE, NEON) for additional speed.
-    </div>
-    <div class="note">
-      <strong>Important:</strong> <code>pffft_transform</code> (internal format)
-      must be used, NOT <code>pffft_transform_ordered</code> (display format).
-      The <code>zconvolve_accumulate</code> function expects internal format.
-      Using the wrong function produces incorrect convolution results.
-    </div>
-
-    <h3 id="resampling">2. Resampling</h3>
-    <p>TaraDSP can resample audio to a different sample rate. The resampling
-    engine selection follows this priority:</p>
-    <ol>
-      <li><strong>SoX Resampler (libsoxr)</strong> — highest quality, used when available</li>
-      <li><strong>R8Brain</strong> — high quality, used when available</li>
-      <li><strong>FinalCD</strong> — external tool, used when available</li>
-      <li><strong>Linear interpolation</strong> — fallback, always available</li>
-    </ol>
-    <p>When resampling is requested (<code>-r</code> option in CLI, or
-    sample rate selector in GUI), both the input signal and the impulse
-    response are resampled to the target rate before convolution.</p>
-
-    <h3 id="dithering">3. Mastering Dither</h3>
-    <p>When outputting 16-bit audio, TaraDSP applies TPDF (Triangular Probability
-    Density Function) dithering with error feedback. This process:</p>
-    <ol>
-      <li>Adds a small amount of random noise (2 LSB peak-to-peak) to the signal.</li>
-      <li>Quantizes to 16-bit.</li>
-      <li>Computes the quantization error.</li>
-      <li>Feeds the error back into the next sample (error feedback).</li>
+      <li>Входной сигнал и импульсная характеристика дополняются нулями до следующей
+      степени 2 (минимум 32 сэмпла для выравнивания PFFFT).</li>
+      <li>Оба сигнала преобразуются в частотную область с помощью прямого БПФ
+      (<code>pffft_transform</code> с <code>PFFFT_FORWARD</code>).</li>
+      <li>Сигналы в частотной области перемножаются (теорема о свёртке)
+      через <code>pffft_zconvolve_accumulate</code>.</li>
+      <li>Результат преобразуется обратно во временную область с помощью обратного БПФ
+      (<code>pffft_transform</code> с <code>PFFFT_BACKWARD</code>).</li>
+      <li>Вывод масштабируется на 1/N и нормализуется до пика 1.0.</li>
     </ol>
     <div class="note">
-      <strong>Why dither?</strong> Without dithering, quantization to 16-bit
-      produces harmonic distortion at low levels. TPDF dithering converts this
-      distortion into a constant low-level noise floor, which is much less
-      audible and more natural-sounding.
+      <strong>Почему PFFFT?</strong> PFFFT специально разработана для
+      аудиоприложений. Она поддерживает вещественное БПФ (не только комплексное),
+      которое вдвое быстрее для вещественных аудиосигналов. Она также обрабатывает
+      инструкции SIMD (SSE, NEON) для дополнительной скорости.
+    </div>
+    <div class="note">
+      <strong>Важно:</strong> нужно использовать <code>pffft_transform</code> (внутренний формат),
+      а НЕ <code>pffft_transform_ordered</code> (формат отображения).
+      Функция <code>zconvolve_accumulate</code> ожидает внутренний формат.
+      Использование неправильной функции даёт неверные результаты свёртки.
     </div>
 
-    <h3 id="minimum-phase">4. Minimum Phase Conversion</h3>
-    <p>Linear-phase impulse responses have symmetric pre-ringing, which can
-    sound unnatural. The <code>--min</code> option (CLI) or "Minimum phase"
-    checkbox (GUI) converts the convolved output to minimum phase, which has:</p>
+    <h3 id="resampling">2. Ресемплинг</h3>
+    <p>TaraDSP может ресемплировать аудио на другую частоту дискретизации. Выбор
+    движка ресемплинга следует этой приоритетности:</p>
+    <ol>
+      <li><strong>SoX Resampler (libsoxr)</strong> — высочайшее качество, используется, когда доступен</li>
+      <li><strong>R8Brain</strong> — высокое качество, используется, когда доступен</li>
+      <li><strong>FinalCD</strong> — внешний инструмент, используется, когда доступен</li>
+      <li><strong>Линейная интерполяция</strong> — запасной вариант, всегда доступен</li>
+    </ol>
+    <p>При запросе ресемплинга (опция <code>-r</code> в CLI или
+    селектор частоты дискретизации в GUI) и входной сигнал, и импульсная
+    характеристика ресемплируются на целевую частоту перед свёрткой.</p>
+
+    <h3 id="dithering">3. Мастеринг-Дизеринг</h3>
+    <p>При выводе 16-битного аудио TaraDSP применяет дизеринг TPDF (Треугольная Функция
+    Плотности Вероятности) с обратной связью по ошибке. Этот процесс:</p>
+    <ol>
+      <li>Добавляет небольшое количество случайного шума (2 LSB размах) к сигналу.</li>
+      <li>Квантует до 16 бит.</li>
+      <li>Вычисляет ошибку квантования.</li>
+      <li>Подаёт ошибку обратно в следующий сэмпл (обратная связь по ошибке).</li>
+    </ol>
+    <div class="note">
+      <strong>Зачем дизеринг?</strong> Без дизеринга квантование до 16 бит
+      даёт гармонические искажения на низких уровнях. Дизеринг TPDF преобразует эти
+      искажения в постоянный низкоуровневый шумовой пол, который гораздо менее
+      слышен и звучит более естественно.
+    </div>
+
+    <h3 id="minimum-phase">4. Преобразование в Минимальную Фазу</h3>
+    <p>Импульсные характеристики с линейной фазой имеют симметричный pre-ringing, который может
+    звучать неестественно. Опция <code>--min</code> (CLI) или флажок «Минимальная фаза»
+    (GUI) преобразует свёрнутый вывод в минимальную фазу, которая имеет:</p>
     <ul>
-      <li>No pre-ringing (energy only after the main impulse)</li>
-      <li>Lower latency</li>
-      <li>More natural sound for cabinet simulation and reverb</li>
+      <li>Нет pre-ringing (энергия только после основного импульса)</li>
+      <li>Меньшая задержка</li>
+      <li>Более естественный звук для симуляции кабинета и реверберации</li>
     </ul>
-    <p>The conversion algorithm:</p>
+    <p>Алгоритм преобразования:</p>
     <ol>
-      <li>Compute the FFT of the signal.</li>
-      <li>Extract the magnitude spectrum.</li>
-      <li>Compute the log magnitude.</li>
-      <li>Compute the real cepstrum (inverse FFT of log magnitude).</li>
-      <li>Fold the cepstrum to create minimum phase.</li>
-      <li>Compute the complex spectrum (magnitude × minimum phase).</li>
-      <li>Inverse FFT to get the minimum phase signal.</li>
+      <li>Вычислить БПФ сигнала.</li>
+      <li>Извлечь спектр magnitude.</li>
+      <li>Вычислить логарифм magnitude.</li>
+      <li>Вычислить реальный цепстр (обратное БПФ логарифма magnitude).</li>
+      <li>Сложить цепстр, чтобы создать минимальную фазу.</li>
+      <li>Вычислить комплексный спектр (magnitude × минимальная фаза).</li>
+      <li>Обратное БПФ для получения сигнала минимальной фазы.</li>
     </ol>
 
-    <h3 id="fades">5. Fades and Trimming</h3>
-    <p>TaraDSP can apply fades and trim silence from the impulse response
-    before convolution:</p>
+    <h3 id="fades">5. Фейды и Обрезка</h3>
+    <p>TaraDSP может применять фейды и обрезать тишину из импульсной характеристики
+    перед свёрткой:</p>
     <ul>
-      <li><strong>Trim (<code>-t</code> / GUI spin):</strong> Removes samples
-      below a threshold (in dB) from the start and end of the IR. Useful for
-      cleaning up impulse responses with silence padding.</li>
-      <li><strong>Fade (<code>-f</code> / GUI spin):</strong> Applies a fade-out
-      of the specified duration (in ms) to the end of the IR. A 1ms fade-in is
-      always applied to prevent clicks. Useful for smoothing IR endings.</li>
+      <li><strong>Обрезка (<code>-t</code> / спин в GUI):</strong> Удаляет сэмплы
+      ниже порога (в дБ) с начала и конца IR. Полезно для
+      очистки импульсных характеристик с заполнением тишиной.</li>
+      <li><strong>Фейд (<code>-f</code> / спин в GUI):</strong> Применяет фейд-аут
+      указанной длительности (в мс) к концу IR. Фейд-ин 1 мс
+      всегда применяется для предотвращения щелчков. Полезно для сглаживания концов IR.</li>
     </ul>
 
-    <h3 id="formats">6. Audio Formats</h3>
-    <h4>Input</h4>
+    <h3 id="formats">6. Аудиоформаты</h3>
+    <h4>Вход</h4>
     <table>
       <thead>
-        <tr><th>Format</th><th>Bit Depth</th><th>Channels</th><th>Notes</th></tr>
+        <tr><th>Формат</th><th>Разрядность</th><th>Каналы</th><th>Примечания</th></tr>
       </thead>
       <tbody>
-        <tr><td>WAV (PCM)</td><td>8-bit unsigned</td><td>Any</td><td>Converted to float internally</td></tr>
-        <tr><td>WAV (PCM)</td><td>16-bit signed</td><td>Any</td><td>Most common format</td></tr>
-        <tr><td>WAV (PCM)</td><td>24-bit signed</td><td>Any</td><td>Studio standard</td></tr>
-        <tr><td>WAV (IEEE Float)</td><td>32-bit float</td><td>Any</td><td>Full dynamic range</td></tr>
+        <tr><td>WAV (PCM)</td><td>8 бит без знака</td><td>Любые</td><td>Конвертируется в float внутри</td></tr>
+        <tr><td>WAV (PCM)</td><td>16 бит со знаком</td><td>Любые</td><td>Самый распространённый формат</td></tr>
+        <tr><td>WAV (PCM)</td><td>24 бита со знаком</td><td>Любые</td><td>Студийный стандарт</td></tr>
+        <tr><td>WAV (IEEE Float)</td><td>32 бита с плавающей точкой</td><td>Любые</td><td>Полный динамический диапазон</td></tr>
       </tbody>
     </table>
 
-    <h4>Output</h4>
+    <h4>Вывод</h4>
     <table>
       <thead>
-        <tr><th>Bit Depth</th><th>Format</th><th>Dithering</th><th>Notes</th></tr>
+        <tr><th>Разрядность</th><th>Формат</th><th>Дизеринг</th><th>Примечания</th></tr>
       </thead>
       <tbody>
-        <tr><td>16-bit</td><td>WAV (PCM)</td><td>TPDF + error feedback</td><td>CD quality</td></tr>
-        <tr><td>24-bit</td><td>WAV (PCM)</td><td>None</td><td>Studio quality (recommended)</td></tr>
-        <tr><td>32-bit</td><td>WAV (IEEE Float)</td><td>None</td><td>For further processing</td></tr>
+        <tr><td>16 бит</td><td>WAV (PCM)</td><td>TPDF + обратная связь по ошибке</td><td>Качество CD</td></tr>
+        <tr><td>24 бита</td><td>WAV (PCM)</td><td>Нет</td><td>Студийное качество (рекомендуется)</td></tr>
+        <tr><td>32 бита</td><td>WAV (IEEE Float)</td><td>Нет</td><td>Для дальнейшей обработки</td></tr>
       </tbody>
     </table>
 
-    <h3 id="gui">7. GUI Overview</h3>
-    <p>The GUI provides the same DSP functionality as the CLI in a window.
-    It is built from <code>gui/TaraDSP_gui.lpi</code> and uses
-    <code>UIRCore.pas</code> for the shared DSP functions.</p>
+    <h3 id="gui">7. Обзор GUI</h3>
+    <p>GUI предоставляет ту же DSP-функциональность, что и CLI, в окне.
+    Она строится из <code>gui/TaraDSP_gui.lpi</code> и использует
+    <code>UIRCore.pas</code> для общих DSP-функций.</p>
     <table>
       <thead>
-        <tr><th>Control</th><th>Description</th></tr>
+        <tr><th>Элемент</th><th>Описание</th></tr>
       </thead>
       <tbody>
-        <tr><td>Source file</td><td>Input WAV file picker</td></tr>
-        <tr><td>Impulse response</td><td>IR WAV file picker (optional — passthrough if empty)</td></tr>
-        <tr><td>Output file</td><td>Output path with browse button</td></tr>
-        <tr><td>Bit depth</td><td>16, 24, or 32-bit output</td></tr>
-        <tr><td>Sample rate</td><td>0 (keep), 44100, 48000, 88200, 96000, 176400, 192000</td></tr>
-        <tr><td>Truncate length</td><td>Maximum output samples (0 = no limit)</td></tr>
-        <tr><td>Fade-out</td><td>Fade duration in ms applied to IR</td></tr>
-        <tr><td>Trim silence</td><td>Threshold in dB (negative values enable trimming)</td></tr>
-        <tr><td>Mono output</td><td>Downmix to single channel</td></tr>
-        <tr><td>Minimum phase</td><td>Convert output to minimum phase</td></tr>
-        <tr><td>PROCESS button</td><td>Run the processing pipeline</td></tr>
-        <tr><td>Log</td><td>Per-step progress output</td></tr>
+        <tr><td>Исходный файл</td><td>Выбор входного WAV-файла</td></tr>
+        <tr><td>Импульсная характеристика</td><td>Выбор WAV-файла IR (необязательно — сквозной проход, если пусто)</td></tr>
+        <tr><td>Выходной файл</td><td>Путь вывода с кнопкой обзора</td></tr>
+        <tr><td>Разрядность</td><td>Вывод 16, 24 или 32 бита</td></tr>
+        <tr><td>Частота дискретизации</td><td>0 (оставить), 44100, 48000, 88200, 96000, 176400, 192000</td></tr>
+        <tr><td>Длина обрезки</td><td>Максимум выходных сэмплов (0 = без лимита)</td></tr>
+        <tr><td>Фейд-аут</td><td>Длительность фейда в мс, применяемая к IR</td></tr>
+        <tr><td>Обрезка тишины</td><td>Порог в дБ (отрицательные значения включают обрезку)</td></tr>
+        <tr><td>Моно-вывод</td><td>Сведение в один канал</td></tr>
+        <tr><td>Минимальная фаза</td><td>Преобразовать вывод в минимальную фазу</td></tr>
+        <tr><td>Кнопка PROCESS</td><td>Запустить конвейер обработки</td></tr>
+        <tr><td>Журнал</td><td>Вывод прогресса по шагам</td></tr>
       </tbody>
     </table>
 
-    <h3 id="building">8. Building from Source</h3>
-    <h4>Prerequisites</h4>
+    <h3 id="building">8. Сборка из Исходного Кода</h3>
+    <h4>Предварительные требования</h4>
     <ul>
-      <li>FreePascal Compiler (FPC) 3.2.2+ or Lazarus IDE 3.0+</li>
-      <li>Lazarus/LCL for the GUI</li>
-      <li>For a full multi-platform build: FPC cross-compilers
+      <li>FreePascal Compiler (FPC) 3.2.2+ или Lazarus IDE 3.0+</li>
+      <li>Lazarus/LCL для GUI</li>
+      <li>Для полной мультиплатформенной сборки: кросс-компиляторы FPC
       (<code>ppcrossx64</code>, <code>ppcrossa64</code>, <code>ppcrossarm</code>)
-      and Inno Setup 6</li>
-      <li>Python 3 (for <code>tools/zip_app.py</code>)</li>
-      <li>Zig (auto-downloaded by <code>build_all.bat</code> for Linux C cross-compilation)</li>
+      и Inno Setup 6</li>
+      <li>Python 3 (для <code>tools/zip_app.py</code>)</li>
+      <li>Zig (автоматически загружается <code>build_all.bat</code> для кросс-компиляции C под Linux)</li>
     </ul>
 
-    <h4>Build everything</h4>
-    <pre>./build_all.bat            # all 5 targets + packages into Deploy/
-./build_all.bat --check    # verify the toolchain only</pre>
+    <h4>Собрать всё</h4>
+    <pre>./build_all.bat            # все 5 целей + пакеты в Deploy/
+./build_all.bat --check    # проверить только цепочку инструментов</pre>
 
-    <h4>Build a single program</h4>
+    <h4>Собрать одну программу</h4>
     <pre># CLI
 fpc -O2 -Fusrc -Sg -Sc TaraDSP.lpr
 
 # GUI
 lazbuild --build-all gui/TaraDSP_gui.lpi
+</pre>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>TaraDSP — Выпущено под лицензией BSD-3-Clause.</p>
+    <p><a href="https://github.com/smallbutfine/TaraDSP">Репозиторий GitHub</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

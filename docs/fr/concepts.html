@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TaraDSP — DSP Concepts in Plain Language</title>
+<title>TaraDSP — Concepts DSP en Langage Simple</title>
 <link rel="stylesheet" href="../style.css">
   <style>
 .crossbar {
@@ -47,377 +47,377 @@
 <header>
   <div class="container">
     <h1>TARA<span class="accent">DSP</span></h1>
-    <p class="subtitle">DSP Concepts in Plain Language</p>
-    <p class="tagline">What convolution actually does, why FFT is fast, and when to reach for dither, minimum phase, or resampling — explained for musicians and audio engineers, not programmers.</p>
+    <p class="subtitle">Concepts DSP en Langage Simple</p>
+    <p class="tagline">Ce que fait réellement la convolution, pourquoi la FFT est rapide, et quand recourir au dither, à la phase minimale ou au rééchantillonnage — expliqué pour les musiciens et ingénieurs du son, pas les programmeurs.</p>
     <nav>
       <a href="index.html">Accueil</a>
       <a href="concepts.html">Concepts</a>
       <a href="cli.html">Référence CLI</a>
-      <a href="gui.html">IUG</a>
+      <a href="gui.html">GUI</a>
       <a href="docs.html">Documentation</a>
       <a href="manual.html">Manuel</a>
       <a href="download.html">Télécharger</a>
-      <a href="de/index.html">DE</a>
-      <a href="es/index.html">ES</a>
-      <a href="fr/index.html">FR</a>
-      <a href="pt/index.html">PT</a>
-      <a href="ru/index.html">RU</a>
-      <a href="zh/index.html">ZH</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/de/">DE</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/es/">ES</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/fr/">FR</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/pt/">PT</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/ru/">RU</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/zh/">ZH</a>
     </nav>
   </div>
 </header>
 
 <section>
   <div class="container">
-    <h2>Start Here</h2>
-    <p>You do not need to understand the math to get great results from TaraDSP. But knowing <em>why</em> the tools behave the way they do makes you faster, cleaner, and a lot less likely to reach for the wrong button. This page explains every DSP concept behind TaraDSP in plain language — the same way you would explain it to a guitarist tracking in the next room or a mixing engineer on their second coffee.</p>
+    <h2>Commencez Ici</h2>
+    <p>Vous n'avez pas besoin de comprendre les mathématiques pour obtenir d'excellents résultats avec TaraDSP. Mais savoir <em>pourquoi</em> les outils se comportent comme ils le font vous rend plus rapide, plus propre et beaucoup moins susceptible d'appuyer sur le mauvais bouton. Cette page explique chaque concept DSP derrière TaraDSP en langage simple — de la même façon que vous l'expliqueriez à un guitariste qui enregistre dans la pièce d'à côté ou à un ingénieur du mixage à son deuxième café.</p>
 
-    <h3>What we will cover</h3>
+    <h3>Ce que nous allons couvrir</h3>
     <ol>
-      <li><a href="#convolution">What is convolution?</a></li>
-      <li><a href="#ir">Impulse responses — the sonic DNA</a></li>
-      <li><a href="#fft">FFT vs direct convolution — why it is 5000&times; faster</a></li>
-      <li><a href="#pffft">PFFFT — the FFT engine under the hood</a></li>
-      <li><a href="#phase">Minimum phase vs linear phase — pre-ringing explained</a></li>
-      <li><a href="#dither">Mastering dither — why 16-bit needs it</a></li>
-      <li><a href="#resampling">Resampling — aliasing and sample rates</a></li>
-      <li><a href="#combine">IR combination — merging two IRs into one</a></li>
+      <li><a href="#convolution">Qu'est-ce que la convolution ?</a></li>
+      <li><a href="#ir">Réponses impulsionnelles — l'ADN sonore</a></li>
+      <li><a href="#fft">FFT vs convolution directe — pourquoi c'est 5000&times; plus rapide</a></li>
+      <li><a href="#pffft">PFFFT — le moteur FFT sous le capot</a></li>
+      <li><a href="#phase">Phase minimale vs phase linéaire — le pre-ringing expliqué</a></li>
+      <li><a href="#dither">Dither de mastering — pourquoi le 16 bits en a besoin</a></li>
+      <li><a href="#resampling">Rééchantillonnage — aliasing et fréquences d'échantillonnage</a></li>
+      <li><a href="#combine">Combinaison d'IR — fusionner deux IR en une seule</a></li>
     </ol>
 
     <div class="note">
-      <strong>Reading tip:</strong> Each section stands on its own. Skim the headings, jump to what you need, and come back to the rest when you are curious. There is no test at the end.
+      <strong>Astuce de lecture :</strong> Chaque section est autonome. Parcourez les titres, sautez à ce dont vous avez besoin et revenez au reste quand vous êtes curieux. Il n'y a pas d'examen à la fin.
     </div>
   </div>
 </section>
 
 <section>
   <div class="container">
-    <h2>The Big Picture: The TaraDSP Pipeline</h2>
-    <p>Every time you run TaraDSP, your audio travels through a chain of optional steps. Each box below is something you can switch on or off. The signal flows left to right:</p>
+    <h2>Vue d'Ensemble : Le Pipeline TaraDSP</h2>
+    <p>Chaque fois que vous lancez TaraDSP, votre audio traverse une chaîne d'étapes facultatives. Chaque case ci-dessous est quelque chose que vous pouvez activer ou désactiver. Le signal circule de gauche à droite :</p>
 
     <div style="display:flex; flex-wrap:wrap; align-items:stretch; gap:10px; margin:25px 0;">
 
       <div style="flex:1 1 130px; background:#1a1a1a; border:1px solid #333; border-top:3px solid #ff6432; padding:14px 12px; text-align:center; min-width:130px;">
-        <div style="color:#ffaa44; font-weight:bold;">Input WAV</div>
-        <div style="font-size:0.8em; color:#999; margin-top:4px;">8 / 16 / 24 / 32-bit<br>read to float</div>
+        <div style="color:#ffaa44; font-weight:bold;">WAV d'Entrée</div>
+        <div style="font-size:0.8em; color:#999; margin-top:4px;">8 / 16 / 24 / 32 bits<br>lu en float</div>
       </div>
 
       <div style="align-self:center; color:#ff6432; font-size:1.6em;">&rarr;</div>
 
       <div style="flex:1 1 130px; background:#1a1a1a; border:1px solid #333; border-top:3px solid #ff6432; padding:14px 12px; text-align:center; min-width:130px;">
-        <div style="color:#ffaa44; font-weight:bold;">Trim &amp; Fade</div>
-        <div style="font-size:0.8em; color:#999; margin-top:4px;">clean up the IR<br><code>-t</code> / <code>-f</code></div>
+        <div style="color:#ffaa44; font-weight:bold;">Couper &amp; Fondu</div>
+        <div style="font-size:0.8em; color:#999; margin-top:4px;">nettoyer l'IR<br><code>-t</code> / <code>-f</code></div>
       </div>
 
       <div style="align-self:center; color:#ff6432; font-size:1.6em;">&rarr;</div>
 
       <div style="flex:1 1 130px; background:#1a1a1a; border:1px solid #333; border-top:3px solid #ff6432; padding:14px 12px; text-align:center; min-width:130px;">
-        <div style="color:#ffaa44; font-weight:bold;">Resample</div>
-        <div style="font-size:0.8em; color:#999; margin-top:4px;">match sample rates<br><code>-r</code></div>
+        <div style="color:#ffaa44; font-weight:bold;">Rééchantillonner</div>
+        <div style="font-size:0.8em; color:#999; margin-top:4px;">accorder les fréquences<br><code>-r</code></div>
       </div>
 
       <div style="align-self:center; color:#ff6432; font-size:1.6em;">&rarr;</div>
 
       <div style="flex:1 1 150px; background:#2e1a1a; border:2px solid #ff6432; padding:14px 12px; text-align:center; min-width:150px; box-shadow:0 0 12px rgba(255,100,50,0.3);">
-        <div style="color:#ff6432; font-weight:bold;">FFT Convolution</div>
-        <div style="font-size:0.8em; color:#ccc; margin-top:4px;">the core step<br>PFFFT engine</div>
+        <div style="color:#ff6432; font-weight:bold;">Convolution FFT</div>
+        <div style="font-size:0.8em; color:#ccc; margin-top:4px;">l'étape centrale<br>moteur PFFFT</div>
       </div>
 
       <div style="align-self:center; color:#ff6432; font-size:1.6em;">&rarr;</div>
 
       <div style="flex:1 1 130px; background:#1a1a1a; border:1px solid #333; border-top:3px solid #ff6432; padding:14px 12px; text-align:center; min-width:130px;">
-        <div style="color:#ffaa44; font-weight:bold;">Minimum Phase</div>
-        <div style="font-size:0.8em; color:#999; margin-top:4px;">remove pre-ringing<br><code>--min</code></div>
+        <div style="color:#ffaa44; font-weight:bold;">Phase Minimale</div>
+        <div style="font-size:0.8em; color:#999; margin-top:4px;">supprimer le pre-ringing<br><code>--min</code></div>
       </div>
 
       <div style="align-self:center; color:#ff6432; font-size:1.6em;">&rarr;</div>
 
       <div style="flex:1 1 130px; background:#1a1a1a; border:1px solid #333; border-top:3px solid #ff6432; padding:14px 12px; text-align:center; min-width:130px;">
-        <div style="color:#ffaa44; font-weight:bold;">Normalize</div>
-        <div style="font-size:0.8em; color:#999; margin-top:4px;">peak to 0 dBFS<br>automatic</div>
+        <div style="color:#ffaa44; font-weight:bold;">Normaliser</div>
+        <div style="font-size:0.8em; color:#999; margin-top:4px;">pic à 0 dBFS<br>automatique</div>
       </div>
 
       <div style="align-self:center; color:#ff6432; font-size:1.6em;">&rarr;</div>
 
       <div style="flex:1 1 130px; background:#1a1a1a; border:1px solid #333; border-top:3px solid #ff6432; padding:14px 12px; text-align:center; min-width:130px;">
-        <div style="color:#ffaa44; font-weight:bold;">Dither &amp; Save</div>
-        <div style="font-size:0.8em; color:#999; margin-top:4px;">TPDF for 16-bit<br><code>-b</code></div>
+        <div style="color:#ffaa44; font-weight:bold;">Dither &amp; Sauver</div>
+        <div style="font-size:0.8em; color:#999; margin-top:4px;">TPDF pour 16 bits<br><code>-b</code></div>
       </div>
 
     </div>
 
-    <p>Only the <strong>FFT Convolution</strong> box is the "point" of TaraDSP — everything else exists to get the input and the impulse response ready, or to make the output clean enough to release. The rest of this page explains each box.</p>
+    <p>Seule la case <strong>Convolution FFT</strong> est le « but » de TaraDSP — tout le reste existe pour préparer l'entrée et la réponse impulsionnelle, ou pour rendre la sortie assez propre pour être publiée. Le reste de cette page explique chaque case.</p>
   </div>
 </section>
 
 <section>
   <div class="container">
-    <h2 id="convolution">1. What is Convolution?</h2>
-    <p>Convolution answers one deceptively simple question:</p>
-    <blockquote>"What does this sound like when played through that?"</blockquote>
-    <p>That is genuinely all it is. You have a sound (your guitar DI, a vocal, a drum bus). You have a recording of a <em>system</em> — a cabinet, a room, a piece of hardware. Convolution plays your sound "through" that system and gives you back the result.</p>
+    <h2 id="convolution">1. Qu'est-ce que la Convolution ?</h2>
+    <p>La convolution répond à une question trompeusement simple :</p>
+    <blockquote>« À quoi cela ressemble-t-il lorsqu'on le joue à travers ceci ? »</blockquote>
+    <p>C'est vraiment tout ce que c'est. Vous avez un son (le DI de votre guitare, une voix, un bus de batterie). Vous avez un enregistrement d'un <em>système</em> — un haut-parleur, une pièce, un morceau de matériel. La convolution joue votre son « à travers » ce système et vous rend le résultat.</p>
 
-    <h3>The intuition</h3>
-    <p>Imagine clapping once in a cathedral. You hear the clap, then the reflections bouncing off the walls, the high ceiling, the stone floor — all smeared out over several seconds. That whole response is the room's "fingerprint" for a single clap. If you could record that fingerprint, you could take any other sound — a voice, a violin — and make it sound like it was performed in that cathedral. That is convolution.</p>
-    <p>The same idea works for a guitar cabinet. A speaker cabinet does not just amplify your guitar; it colors it with resonances, frequency response, and the particular way that speaker cone moves. Record the cabinet's response to a tiny click, and you can apply that exact coloring to any dry guitar signal.</p>
+    <h3>L'intuition</h3>
+    <p>Imaginez applaudir une fois dans une cathédrale. Vous entendez l'applaudissement, puis les réflexions qui rebondissent sur les murs, le haut plafond, le sol en pierre — le tout étalé sur plusieurs secondes. Cette réponse complète est l'« empreinte » de la pièce pour un seul applaudissement. Si vous pouviez enregistrer cette empreinte, vous pourriez prendre n'importe quel autre son — une voix, un violon — et le faire sonner comme s'il avait été joué dans cette cathédrale. C'est la convolution.</p>
+    <p>La même idée fonctionne pour un haut-parleur de guitare. Un haut-parleur ne se contente pas d'amplifier votre guitare ; il la colore avec des résonances, une réponse en fréquence et la façon particulière dont le cône du haut-parleur se déplace. Enregistrez la réponse du haut-parleur à un petit clic, et vous pouvez appliquer cette coloration exacte à n'importe quel signal de guitare sec.</p>
 
-    <h3>Where you already use it</h3>
+    <h3>Où vous l'utilisez déjà</h3>
     <div class="feature-grid">
       <div class="feature-card">
-        <h3>Cabinet Simulation</h3>
-        <p>The classic use. A dry DI guitar goes in, a miked-cabinet sound comes out. The IR is the speaker, the cabinet, the microphone, and the mic position all baked into one file.</p>
+        <h3>Simulation de Haut-Parleur</h3>
+        <p>L'usage classique. Une guitare DI sèche entre, un son de haut-parleur microphoné sort. L'IR est le haut-parleur, le cabinet, le microphone et la position du micro, le tout intégré dans un fichier.</p>
       </div>
       <div class="feature-card">
-        <h3>Convolution Reverb</h3>
-        <p>Instead of an algorithm approximating a room, you use a recording of a real space — a concert hall, a plate, a spring tank. The result is the actual acoustics of that space.</p>
+        <h3>Réverbération par Convolution</h3>
+        <p>Au lieu d'un algorithme qui approxime une pièce, vous utilisez un enregistrement d'un espace réel — une salle de concert, une plaque, un réservoir à ressorts. Le résultat est l'acoustique réelle de cet espace.</p>
       </div>
       <div class="feature-card">
-        <h3>Analog Hardware Emulation</h3>
-        <p>EQ curves, transformer color, tape saturation, console summing — any linear piece of gear can be captured as an IR and applied with convolution.</p>
+        <h3>Émulation de Matériel Analogique</h3>
+        <p>Courbes d'EQ, couleur de transformateur, saturation de bande, sommation de console — tout équipement linéaire peut être capturé en IR et appliqué par convolution.</p>
       </div>
     </div>
 
     <div class="note">
-      <strong>Key idea:</strong> Convolution is <em>linear</em> and <em>time-invariant</em>. In plain terms: it colors your sound without distorting it (no added harmonics the way a distortion pedal would), and the coloring does not change over time. That is exactly what you want for cabs, rooms, and clean EQ — and exactly why it is the wrong tool for distortion or compression.
+      <strong>Idée clé :</strong> La convolution est <em>linéaire</em> et <em>invariante dans le temps</em>. En termes simples : elle colore votre son sans le distordre (sans ajouter d'harmoniques comme le ferait une pédale de distorsion), et la coloration ne change pas avec le temps. C'est exactement ce que vous voulez pour les haut-parleurs, les pièces et l'EQ propre — et exactement pourquoi c'est le mauvais outil pour la distorsion ou la compression.
     </div>
   </div>
 </section>
 
 <section>
   <div class="container">
-    <h2 id="ir">2. Impulse Responses — The Sonic DNA</h2>
-    <p>An <strong>impulse response</strong> (IR) is a recording of a system's reaction to a very short, sharp input — usually a click, a sine sweep, or a starter pistol. That recording captures everything about how the system colors sound: its frequency response, its resonances, how long it rings, and the early reflections around it.</p>
-    <p>Think of an IR as the <strong>sonic DNA</strong> of a cabinet, room, or piece of gear. Feed a dry signal through that DNA and it comes out sounding like it went through the real thing.</p>
+    <h2 id="ir">2. Réponses Impulsionnelles — L'ADN Sonore</h2>
+    <p>Une <strong>réponse impulsionnelle</strong> (IR) est un enregistrement de la réaction d'un système à une entrée très courte et nette — généralement un clic, un balayage sinusoïdal ou un pistolet de départ. Cet enregistrement capture tout de la façon dont le système colore le son : sa réponse en fréquence, ses résonances, la durée de sa résonance et les réflexions précoces qui l'entourent.</p>
+    <p>Pensez à une IR comme à l'<strong>ADN sonore</strong> d'un haut-parleur, d'une pièce ou d'un équipement. Faites passer un signal sec à travers cet ADN et il ressort en sonnant comme s'il était passé par la vraie chose.</p>
 
-    <h3>The main types of IR</h3>
+    <h3>Les principaux types d'IR</h3>
     <table>
       <thead>
-        <tr><th>Type</th><th>What it captures</th><th>Typical length</th><th>Use it for</th></tr>
+        <tr><th>Type</th><th>Ce qu'il capture</th><th>Durée typique</th><th>Utilisez-le pour</th></tr>
       </thead>
       <tbody>
-        <tr><td>Cabinet IR</td><td>Speaker + cabinet + microphone + mic position</td><td>0.5&ndash;2 s</td><td>Guitar and bass cab simulation</td></tr>
-        <tr><td>Room IR</td><td>The acoustics of a real space (hall, studio, church)</td><td>1&ndash;4 s</td><td>Convolution reverb, placing a track in a space</td></tr>
-        <tr><td>Hardware IR</td><td>EQ curves, compressors, tape, consoles (linear parts)</td><td>0.1&ndash;1 s</td><td>Analog gear emulation, tone shaping</td></tr>
-        <tr><td>Plate / Spring IR</td><td>Mechanical reverb tanks</td><td>1&ndash;3 s</td><td>Vintage reverb sounds</td></tr>
+        <tr><td>IR de Haut-Parleur</td><td>Haut-parleur + cabinet + microphone + position du micro</td><td>0,5&ndash;2 s</td><td>Simulation de haut-parleur de guitare et basse</td></tr>
+        <tr><td>IR de Pièce</td><td>L'acoustique d'un espace réel (salle, studio, église)</td><td>1&ndash;4 s</td><td>Réverbération par convolution, placer une piste dans un espace</td></tr>
+        <tr><td>IR de Matériel</td><td>Courbes d'EQ, compresseurs, bande, consoles (parties linéaires)</td><td>0,1&ndash;1 s</td><td>Émulation de matériel analogique, modelage du ton</td></tr>
+        <tr><td>IR de Plaque / Ressort</td><td>Réservoirs de réverbération mécaniques</td><td>1&ndash;3 s</td><td>Sons de reverb vintage</td></tr>
       </tbody>
     </table>
 
-    <h3>Where to find them</h3>
+    <h3>Où les trouver</h3>
     <ul>
-      <li><strong>Free libraries:</strong> Guitar Hack, God's Cab, Seacow, and many more shared by the community.</li>
-      <li><strong>Commercial libraries:</strong> Celestion, Redwirez, York Audio, and others — usually recorded in treated rooms with high-end mics.</li>
-      <li><strong>DIY:</strong> Play a click or sine sweep through your own cabinet, record it with a mic, and you have a custom IR of your exact rig.</li>
+      <li><strong>Bibliothèques gratuites :</strong> Guitar Hack, God's Cab, Seacow, et bien d'autres partagées par la communauté.</li>
+      <li><strong>Bibliothèques commerciales :</strong> Celestion, Redwirez, York Audio, et d'autres — généralement enregistrées dans des pièces traitées avec des micros haut de gamme.</li>
+      <li><strong>DIY :</strong> Jouez un clic ou un balayage sinusoïdal à travers votre propre haut-parleur, enregistrez-le avec un micro, et vous avez une IR personnalisée de votre configuration exacte.</li>
     </ul>
 
     <div class="note">
-      <strong>Length matters:</strong> A shorter IR (0.5 s) gives a tighter, more focused sound with less low-end rumble. A longer IR (2 s) captures more of the cabinet's resonance and the room around it. For tight rhythm guitar, reach short. For ambience and depth, reach long.
+      <strong>La durée compte :</strong> Une IR plus courte (0,5 s) donne un son plus serré et plus ciblé avec moins de grondement dans les basses. Une IR plus longue (2 s) capture plus de la résonance du haut-parleur et de la pièce autour. Pour une guitare rythmique serrée, optez pour court. Pour l'ambiance et la profondeur, optez pour long.
     </div>
   </div>
 </section>
 
 <section>
   <div class="container">
-    <h2 id="fft">3. FFT vs Direct Convolution — Why It Is 5000&times; Faster</h2>
-    <p>Convolution is the right tool, but the obvious way to do it is painfully slow. The clever way — the one TaraDSP uses — is thousands of times faster. Here is why.</p>
+    <h2 id="fft">3. FFT vs Convolution Directe — Pourquoi C'est 5000&times; Plus Rapide</h2>
+    <p>La convolution est le bon outil, mais la façon évidente de la faire est douloureusement lente. La façon intelligente — celle qu'utilise TaraDSP — est des milliers de fois plus rapide. Voici pourquoi.</p>
 
-    <h3>The slow way: direct convolution</h3>
-    <p>Direct convolution works sample by sample. For every single output sample, you multiply it against every sample of the impulse response and add up the results. For a one-second file at 44.1 kHz convolved with a one-second IR, that is roughly <strong>44,100 &times; 44,100 &asymp; 2 billion</strong> multiply-add operations. For a whole song, it is completely impractical.</p>
+    <h3>La façon lente : la convolution directe</h3>
+    <p>La convolution directe fonctionne échantillon par échantillon. Pour chaque échantillon de sortie, vous le multipliez par chaque échantillon de la réponse impulsionnelle et additionnez les résultats. Pour un fichier d'une seconde à 44,1 kHz convolué avec une IR d'une seconde, cela fait environ <strong>44 100 &times; 44 100 &asymp; 2 milliards</strong> d'opérations multiplier-et-additionner. Pour une chanson entière, c'est totalement impraticable.</p>
 
-    <h3>The fast way: the convolution theorem</h3>
-    <p>Here is the trick that makes everything fast. A mathematician's theorem says:</p>
-    <blockquote>Convolution in the time domain = Multiplication in the frequency domain</blockquote>
-    <p>In plain language: instead of doing billions of little multiply-adds, you can:</p>
+    <h3>La façon rapide : le théorème de convolution</h3>
+    <p>Voici l'astuce qui rend tout rapide. Le théorème d'un mathématicien dit :</p>
+    <blockquote>Convolution dans le domaine temporel = Multiplication dans le domaine fréquentiel</blockquote>
+    <p>En langage simple : au lieu de faire des milliards de petites multiplications-additions, vous pouvez :</p>
     <ol>
-      <li><strong>Transform both signals to the frequency domain</strong> using the FFT (Fast Fourier Transform). This is like looking at the sound as a recipe of frequencies instead of a waveform.</li>
-      <li><strong>Multiply them together</strong> — one simple multiply per frequency bin, instead of billions of operations.</li>
-      <li><strong>Transform back</strong> to the time domain with an inverse FFT. You have your convolved audio.</li>
+      <li><strong>Transformer les deux signaux dans le domaine fréquentiel</strong> en utilisant la FFT (Transformée de Fourier Rapide). C'est comme regarder le son comme une recette de fréquences au lieu d'une forme d'onde.</li>
+      <li><strong>Les multiplier ensemble</strong> — une simple multiplication par bin de fréquence, au lieu de milliards d'opérations.</li>
+      <li><strong>Transformer en sens inverse</strong> dans le domaine temporel avec une FFT inverse. Vous avez votre audio convolué.</li>
     </ol>
-    <p>The FFT reduces the work from O(n&sup2;) to O(n log n). In practice, for audio-length signals, that is around a <strong>5000&times; speedup</strong>. A convolution that would take minutes now takes milliseconds.</p>
+    <p>La FFT réduit le travail de O(n&sup2;) à O(n log n). En pratique, pour des signaux de durée audio, c'est environ une <strong>accélération de 5000&times;</strong>. Une convolution qui prendrait des minutes prend maintenant des millisecondes.</p>
 
     <div class="note">
-      <strong>Why you should care:</strong> This is why TaraDSP can convolve a full song with a two-second room IR essentially instantly, and why real-time cab sim plugins can run on stage without melting your laptop. The FFT is the reason convolution is practical at all.
+      <strong>Pourquoi cela devrait vous importer :</strong> C'est pourquoi TaraDSP peut convoluer une chanson entière avec une IR de pièce de deux secondes essentiellement instantanément, et pourquoi les plugins de simulation de haut-parleur en temps réel peuvent tourner sur scène sans faire fondre votre ordinateur portable. La FFT est la raison pour laquelle la convolution est pratique du tout.
     </div>
   </div>
 </section>
 
 <section>
   <div class="container">
-    <h2 id="pffft">4. PFFFT — The FFT Engine Under the Hood</h2>
-    <p>TaraDSP does not use a generic FFT. It uses <strong>PFFFT</strong> — "Pretty Fast FFT" — a library built specifically for audio. Two things make it special.</p>
+    <h2 id="pffft">4. PFFFT — Le Moteur FFT Sous le Capot</h2>
+    <p>TaraDSP n'utilise pas une FFT générique. Il utilise <strong>PFFFT</strong> — « Pretty Fast FFT » — une bibliothèque construite spécifiquement pour l'audio. Deux choses la rendent spéciale.</p>
 
     <div class="feature-grid">
       <div class="feature-card">
-        <h3>Real FFT = 2&times; faster</h3>
-        <p>Audio samples are real numbers, not complex ones. A generic FFT still does the full complex math. PFFFT has a dedicated <em>real</em> FFT that skips the imaginary half of the work — roughly twice as fast for the exact kind of data audio is made of.</p>
+        <h3>FFT Réelle = 2&times; plus rapide</h3>
+        <p>Les échantillons audio sont des nombres réels, pas complexes. Une FFT générique fait quand même tout le calcul complexe. PFFFT a une FFT <em>réelle</em> dédiée qui saute la moitié imaginaire du travail — environ deux fois plus rapide pour le type exact de données dont l'audio est fait.</p>
       </div>
       <div class="feature-card">
-        <h3>SIMD acceleration</h3>
-        <p>Modern CPUs can do several calculations in a single instruction (SSE on Intel/AMD, NEON on Apple Silicon and ARM). PFFFT is written to use these, processing 4 to 8 samples per instruction. It is the difference between a polite engine and a very fast one.</p>
+        <h3>Accélération SIMD</h3>
+        <p>Les CPU modernes peuvent faire plusieurs calculs dans une seule instruction (SSE sur Intel/AMD, NEON sur Apple Silicon et ARM). PFFFT est écrit pour les utiliser, traitant 4 à 8 échantillons par instruction. C'est la différence entre un moteur poli et un moteur très rapide.</p>
       </div>
     </div>
 
-    <p>The practical upshot: PFFFT is why TaraDSP stays fast across every platform it runs on — Windows, macOS (Intel and Apple Silicon), and Linux (x86_64 and ARM). The same optimized engine, tuned for real audio, everywhere.</p>
+    <p>La conclusion pratique : PFFFT est la raison pour laquelle TaraDSP reste rapide sur chaque plateforme où il tourne — Windows, macOS (Intel et Apple Silicon) et Linux (x86_64 et ARM). Le même moteur optimisé, réglé pour l'audio réel, partout.</p>
 
     <div class="note">
-      <strong>Under the hood:</strong> TaraDSP uses PFFFT's internal transform format (not the "ordered" display format) because the convolution routine expects it. This is a programmer detail, but it is the kind of thing that, if gotten wrong, produces quietly broken audio — which is exactly why the manual calls it out.
+      <strong>Sous le capot :</strong> TaraDSP utilise le format de transformation interne de PFFFT (pas le format d'affichage « ordonné ») car la routine de convolution l'attend. C'est un détail de programmeur, mais c'est le genre de chose qui, si elle est mal faite, produit un audio silencieusement cassé — ce qui est exactement pourquoi le manuel le signale.
     </div>
   </div>
 </section>
 
 <section>
   <div class="container">
-    <h2 id="phase">5. Minimum Phase vs Linear Phase — Pre-Ringing Explained</h2>
-    <p>This is the one concept that audibly changes your tone, so it is worth two minutes of your time.</p>
+    <h2 id="phase">5. Phase Minimale vs Phase Linéaire — Le Pre-Ringing Expliqué</h2>
+    <p>C'est le seul concept qui change audiblement votre ton, donc cela vaut deux minutes de votre temps.</p>
 
-    <h3>What pre-ringing is</h3>
-    <p>Some impulse responses are <strong>linear phase</strong>: their energy is symmetric — spread evenly <em>before</em> and <em>after</em> the main impulse. The energy that shows up <em>before</em> the main hit is called <strong>pre-ringing</strong>.</p>
-    <p>Why does that matter? Because in the real world, sound never arrives before the thing that made it. A guitar pick hits a string, <em>then</em> the sound reaches your ear. Pre-ringing puts a faint "ghost" of the sound ahead of the transient, and our ears hear that as unnatural — a smeared, slightly metallic or "phasey" quality, especially on drums and picked guitar.</p>
+    <h3>Ce qu'est le pre-ringing</h3>
+    <p>Certaines réponses impulsionnelles sont à <strong>phase linéaire</strong> : leur énergie est symétrique — répartie uniformément <em>avant</em> et <em>après</em> l'impulsion principale. L'énergie qui apparaît <em>avant</em> le coup principal est appelée <strong>pre-ringing</strong>.</p>
+    <p>Pourquoi cela compte-t-il ? Parce que dans le monde réel, le son n'arrive jamais avant la chose qui l'a produit. Un médiator de guitare frappe une corde, <em>puis</em> le son atteint votre oreille. Le pre-ringing met un faible « fantôme » du son en avant du transitoire, et nos oreilles l'entendent comme non naturel — une qualité floue, légèrement métallique ou « phaseuse », surtout sur les batteries et la guitare pincée.</p>
 
-    <h3>What minimum phase does</h3>
-    <p>A <strong>minimum phase</strong> IR rearranges the same frequency response so that all the energy sits <em>at</em> and <em>after</em> the main impulse. The result:</p>
+    <h3>Ce que fait la phase minimale</h3>
+    <p>Une IR à <strong>phase minimale</strong> réorganise la même réponse en fréquence pour que toute l'énergie se situe <em>à</em> et <em>après</em> l'impulsion principale. Le résultat :</p>
     <ul>
-      <li><strong>No pre-ringing</strong> — energy only arrives after the transient, like it does in nature.</li>
-      <li><strong>Lower latency</strong> — the response is more compact, which matters for real-time playing.</li>
-      <li><strong>Same frequency response</strong> — the tonal balance (the magnitude) is unchanged. Only the time alignment is different.</li>
+      <li><strong>Pas de pre-ringing</strong> — l'énergie n'arrive qu'après le transitoire, comme dans la nature.</li>
+      <li><strong>Latence plus faible</strong> — la réponse est plus compacte, ce qui compte pour le jeu en temps réel.</li>
+      <li><strong>Même réponse en fréquence</strong> — l'équilibre tonal (la magnitude) est inchangé. Seul l'alignement temporel est différent.</li>
     </ul>
 
     <table>
       <thead>
-        <tr><th></th><th>Linear phase</th><th>Minimum phase</th></tr>
+        <tr><th></th><th>Phase linéaire</th><th>Phase minimale</th></tr>
       </thead>
       <tbody>
-        <tr><td>Energy timing</td><td>Before AND after the impulse</td><td>At and after the impulse only</td></tr>
-        <tr><td>Pre-ringing</td><td>Yes (symmetric)</td><td>No</td></tr>
-        <tr><td>Latency</td><td>Higher</td><td>Lower</td></tr>
-        <tr><td>Frequency response</td><td colspan="2" style="text-align:center;">Identical — only the time behavior changes</td></tr>
-        <tr><td>Best for</td><td>Some reverb, spacious/ambient sounds</td><td>Cabinet sim, real-time, tight rhythm</td></tr>
+        <tr><td>Timing de l'énergie</td><td>Avant ET après l'impulsion</td><td>À et après l'impulsion seulement</td></tr>
+        <tr><td>Pre-ringing</td><td>Oui (symétrique)</td><td>Non</td></tr>
+        <tr><td>Latence</td><td>Plus élevée</td><td>Plus faible</td></tr>
+        <tr><td>Réponse en fréquence</td><td colspan="2" style="text-align:center;">Identique — seul le comportement temporel change</td></tr>
+        <tr><td>Idéal pour</td><td>Une certaine reverb, sons spacieux/ambiance</td><td>Simulation de haut-parleur, temps réel, rythme serré</td></tr>
       </tbody>
     </table>
 
     <div class="note">
-      <strong>Rule of thumb:</strong> For cabinet simulation, <strong>always use minimum phase</strong> (<code>--min</code>). It is how real speakers and cabs behave, and it removes the pre-ringing that makes linear-phase cabs sound "not quite real." For reverb, either can work — some engineers prefer the spaciousness of linear phase for ambient pads.
+      <strong>Règle empirique :</strong> Pour la simulation de haut-parleur, <strong>utilisez toujours la phase minimale</strong> (<code>--min</code>). C'est ainsi que se comportent les vrais haut-parleurs et cabinets, et cela supprime le pre-ringing qui fait que les cabinets à phase linéaire sonnent « pas tout à fait réels ». Pour la reverb, l'un ou l'autre peut fonctionner — certains ingénieurs préfèrent l'ampleur de la phase linéaire pour les nappes ambiantes.
     </div>
   </div>
 </section>
 
 <section>
   <div class="container">
-    <h2 id="dither">6. Mastering Dither — Why 16-bit Needs It</h2>
-    <p>Dither is one of the most misunderstood steps in digital audio, and also one of the easiest to get wrong. Here is the whole story in plain language.</p>
+    <h2 id="dither">6. Dither de Mastering — Pourquoi le 16 Bits en a Besoin</h2>
+    <p>Le dither est l'une des étapes les plus mal comprises de l'audio numérique, et aussi l'une des plus faciles à rater. Voici toute l'histoire en langage simple.</p>
 
-    <h3>The problem</h3>
-    <p>Every digital audio file has to round its samples to the nearest available value — that rounding is called <strong>quantization</strong>. When you go from a high-resolution file (24-bit or 32-bit float) down to 16-bit, the rounding gets coarse. Without help, that coarse rounding turns quiet, fading details (a cymbal decay, reverb tail, the last breath of a held note) into <strong>harmonic distortion</strong> — a gritty, crunchy artifact that is very audible on exactly the material you least want it on.</p>
+    <h3>Le problème</h3>
+    <p>Chaque fichier audio numérique doit arrondir ses échantillons à la valeur disponible la plus proche — cet arrondi s'appelle la <strong>quantification</strong>. Lorsque vous passez d'un fichier haute résolution (24 bits ou 32 bits flottant) à 16 bits, l'arrondi devient grossier. Sans aide, cet arrondi grossier transforme les détails faibles et en fondu (la décroissance d'une cymbale, la queue de reverb, le dernier souffle d'une note tenue) en <strong>distorsion harmonique</strong> — un artefact granuleux et croustillant très audible sur exactement le matériel sur lequel vous le voulez le moins.</p>
 
-    <h3>The solution: TPDF dither</h3>
-    <p><strong>TPDF</strong> stands for "Triangular Probability Density Function." In plain terms: before rounding to 16-bit, TaraDSP adds a tiny, carefully-shaped layer of random noise. That noise is triangular — the sum of two random values — which is the ideal shape for this job.</p>
-    <p>The effect is that the distortion gets converted into a <strong>constant, low-level noise floor</strong> instead. A steady, quiet hiss is far less audible and far more natural than gritty harmonic distortion. This is the same principle behind why a vinyl record's surface noise is less objectionable than digital clipping.</p>
+    <h3>La solution : le dither TPDF</h3>
+    <p><strong>TPDF</strong> signifie « Fonction de Densité de Probabilité Triangulaire ». En termes simples : avant l'arrondi à 16 bits, TaraDSP ajoute une minuscule couche de bruit aléatoire soigneusement mis en forme. Ce bruit est triangulaire — la somme de deux valeurs aléatoires — ce qui est la forme idéale pour ce travail.</p>
+    <p>L'effet est que la distorsion est convertie en un <strong>plancher de bruit constant à faible niveau</strong> à la place. Un souffle constant et calme est bien moins audible et bien plus naturel que la distorsion harmonique granuleuse. C'est le même principe qui explique pourquoi le bruit de surface d'un disque vinyle est moins gênant que l'écrêtage numérique.</p>
 
-    <h3>Error feedback</h3>
-    <p>TaraDSP goes one step further with <strong>error feedback</strong>. After each sample is rounded, the rounding error (the difference between the ideal value and the rounded value) is measured and fed back into the next sample. This shapes where the noise sits in the frequency spectrum, pushing it away from the range where our ears are most sensitive. The result is even cleaner than plain TPDF.</p>
+    <h3>Rétroaction d'erreur</h3>
+    <p>TaraDSP va un peu plus loin avec la <strong>rétroaction d'erreur</strong>. Après l'arrondi de chaque échantillon, l'erreur d'arrondi (la différence entre la valeur idéale et la valeur arrondie) est mesurée et réinjectée dans l'échantillon suivant. Cela met en forme l'endroit où le bruit se situe dans le spectre de fréquences, le poussant loin de la plage où nos oreilles sont les plus sensibles. Le résultat est encore plus propre que le TPDF simple.</p>
 
     <div class="warning">
-      <strong>Do not dither twice.</strong> Dither is a one-time, final-output step. If you dither, then process, then dither again, you stack noise on noise and undo the benefit. Dither once, at the very end, only when going to 16-bit.
+      <strong>Ne faites pas de dither deux fois.</strong> Le dither est une étape unique de sortie finale. Si vous faites du dither, puis traitez, puis faites à nouveau du dither, vous empilez du bruit sur du bruit et annulez le bénéfice. Faites du dither une fois, tout à la fin, seulement en passant au 16 bits.
     </div>
 
     <div class="note">
-      <strong>When to use it:</strong> Always dither for 16-bit output. Never dither for 24-bit or 32-bit — those formats have enough resolution that dither is unnecessary and only adds noise. In TaraDSP, dither engages automatically when you choose <code>-b 16</code>.
+      <strong>Quand l'utiliser :</strong> Faites toujours du dither pour une sortie 16 bits. Ne faites jamais de dither pour du 24 ou 32 bits — ces formats ont assez de résolution que le dither est inutile et n'ajoute que du bruit. Dans TaraDSP, le dither s'engage automatiquement lorsque vous choisissez <code>-b 16</code>.
     </div>
   </div>
 </section>
 
 <section>
   <div class="container">
-    <h2 id="resampling">7. Resampling — Aliasing and Sample Rates</h2>
-    <p>Sample rate is how many snapshots of the audio are taken per second. A 44.1 kHz file takes 44,100 snapshots a second; a 96 kHz file takes 96,000. <strong>Resampling</strong> is converting between these rates — for example, when your project runs at 48 kHz but a reverb IR was recorded at 44.1 kHz.</p>
+    <h2 id="resampling">7. Rééchantillonnage — Aliasing et Fréquences d'Échantillonnage</h2>
+    <p>La fréquence d'échantillonnage est le nombre d'instantanés de l'audio pris par seconde. Un fichier 44,1 kHz prend 44 100 instantanés par seconde ; un fichier 96 kHz en prend 96 000. Le <strong>rééchantillonnage</strong> est la conversion entre ces fréquences — par exemple, lorsque votre projet tourne à 48 kHz mais qu'une IR de reverb a été enregistrée à 44,1 kHz.</p>
 
-    <h3>Why sample rate matters</h3>
-    <p>A sample rate can only represent frequencies up to half its value — a limit called the <strong>Nyquist frequency</strong>. For 44.1 kHz audio, that is 22.05 kHz, comfortably above the range of human hearing. This is why 44.1 kHz became the CD standard: it captures everything we can hear.</p>
+    <h3>Pourquoi la fréquence d'échantillonnage compte</h3>
+    <p>Une fréquence d'échantillonnage ne peut représenter que des fréquences allant jusqu'à la moitié de sa valeur — une limite appelée <strong>fréquence de Nyquist</strong>. Pour l'audio 44,1 kHz, c'est 22,05 kHz, confortablement au-dessus de la plage de l'audition humaine. C'est pourquoi le 44,1 kHz est devenu le standard CD : il capture tout ce que nous pouvons entendre.</p>
 
-    <h3>Aliasing — the artifact to avoid</h3>
-    <p>When you downsample (say, 96 kHz to 44.1 kHz) without filtering first, any frequencies above the new Nyquist limit do not politely disappear. They <strong>fold back</strong> into the audible range as inharmonic, metallic garbage. This is called <strong>aliasing</strong>, and it is the digital equivalent of a fax machine screaming.</p>
-    <p>Good resamplers avoid aliasing by applying a steep anti-aliasing filter before downsampling — they remove the frequencies that would fold back, so nothing lands in your audio as an artifact.</p>
+    <h3>Aliasing — l'artefact à éviter</h3>
+    <p>Lorsque vous sous-échantillonnez (disons, 96 kHz vers 44,1 kHz) sans filtrer d'abord, toutes les fréquences au-dessus de la nouvelle limite de Nyquist ne disparaissent pas poliment. Elles se <strong>replient</strong> dans la plage audible sous forme de déchets inharmoniques et métalliques. Cela s'appelle l'<strong>aliasing</strong>, et c'est l'équivalent numérique d'un fax qui hurle.</p>
+    <p>Les bons rééchantillonneurs évitent l'aliasing en appliquant un filtre anti-aliasing raide avant le sous-échantillonnage — ils suppriment les fréquences qui se replieraient, de sorte que rien n'atterrit dans votre audio comme un artefact.</p>
 
-    <h3>Engine quality in TaraDSP</h3>
-    <p>TaraDSP picks the best available resampling engine, in this order of preference:</p>
+    <h3>Qualité du moteur dans TaraDSP</h3>
+    <p>TaraDSP choisit le meilleur moteur de rééchantillonnage disponible, dans cet ordre de préférence :</p>
     <ol>
-      <li><strong>SoX Resampler (libsoxr)</strong> — very high quality, proper anti-aliasing. The best option; install <code>libsoxr</code> for it.</li>
-      <li><strong>R8Brain</strong> — very high quality, used when libsoxr is unavailable.</li>
-      <li><strong>FinalCD</strong> — an external tool, used when present.</li>
-      <li><strong>Linear interpolation</strong> — the always-available fallback. It works, but it has no anti-aliasing, so use it only when nothing else is available.</li>
+      <li><strong>SoX Resampler (libsoxr)</strong> — très haute qualité, anti-aliasing approprié. La meilleure option ; installez <code>libsoxr</code> pour cela.</li>
+      <li><strong>R8Brain</strong> — très haute qualité, utilisé lorsque libsoxr n'est pas disponible.</li>
+      <li><strong>FinalCD</strong> — un outil externe, utilisé lorsqu'il est présent.</li>
+      <li><strong>Interpolation linéaire</strong> — le repli toujours disponible. Il fonctionne, mais il n'a pas d'anti-aliasing, donc utilisez-le seulement quand rien d'autre n'est disponible.</li>
     </ol>
 
     <div class="note">
-      <strong>Practical tip:</strong> If you care about the final quality, install libsoxr so TaraDSP uses the SoX engine. It is the difference between a transparent sample-rate conversion and one that can leave subtle metallic artifacts on cymbals and bright transients.
+      <strong>Astuce pratique :</strong> Si vous tenez à la qualité finale, installez libsoxr pour que TaraDSP utilise le moteur SoX. C'est la différence entre une conversion de fréquence d'échantillonnage transparente et une qui peut laisser de subtils artefacts métalliques sur les cymbales et les transitoires brillants.
     </div>
   </div>
 </section>
 
 <section>
   <div class="container">
-    <h2 id="combine">8. IR Combination — Merging Two IRs Into One</h2>
-    <p>Sometimes one IR is not enough. You want a cabinet <em>and</em> the room it sits in. Or a cabinet with an EQ curve baked in. Or a blend of two different speakers. TaraDSP can merge two impulse responses into a single new IR, and the reason it works comes down to one elegant property of convolution.</p>
+    <h2 id="combine">8. Combinaison d'IR — Fusionner Deux IR en Une Seule</h2>
+    <p>Parfois, une seule IR ne suffit pas. Vous voulez un haut-parleur <em>et</em> la pièce dans laquelle il se trouve. Ou un haut-parleur avec une courbe d'EQ intégrée. Ou un mélange de deux haut-parleurs différents. TaraDSP peut fusionner deux réponses impulsionnelles en une seule nouvelle IR, et la raison pour laquelle cela fonctionne tient à une élégante propriété de la convolution.</p>
 
-    <h3>Why it works: associativity</h3>
-    <p>Convolution is <strong>associative</strong>. In plain language: if you take a signal and run it through IR X, then through IR Y, the result is identical to running it through a single IR that is itself the combination of X and Y. The order of grouping does not matter.</p>
+    <h3>Pourquoi cela fonctionne : l'associativité</h3>
+    <p>La convolution est <strong>associative</strong>. En langage simple : si vous prenez un signal et le faites passer par l'IR X, puis par l'IR Y, le résultat est identique à le faire passer par une seule IR qui est elle-même la combinaison de X et Y. L'ordre de regroupement n'a pas d'importance.</p>
     <blockquote>Signal &rarr; (IR X &rarr; IR Y) &nbsp;=&nbsp; Signal &rarr; (IR X * IR Y)</blockquote>
-    <p>So to combine two IRs, you simply convolve one IR with the other. The output is a brand-new WAV that behaves as a single IR containing both. Use it anywhere you would use a normal IR.</p>
+    <p>Donc pour combiner deux IR, vous vous contentez de convoluer une IR avec l'autre. La sortie est un tout nouveau WAV qui se comporte comme une seule IR contenant les deux. Utilisez-le partout où vous utiliseriez une IR normale.</p>
 
-    <h3>What you can build</h3>
+    <h3>Ce que vous pouvez construire</h3>
     <div class="feature-grid">
       <div class="feature-card">
-        <h3>Cab + Room</h3>
-        <p>Combine a close-miked cab IR with a room IR to get a "cabinet in a room" sound — the dry speaker tone plus the space around it, in one file.</p>
+        <h3>Cab + Pièce</h3>
+        <p>Combinez une IR de cab microphoné de près avec une IR de pièce pour obtenir un son de « haut-parleur dans une pièce » — le ton sec du haut-parleur plus l'espace autour, dans un seul fichier.</p>
       </div>
       <div class="feature-card">
         <h3>Cab + EQ</h3>
-        <p>Convolve a cab IR with an EQ curve (as an IR) to bake the EQ permanently into the cabinet. The result is a new cab IR with that tonal shape built in.</p>
+        <p>Convoluez une IR de cab avec une courbe d'EQ (en tant qu'IR) pour intégrer l'EQ de façon permanente au haut-parleur. Le résultat est une nouvelle IR de cab avec cette forme tonale intégrée.</p>
       </div>
       <div class="feature-card">
-        <h3>Two Cabs Blended</h3>
-        <p>Mix two different speakers — say a 4&times;12 and a 2&times;12 — into a single IR. The relative loudness of each depends on the source levels, so normalize first if needed.</p>
+        <h3>Deux Cabs Mélangés</h3>
+        <p>Mélangez deux haut-parleurs différents — disons un 4&times;12 et un 2&times;12 — en une seule IR. La sonorité relative de chacun dépend des niveaux source, donc normalisez d'abord si nécessaire.</p>
       </div>
     </div>
 
-    <h3>How to do it in TaraDSP</h3>
-    <p>Treat one IR as the input signal and the other as the impulse response. The output is your combined IR:</p>
+    <h3>Comment le faire dans TaraDSP</h3>
+    <p>Traitez une IR comme le signal d'entrée et l'autre comme la réponse impulsionnelle. La sortie est votre IR combinée :</p>
     <div class="command-block">
-      <span class="comment"># Blend a close-miked cab with a room IR</span><br>
+      <span class="comment"># Mélanger un cab microphoné de près avec une IR de pièce</span><br>
       <span class="option">TaraDSP</span> -x cab_close.wav -y cab_room.wav -o cab_blend.wav -b 32 --min
     </div>
     <div class="command-block">
-      <span class="comment"># Bake an EQ curve into a cab IR</span><br>
+      <span class="comment"># Intégrer une courbe d'EQ dans une IR de cab</span><br>
       <span class="option">TaraDSP</span> -x cab_ir.wav -y eq_curve.wav -o cab_eq.wav -b 32 --min
     </div>
 
     <div class="note">
-      <strong>Always combine at 32-bit float (<code>-b 32</code>).</strong> This preserves the full dynamic range with no quantization loss. Only reduce to 16- or 24-bit for the final release, after all processing is done.
+      <strong>Combinez toujours en 32 bits flottant (<code>-b 32</code>).</strong> Cela préserve la plage dynamique complète sans perte de quantification. Ne réduisez à 16 ou 24 bits que pour la version finale, après que tout le traitement est terminé.
     </div>
     <div class="note">
-      <strong>Use <code>--min</code> when combining for cabinet work.</strong> It removes pre-ringing at each stage and keeps the combined IR tight and natural.
+      <strong>Utilisez <code>--min</code> lors de la combinaison pour le travail de haut-parleur.</strong> Cela supprime le pre-ringing à chaque étape et garde l'IR combinée serrée et naturelle.
     </div>
   </div>
 </section>
 
 <section>
   <div class="container">
-    <h2>Quick Reference</h2>
+    <h2>Référence Rapide</h2>
     <table>
       <thead>
-        <tr><th>Term</th><th>Plain-language meaning</th></tr>
+        <tr><th>Terme</th><th>Signification en langage simple</th></tr>
       </thead>
       <tbody>
-        <tr><td>Convolution</td><td>"What does this sound like played through that?" — applying one sound's character to another.</td></tr>
-        <tr><td>Impulse response (IR)</td><td>A recording of a system's reaction to a click — its sonic fingerprint.</td></tr>
-        <tr><td>FFT</td><td>Fast Fourier Transform — the trick that makes convolution thousands of times faster.</td></tr>
-        <tr><td>PFFFT</td><td>Pretty Fast FFT — the audio-optimized, SIMD-accelerated FFT engine TaraDSP uses.</td></tr>
-        <tr><td>Minimum phase</td><td>An IR with no pre-ringing; energy arrives at and after the transient, like in nature.</td></tr>
-        <tr><td>Linear phase</td><td>An IR with symmetric energy before and after — can cause audible pre-ringing.</td></tr>
-        <tr><td>Pre-ringing</td><td>A faint ghost of the sound arriving <em>before</em> the transient; sounds unnatural.</td></tr>
-        <tr><td>Dither (TPDF)</td><td>A tiny shaped noise added before 16-bit rounding; turns distortion into a quiet hiss.</td></tr>
-        <tr><td>Error feedback</td><td>Feeding rounding error back to shape the dither noise where ears hear it least.</td></tr>
-        <tr><td>Aliasing</td><td>High frequencies folding back as metallic artifacts when downsampling without filtering.</td></tr>
-        <tr><td>Nyquist frequency</td><td>Half the sample rate — the highest frequency a given rate can represent.</td></tr>
-        <tr><td>Associativity</td><td>Why combining two IRs into one gives the same result as running through both in sequence.</td></tr>
+        <tr><td>Convolution</td><td>« À quoi cela ressemble-t-il joué à travers ceci ? » — appliquer le caractère d'un son à un autre.</td></tr>
+        <tr><td>Réponse impulsionnelle (IR)</td><td>Un enregistrement de la réaction d'un système à un clic — son empreinte sonore.</td></tr>
+        <tr><td>FFT</td><td>Transformée de Fourier Rapide — l'astuce qui rend la convolution des milliers de fois plus rapide.</td></tr>
+        <tr><td>PFFFT</td><td>Pretty Fast FFT — le moteur FFT optimisé pour l'audio et accéléré SIMD qu'utilise TaraDSP.</td></tr>
+        <tr><td>Phase minimale</td><td>Une IR sans pre-ringing ; l'énergie arrive à et après le transitoire, comme dans la nature.</td></tr>
+        <tr><td>Phase linéaire</td><td>Une IR avec une énergie symétrique avant et après — peut provoquer un pre-ringing audible.</td></tr>
+        <tr><td>Pre-ringing</td><td>Un faible fantôme du son arrivant <em>avant</em> le transitoire ; sonne non naturel.</td></tr>
+        <tr><td>Dither (TPDF)</td><td>Un minuscule bruit mis en forme ajouté avant l'arrondi 16 bits ; transforme la distorsion en un souffle calme.</td></tr>
+        <tr><td>Rétroaction d'erreur</td><td>Réinjecter l'erreur d'arrondi pour mettre en forme le bruit du dither là où les oreilles l'entendent le moins.</td></tr>
+        <tr><td>Aliasing</td><td>Hautes fréquences se repliant en artefacts métalliques lors du sous-échantillonnage sans filtrage.</td></tr>
+        <tr><td>Fréquence de Nyquist</td><td>La moitié de la fréquence d'échantillonnage — la plus haute fréquence qu'une fréquence donnée peut représenter.</td></tr>
+        <tr><td>Associativité</td><td>Pourquoi combiner deux IR en une donne le même résultat que de passer par les deux en séquence.</td></tr>
       </tbody>
     </table>
   </div>
@@ -425,8 +425,8 @@
 
 <footer>
   <div class="container">
-    <p>TaraDSP — Released under the BSD-3-Clause License.</p>
-    <p><a href="https://github.com/smallbutfine/TaraDSP">GitHub Repository</a></p>
+    <p>TaraDSP — Publié sous licence BSD-3-Clause.</p>
+    <p><a href="https://github.com/smallbutfine/TaraDSP">Dépôt GitHub</a></p>
   </div>
 </footer>
 

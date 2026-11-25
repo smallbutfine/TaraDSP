@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TaraDSP — Professional Audio Convolution & Mastering</title>
+<title>TaraDSP — 专业音频卷积与母带处理</title>
 <link rel="stylesheet" href="../style.css">
   <style>
 .crossbar {
@@ -46,67 +46,64 @@
 
 <header>
   <div class="container">
-    <h1>TARA<span class="accent">DSP</span></h1>
-    <p class="subtitle">Professional Audio Convolution & Mastering — FreePascal / Lazarus</p>
-    <p class="tagline">Studio-quality impulse response convolution, resampling, and mastering — in a single command-line tool.</p>
+    <h1><img src="../chameleon.jpg" alt="变色龙" style="width:48px; height:48px; border-radius:50%; vertical-align:middle; margin-right:10px; border:2px solid #30363d;" />TARA<span class="accent">DSP</span></h1>
+    <p class="subtitle">专业音频卷积与母带处理 — FreePascal / Lazarus</p>
+    <p class="tagline">录音室级脉冲响应卷积、重采样和母带处理 — 集成于单一命令行工具中。</p>
     <nav>
       <a href="index.html">首页</a>
       <a href="concepts.html">概念</a>
-      <a href="cli.html">CLI参考</a>
-      <a href="gui.html">界面</a>
+      <a href="cli.html">CLI 参考</a>
+      <a href="gui.html">图形界面</a>
       <a href="docs.html">文档</a>
       <a href="manual.html">手册</a>
       <a href="download.html">下载</a>
-      <a href="de/index.html">DE</a>
-      <a href="es/index.html">ES</a>
-      <a href="fr/index.html">FR</a>
-      <a href="pt/index.html">PT</a>
-      <a href="ru/index.html">RU</a>
-      <a href="zh/index.html">ZH</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/de/">DE</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/es/">ES</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/fr/">FR</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/pt/">PT</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/ru/">RU</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/zh/">ZH</a>
     </nav>
   </div>
 </header>
 
 <section>
   <div class="container">
-    <h2>What is TaraDSP?</h2>
-    <p>TaraDSP is a professional audio processing tool that applies
-    <strong>FFT-based convolution</strong> with impulse responses, resamples audio,
-    and applies mastering-grade dithering and fades. It is designed for
-    musicians, audio engineers, and developers who need studio-quality results
-    from a lightweight, cross-platform command-line tool.</p>
+    <h2>什么是 TaraDSP？</h2>
+    <p>TaraDSP 是一款专业音频处理工具，采用<strong>基于 FFT 的卷积</strong>处理脉冲响应，
+    对音频进行重采样，并应用母带级别的抖动和淡入淡出。它专为需要从轻巧、跨平台命令行工具
+    中获得录音室级品质结果的音乐人、音频工程师和开发者而设计。</p>
 
     <div class="feature-grid">
       <div class="feature-card">
-        <h3>FFT Convolution</h3>
-        <p>High-speed convolution using the PFFFT library (Pretty Fast FFT).
-        Convolve any audio signal with cabinet impulse responses, reverb IRs,
-        or custom filters in seconds.</p>
+        <h3>FFT 卷积</h3>
+        <p>使用 PFFFT 库（Pretty Fast FFT）进行高速卷积。
+        在几秒钟内将任何音频信号与箱体脉冲响应、混响 IR 或自定义滤波器进行卷积。</p>
       </div>
       <div class="feature-card">
-        <h3>Multi-Platform</h3>
-        <p>Native binaries for Windows (x86_64), macOS (Intel + Apple Silicon),
-        and Linux (x86_64 + ARM). One tool, every platform.</p>
+        <h3>跨平台</h3>
+        <p>适用于 Windows（x86_64）、macOS（Intel + Apple Silicon）
+        和 Linux（x86_64 + ARM）的原生二进制文件。一个工具，覆盖所有平台。</p>
       </div>
       <div class="feature-card">
-        <h3>Mastering Dither</h3>
-        <p>TPDF (Triangular Probability Density Function) dithering with
-        error feedback for transparent 16-bit and 24-bit output.</p>
+        <h3>母带抖动</h3>
+        <p>TPDF（三角概率密度函数）抖动，带误差反馈，实现透明的
+        16 位和 24 位输出。</p>
       </div>
       <div class="feature-card">
-        <h3>Resampling</h3>
-        <p>High-quality sample rate conversion via SoX Resampler (libsoxr)
-          with fallback to linear interpolation. Convert between any rates.</p>
+        <h3>重采样</h3>
+        <p>通过 SoX Resampler（libsoxr）进行高质量采样率转换，
+        并以线性插值作为后备。可在任意采样率之间转换。</p>
       </div>
       <div class="feature-card">
-        <h3>Minimum Phase</h3>
-        <p>Convert linear-phase impulse responses to minimum phase for
-        lower latency and more natural sound.</p>
+        <h3>最小相位</h3>
+        <p>将线性相位脉冲响应转换为最小相位，实现
+        更低延迟和更自然的声音。</p>
       </div>
       <div class="feature-card">
-        <h3>Cross-Platform Build</h3>
-        <p>Automated CI/CD with GitHub Actions. fpcupdeluxe-based toolchain
-        installs FPC, Lazarus, and all cross-compilers automatically.</p>
+        <h3>跨平台构建</h3>
+        <p>使用 GitHub Actions 实现自动化 CI/CD。基于
+        fpcupdeluxe 的工具链会自动安装 FPC、Lazarus 和所有交叉编译器。</p>
       </div>
     </div>
   </div>
@@ -114,16 +111,16 @@
 
 <section>
   <div class="container">
-    <h2>Quick Start</h2>
-    <p>Apply an impulse response to an audio file:</p>
+    <h2>快速开始</h2>
+    <p>将脉冲响应应用于音频文件：</p>
     <div class="command-block">
       <span class="option">TaraDSP</span> -x input.wav -y impulse_response.wav -o output.wav
     </div>
-    <p>Convert to 24-bit with resampling:</p>
+    <p>转换为 24 位并进行重采样：</p>
     <div class="command-block">
       <span class="option">TaraDSP</span> -x input.wav -y ir.wav -o output.wav -b 24 -r 48000
     </div>
-    <p>Apply fades and trim silence:</p>
+    <p>应用淡入淡出并修剪静音：</p>
     <div class="command-block">
       <span class="option">TaraDSP</span> -x input.wav -y ir.wav -o output.wav -f 50 -t -60
     </div>
@@ -132,16 +129,16 @@
 
 <section>
   <div class="container">
-    <h2>System Requirements</h2>
+    <h2>系统要求</h2>
     <table>
       <thead>
-        <tr><th>Component</th><th>Requirement</th></tr>
+        <tr><th>组件</th><th>要求</th></tr>
       </thead>
       <tbody>
-        <tr><td>OS</td><td>Windows 10+, macOS 10.13+, or Linux (x86_64/ARM)</td></tr>
-        <tr><td>CPU</td><td>x86_64 or ARM (Intel/AMD/Apple Silicon)</td></tr>
-        <tr><td>RAM</td><td>1 GB minimum (4 GB recommended for long files)</td></tr>
-        <tr><td>Shared Library</td><td><code>libpffft.dll</code> / <code>libpffft.dylib</code> / <code>libpffft.so</code> (included)</td></tr>
+        <tr><td>操作系统</td><td>Windows 10+、macOS 10.13+ 或 Linux（x86_64/ARM）</td></tr>
+        <tr><td>CPU</td><td>x86_64 或 ARM（Intel/AMD/Apple Silicon）</td></tr>
+        <tr><td>内存</td><td>最低 1 GB（处理长文件推荐 4 GB）</td></tr>
+        <tr><td>共享库</td><td><code>libpffft.dll</code> / <code>libpffft.dylib</code> / <code>libpffft.so</code>（已包含）</td></tr>
       </tbody>
     </table>
   </div>
@@ -149,8 +146,8 @@
 
 <footer>
   <div class="container">
-    <p>TaraDSP — Released under the BSD-3-Clause License.</p>
-    <p><a href="https://github.com/smallbutfine/TaraDSP">GitHub Repository</a></p>
+    <p>TaraDSP — 根据 BSD-3-Clause 许可证发布。</p>
+    <p><a href="https://github.com/smallbutfine/TaraDSP">GitHub 仓库</a></p>
   </div>
 </footer>
 

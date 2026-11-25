@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TaraDSP — GUI Reference</title>
+<title>TaraDSP — Справочник по GUI</title>
 <link rel="stylesheet" href="../style.css">
   <style>
 .crossbar {
@@ -50,144 +50,144 @@
     <nav>
       <a href="index.html">Главная</a>
       <a href="concepts.html">Концепции</a>
-      <a href="cli.html">CLI-справочник</a>
+      <a href="cli.html">Справка CLI</a>
       <a href="gui.html">GUI</a>
       <a href="docs.html">Документация</a>
       <a href="manual.html">Руководство</a>
       <a href="download.html">Скачать</a>
-      <a href="de/index.html">DE</a>
-      <a href="es/index.html">ES</a>
-      <a href="fr/index.html">FR</a>
-      <a href="pt/index.html">PT</a>
-      <a href="ru/index.html">RU</a>
-      <a href="zh/index.html">ZH</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/de/">DE</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/es/">ES</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/fr/">FR</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/pt/">PT</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/ru/">RU</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/zh/">ZH</a>
     </nav>
   </div>
 </header>
 
 <section>
   <div class="container">
-    <h2>Graphical User Interface</h2>
-    <p>The TaraDSP GUI provides the same professional audio processing as the
-    CLI in an easy-to-use window. It is the recommended way to process files
-    interactively.</p>
+    <h2>Графический Интерфейс Пользователя</h2>
+    <p>GUI TaraDSP предоставляет ту же профессиональную обработку аудио, что и
+    CLI, в простом в использовании окне. Это рекомендуемый способ интерактивной
+    обработки файлов.</p>
 
-    <h3>Controls</h3>
+    <h3>Элементы управления</h3>
     <table>
       <thead>
-        <tr><th>Control</th><th>Type</th><th>Description</th></tr>
+        <tr><th>Элемент</th><th>Тип</th><th>Описание</th></tr>
       </thead>
       <tbody>
         <tr>
-          <td>Source File</td>
-          <td>File picker</td>
-          <td>The input WAV file to process. Click to browse for a file.</td>
+          <td>Исходный файл</td>
+          <td>Выбор файла</td>
+          <td>Входной WAV-файл для обработки. Нажмите, чтобы выбрать файл.</td>
         </tr>
         <tr>
-          <td>Impulse Response</td>
-          <td>File picker</td>
-          <td>The IR WAV file to convolve with. Leave empty for passthrough
-          mode (mastering only: dither, normalize, fades).</td>
+          <td>Импульсная характеристика</td>
+          <td>Выбор файла</td>
+          <td>WAV-файл IR, с которым свернуть. Оставьте пустым для сквозного
+          режима (только мастеринг: дизеринг, нормализация, фейды).</td>
         </tr>
         <tr>
-          <td>Output File</td>
-          <td>Text + browse</td>
-          <td>The output WAV file path. Click "..." to browse for a location.</td>
+          <td>Выходной файл</td>
+          <td>Текст + обзор</td>
+          <td>Путь к выходному WAV-файлу. Нажмите «...», чтобы выбрать местоположение.</td>
         </tr>
         <tr>
-          <td>Bit Depth</td>
-          <td>Combo: 16 / 24 / 32</td>
-          <td>Output bit depth. 24 is recommended for studio quality.
-          16 applies TPDF dithering. 32 outputs IEEE float.</td>
+          <td>Разрядность</td>
+          <td>Список: 16 / 24 / 32</td>
+          <td>Разрядность вывода. 24 рекомендуется для студийного качества.
+          16 применяет дизеринг TPDF. 32 выдаёт IEEE float.</td>
         </tr>
         <tr>
-          <td>Sample Rate</td>
-          <td>Combo</td>
-          <td>Target sample rate: 0 (keep original), 44100, 48000, 88200,
-          96000, 176400, 192000. Both input and IR are resampled if needed.</td>
+          <td>Частота дискретизации</td>
+          <td>Список</td>
+          <td>Целевая частота дискретизации: 0 (оставить исходную), 44100, 48000, 88200,
+          96000, 176400, 192000. И вход, и IR ресемплируются при необходимости.</td>
         </tr>
         <tr>
-          <td>Truncate Length</td>
-          <td>Spin edit</td>
-          <td>Maximum output samples. 0 = no limit. Useful for guitar modelers
-          (e.g. 1024 for GP-200). A short fade-out is applied at the truncation
-          point to prevent clicks.</td>
+          <td>Длина обрезки</td>
+          <td>Спин-поле</td>
+          <td>Максимум выходных сэмплов. 0 = без лимита. Полезно для гитарных
+          модельеров (например, 1024 для GP-200). Короткий фейд-аут применяется
+          в точке обрезки для предотвращения щелчков.</td>
         </tr>
         <tr>
-          <td>Fade-Out</td>
-          <td>Spin edit (ms)</td>
-          <td>Duration of fade-out applied to the IR before convolution.
-          A 1ms fade-in is always applied to prevent start clicks.</td>
+          <td>Фейд-аут</td>
+          <td>Спин-поле (мс)</td>
+          <td>Длительность фейд-аута, применяемого к IR перед свёрткой.
+          Фейд-ин 1 мс всегда применяется для предотвращения щелчков в начале.</td>
         </tr>
         <tr>
-          <td>Trim Silence</td>
-          <td>Spin edit (dB)</td>
-          <td>Threshold below which samples are considered silence and removed
-          from the IR. Set to 0 to disable. Typical: -60 to -80.</td>
+          <td>Обрезка тишины</td>
+          <td>Спин-поле (дБ)</td>
+          <td>Порог, ниже которого сэмплы считаются тишиной и удаляются
+          из IR. Установите 0 для отключения. Типично: -60 до -80.</td>
         </tr>
         <tr>
-          <td>Mono Output</td>
-          <td>Checkbox</td>
-          <td>Downmix the output to a single channel.</td>
+          <td>Моно-вывод</td>
+          <td>Флажок</td>
+          <td>Свести вывод в один канал.</td>
         </tr>
         <tr>
-          <td>Minimum Phase</td>
-          <td>Checkbox</td>
-          <td>Convert the convolved output to minimum phase. Removes pre-ringing
-          and reduces latency.</td>
+          <td>Минимальная фаза</td>
+          <td>Флажок</td>
+          <td>Преобразовать свёрнутый вывод в минимальную фазу. Убирает pre-ringing
+          и снижает задержку.</td>
         </tr>
         <tr>
           <td>PROCESS</td>
-          <td>Button</td>
-          <td>Run the processing pipeline. Progress is shown in the log.</td>
+          <td>Кнопка</td>
+          <td>Запустить конвейер обработки. Прогресс показывается в журнале.</td>
         </tr>
         <tr>
-          <td>Log</td>
-          <td>Read-only memo</td>
-          <td>Shows per-step progress: loading, resampling, convolving,
-          normalizing, saving. Errors are shown in red text.</td>
+          <td>Журнал</td>
+          <td>Поле только для чтения</td>
+          <td>Показывает прогресс по шагам: загрузка, ресемплинг, свёртка,
+          нормализация, сохранение. Ошибки показываются красным текстом.</td>
         </tr>
       </tbody>
     </table>
 
-    <h3>Processing Pipeline</h3>
-    <p>When you click PROCESS, the GUI runs the following steps in order:</p>
+    <h3>Конвейер обработки</h3>
+    <p>Когда вы нажимаете PROCESS, GUI выполняет следующие шаги по порядку:</p>
     <ol>
-      <li><strong>Load input</strong> — Read the source WAV file (8/16/24/32-bit PCM or float)</li>
-      <li><strong>Load IR</strong> — Read the impulse response (if specified)</li>
-      <li><strong>Trim silence</strong> — Remove silence below threshold from IR (if set)</li>
-      <li><strong>Apply fade</strong> — Apply fade-out to IR (if set)</li>
-      <li><strong>Resample</strong> — Resample input and IR to target rate (if set)</li>
-      <li><strong>Convolve</strong> — FFT convolution per channel</li>
-      <li><strong>Minimum phase</strong> — Convert to minimum phase (if checked)</li>
-      <li><strong>Normalize</strong> — Peak normalize to 1.0</li>
-      <li><strong>Truncate</strong> — Truncate to max length (if set)</li>
-      <li><strong>Save</strong> — Write output WAV with dithering (16-bit) or float (32-bit)</li>
+      <li><strong>Загрузить вход</strong> — Прочитать исходный WAV-файл (PCM или float 8/16/24/32 бита)</li>
+      <li><strong>Загрузить IR</strong> — Прочитать импульсную характеристику (если указана)</li>
+      <li><strong>Обрезать тишину</strong> — Удалить тишину ниже порога из IR (если задано)</li>
+      <li><strong>Применить фейд</strong> — Применить фейд-аут к IR (если задано)</li>
+      <li><strong>Ресемплинг</strong> — Ресемплировать вход и IR на целевую частоту (если задана)</li>
+      <li><strong>Свёртка</strong> — БПФ-конволюция по каналам</li>
+      <li><strong>Минимальная фаза</strong> — Преобразовать в минимальную фазу (если отмечено)</li>
+      <li><strong>Нормализация</strong> — Нормализовать пик до 1.0</li>
+      <li><strong>Обрезка</strong> — Обрезать до максимальной длины (если задано)</li>
+      <li><strong>Сохранить</strong> — Записать выходной WAV с дизерингом (16 бит) или float (32 бита)</li>
     </ol>
 
-    <h3>Tips</h3>
+    <h3>Советы</h3>
     <div class="note">
-      <strong>Tip 1:</strong> Leave the IR field empty to use the GUI as a
-      mastering tool — it will apply dither, normalize, and fades without
-      convolution.
+      <strong>Совет 1:</strong> Оставьте поле IR пустым, чтобы использовать GUI как
+      инструмент мастеринга — он применит дизеринг, нормализует и применит фейды без
+      свёртки.
     </div>
     <div class="note">
-      <strong>Tip 2:</strong> For guitar cabinet simulation, set the truncate
-      length to 1024 or 2048 samples and enable minimum phase for the tightest,
-      lowest-latency sound.
+      <strong>Совет 2:</strong> Для симуляции гитарного кабинета установите длину
+      обрезки 1024 или 2048 сэмплов и включите минимальную фазу для самого плотного
+      звука с наименьшей задержкой.
     </div>
     <div class="note">
-      <strong>Tip 3:</strong> Use 24-bit output for the best balance of quality
-      and file size. 16-bit is only needed for CD compatibility.
+      <strong>Совет 3:</strong> Используйте вывод 24 бита для лучшего баланса качества
+      и размера файла. 16 бит нужен только для совместимости с CD.
     </div>
     <div class="note">
-      <strong>Tip 4:</strong> The GUI reads <code>settings.ini</code> from the
-      same directory as the executable for default values (artist name, bit depth,
-      dither amount, truncate length).
+      <strong>Совет 4:</strong> GUI читает <code>settings.ini</code> из
+      того же каталога, что и исполняемый файл, для значений по умолчанию (имя исполнителя,
+      разрядность, величина дизеринга, длина обрезки).
     </div>
 
-    <h3>Configuration File</h3>
-    <p>The GUI reads a <code>settings.ini</code> file for default values:</p>
+    <h3>Файл конфигурации</h3>
+    <p>GUI читает файл <code>settings.ini</code> для значений по умолчанию:</p>
     <pre>; settings.ini
 [Metadata]
 Artist=Your Studio Name
@@ -203,8 +203,8 @@ TruncateLen=0</pre>
 
 <footer>
   <div class="container">
-    <p>TaraDSP — Released under the BSD-3-Clause License.</p>
-    <p><a href="https://github.com/smallbutfine/TaraDSP">GitHub Repository</a></p>
+    <p>TaraDSP — Выпущено под лицензией BSD-3-Clause.</p>
+    <p><a href="https://github.com/smallbutfine/TaraDSP">Репозиторий GitHub</a></p>
   </div>
 </footer>
 

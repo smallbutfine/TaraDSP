@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TaraDSP — GUI Reference</title>
+<title>TaraDSP — 图形界面参考</title>
 <link rel="stylesheet" href="../style.css">
   <style>
 .crossbar {
@@ -50,144 +50,143 @@
     <nav>
       <a href="index.html">首页</a>
       <a href="concepts.html">概念</a>
-      <a href="cli.html">CLI参考</a>
-      <a href="gui.html">界面</a>
+      <a href="cli.html">CLI 参考</a>
+      <a href="gui.html">图形界面</a>
       <a href="docs.html">文档</a>
       <a href="manual.html">手册</a>
       <a href="download.html">下载</a>
-      <a href="de/index.html">DE</a>
-      <a href="es/index.html">ES</a>
-      <a href="fr/index.html">FR</a>
-      <a href="pt/index.html">PT</a>
-      <a href="ru/index.html">RU</a>
-      <a href="zh/index.html">ZH</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/de/">DE</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/es/">ES</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/fr/">FR</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/pt/">PT</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/ru/">RU</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/zh/">ZH</a>
     </nav>
   </div>
 </header>
 
 <section>
   <div class="container">
-    <h2>Graphical User Interface</h2>
-    <p>The TaraDSP GUI provides the same professional audio processing as the
-    CLI in an easy-to-use window. It is the recommended way to process files
-    interactively.</p>
+    <h2>图形用户界面</h2>
+    <p>TaraDSP 图形界面在易用的窗口中提供与 CLI
+    相同的专业音频处理。这是推荐的交互式处理文件的方式。</p>
 
-    <h3>Controls</h3>
+    <h3>控件</h3>
     <table>
       <thead>
-        <tr><th>Control</th><th>Type</th><th>Description</th></tr>
+        <tr><th>控件</th><th>类型</th><th>说明</th></tr>
       </thead>
       <tbody>
         <tr>
-          <td>Source File</td>
-          <td>File picker</td>
-          <td>The input WAV file to process. Click to browse for a file.</td>
+          <td>源文件</td>
+          <td>文件选择器</td>
+          <td>要处理的输入 WAV 文件。点击以浏览文件。</td>
         </tr>
         <tr>
-          <td>Impulse Response</td>
-          <td>File picker</td>
-          <td>The IR WAV file to convolve with. Leave empty for passthrough
-          mode (mastering only: dither, normalize, fades).</td>
+          <td>脉冲响应</td>
+          <td>文件选择器</td>
+          <td>要与之卷积的 IR WAV 文件。留空则进入直通
+          模式（仅母带处理：抖动、归一化、淡入淡出）。</td>
         </tr>
         <tr>
-          <td>Output File</td>
-          <td>Text + browse</td>
-          <td>The output WAV file path. Click "..." to browse for a location.</td>
+          <td>输出文件</td>
+          <td>文本 + 浏览</td>
+          <td>输出 WAV 文件路径。点击「...」以浏览位置。</td>
         </tr>
         <tr>
-          <td>Bit Depth</td>
-          <td>Combo: 16 / 24 / 32</td>
-          <td>Output bit depth. 24 is recommended for studio quality.
-          16 applies TPDF dithering. 32 outputs IEEE float.</td>
+          <td>位深</td>
+          <td>组合框：16 / 24 / 32</td>
+          <td>输出位深。录音室品质推荐 24。
+          16 应用 TPDF 抖动。32 输出 IEEE 浮点。</td>
         </tr>
         <tr>
-          <td>Sample Rate</td>
-          <td>Combo</td>
-          <td>Target sample rate: 0 (keep original), 44100, 48000, 88200,
-          96000, 176400, 192000. Both input and IR are resampled if needed.</td>
+          <td>采样率</td>
+          <td>组合框</td>
+          <td>目标采样率：0（保持原始）、44100、48000、88200、
+          96000、176400、192000。如有需要，输入和 IR 都会重采样。</td>
         </tr>
         <tr>
-          <td>Truncate Length</td>
-          <td>Spin edit</td>
-          <td>Maximum output samples. 0 = no limit. Useful for guitar modelers
-          (e.g. 1024 for GP-200). A short fade-out is applied at the truncation
-          point to prevent clicks.</td>
+          <td>截断长度</td>
+          <td>微调框</td>
+          <td>最大输出采样。0 = 无限制。适用于吉他建模器
+          （例如 GP-200 用 1024）。在截断点应用短淡出
+          以防止咔哒声。</td>
         </tr>
         <tr>
-          <td>Fade-Out</td>
-          <td>Spin edit (ms)</td>
-          <td>Duration of fade-out applied to the IR before convolution.
-          A 1ms fade-in is always applied to prevent start clicks.</td>
+          <td>淡出</td>
+          <td>微调框（ms）</td>
+          <td>卷积前应用于 IR 的淡出时长。
+          始终应用 1ms 淡入以防止开始咔哒声。</td>
         </tr>
         <tr>
-          <td>Trim Silence</td>
-          <td>Spin edit (dB)</td>
-          <td>Threshold below which samples are considered silence and removed
-          from the IR. Set to 0 to disable. Typical: -60 to -80.</td>
+          <td>修剪静音</td>
+          <td>微调框（dB）</td>
+          <td>低于此阈值的采样被视为静音并从 IR 中移除
+          。设为 0 以禁用。典型值：-60 到 -80。</td>
         </tr>
         <tr>
-          <td>Mono Output</td>
-          <td>Checkbox</td>
-          <td>Downmix the output to a single channel.</td>
+          <td>单声道输出</td>
+          <td>复选框</td>
+          <td>将输出下混为单声道。</td>
         </tr>
         <tr>
-          <td>Minimum Phase</td>
-          <td>Checkbox</td>
-          <td>Convert the convolved output to minimum phase. Removes pre-ringing
-          and reduces latency.</td>
+          <td>最小相位</td>
+          <td>复选框</td>
+          <td>将卷积输出转换为最小相位。消除预 ringing
+          并降低延迟。</td>
         </tr>
         <tr>
           <td>PROCESS</td>
-          <td>Button</td>
-          <td>Run the processing pipeline. Progress is shown in the log.</td>
+          <td>按钮</td>
+          <td>运行处理流水线。进度显示在日志中。</td>
         </tr>
         <tr>
-          <td>Log</td>
-          <td>Read-only memo</td>
-          <td>Shows per-step progress: loading, resampling, convolving,
-          normalizing, saving. Errors are shown in red text.</td>
+          <td>日志</td>
+          <td>只读 Memo</td>
+          <td>显示逐步进度：加载、重采样、卷积、
+          归一化、保存。错误以红色文本显示。</td>
         </tr>
       </tbody>
     </table>
 
-    <h3>Processing Pipeline</h3>
-    <p>When you click PROCESS, the GUI runs the following steps in order:</p>
+    <h3>处理流水线</h3>
+    <p>点击 PROCESS 时，图形界面按顺序运行以下步骤：</p>
     <ol>
-      <li><strong>Load input</strong> — Read the source WAV file (8/16/24/32-bit PCM or float)</li>
-      <li><strong>Load IR</strong> — Read the impulse response (if specified)</li>
-      <li><strong>Trim silence</strong> — Remove silence below threshold from IR (if set)</li>
-      <li><strong>Apply fade</strong> — Apply fade-out to IR (if set)</li>
-      <li><strong>Resample</strong> — Resample input and IR to target rate (if set)</li>
-      <li><strong>Convolve</strong> — FFT convolution per channel</li>
-      <li><strong>Minimum phase</strong> — Convert to minimum phase (if checked)</li>
-      <li><strong>Normalize</strong> — Peak normalize to 1.0</li>
-      <li><strong>Truncate</strong> — Truncate to max length (if set)</li>
-      <li><strong>Save</strong> — Write output WAV with dithering (16-bit) or float (32-bit)</li>
+      <li><strong>加载输入</strong> — 读取源 WAV 文件（8/16/24/32 位 PCM 或浮点）</li>
+      <li><strong>加载 IR</strong> — 读取脉冲响应（如果指定）</li>
+      <li><strong>修剪静音</strong> — 从 IR 中移除低于阈值的静音（如果设置）</li>
+      <li><strong>应用淡出</strong> — 对 IR 应用淡出（如果设置）</li>
+      <li><strong>重采样</strong> — 将输入和 IR 重采样到目标采样率（如果设置）</li>
+      <li><strong>卷积</strong> — 按声道进行 FFT 卷积</li>
+      <li><strong>最小相位</strong> — 转换为最小相位（如果勾选）</li>
+      <li><strong>归一化</strong> — 峰值归一化到 1.0</li>
+      <li><strong>截断</strong> — 截断到最大长度（如果设置）</li>
+      <li><strong>保存</strong> — 写入带抖动（16 位）或浮点（32 位）的输出 WAV</li>
     </ol>
 
-    <h3>Tips</h3>
+    <h3>提示</h3>
     <div class="note">
-      <strong>Tip 1:</strong> Leave the IR field empty to use the GUI as a
-      mastering tool — it will apply dither, normalize, and fades without
-      convolution.
+      <strong>提示 1：</strong> 将 IR 字段留空，把图形界面用作母带处理
+      工具 — 它会应用抖动、归一化并淡入淡出而不
+      进行卷积。
     </div>
     <div class="note">
-      <strong>Tip 2:</strong> For guitar cabinet simulation, set the truncate
-      length to 1024 or 2048 samples and enable minimum phase for the tightest,
-      lowest-latency sound.
+      <strong>提示 2：</strong> 对于吉他箱体模拟，将截断
+      长度设为 1024 或 2048 个采样，并启用最小相位，以获得最
+      紧凑、最低延迟的声音。
     </div>
     <div class="note">
-      <strong>Tip 3:</strong> Use 24-bit output for the best balance of quality
-      and file size. 16-bit is only needed for CD compatibility.
+      <strong>提示 3：</strong> 使用 24 位输出，在质量
+      和文件大小之间取得最佳平衡。16 位仅在需要 CD 兼容性时才需要。
     </div>
     <div class="note">
-      <strong>Tip 4:</strong> The GUI reads <code>settings.ini</code> from the
-      same directory as the executable for default values (artist name, bit depth,
-      dither amount, truncate length).
+      <strong>提示 4：</strong> 图形界面从可执行文件
+      所在目录读取 <code>settings.ini</code> 以获取默认值（艺术家名称、位深、
+      抖动量、截断长度）。
     </div>
 
-    <h3>Configuration File</h3>
-    <p>The GUI reads a <code>settings.ini</code> file for default values:</p>
+    <h3>配置文件</h3>
+    <p>图形界面读取 <code>settings.ini</code> 文件以获取默认值：</p>
     <pre>; settings.ini
 [Metadata]
 Artist=Your Studio Name
@@ -203,8 +202,8 @@ TruncateLen=0</pre>
 
 <footer>
   <div class="container">
-    <p>TaraDSP — Released under the BSD-3-Clause License.</p>
-    <p><a href="https://github.com/smallbutfine/TaraDSP">GitHub Repository</a></p>
+    <p>TaraDSP — 根据 BSD-3-Clause 许可证发布。</p>
+    <p><a href="https://github.com/smallbutfine/TaraDSP">GitHub 仓库</a></p>
   </div>
 </footer>
 

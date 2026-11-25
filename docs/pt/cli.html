@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TaraDSP — Command Line Reference</title>
+<title>TaraDSP — Referência de Linha de Comando</title>
 <link rel="stylesheet" href="../style.css">
   <style>
 .crossbar {
@@ -55,182 +55,182 @@
       <a href="docs.html">Documentação</a>
       <a href="manual.html">Manual</a>
       <a href="download.html">Baixar</a>
-      <a href="de/index.html">DE</a>
-      <a href="es/index.html">ES</a>
-      <a href="fr/index.html">FR</a>
-      <a href="pt/index.html">PT</a>
-      <a href="ru/index.html">RU</a>
-      <a href="zh/index.html">ZH</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/de/">DE</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/es/">ES</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/fr/">FR</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/pt/">PT</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/ru/">RU</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/zh/">ZH</a>
     </nav>
   </div>
 </header>
 
 <section class="docs-section">
   <div class="container">
-    <h2>Command Line Reference</h2>
-    <p>The <code>TaraDSP</code> executable is a command-line audio processing
-    tool. It applies FFT convolution with impulse responses, resamples audio,
-    and applies mastering dithering and fades.</p>
+    <h2>Referência de Linha de Comando</h2>
+    <p>O executável <code>TaraDSP</code> é uma ferramenta de processamento de áudio
+    de linha de comando. Aplica convolução FFT com respostas ao impulso, reamostra áudio,
+    e aplica dithering e fades de masterização.</p>
 
     <div class="quick-reference">
-      <h3>Quick start</h3>
+      <h3>Início rápido</h3>
       <pre>TaraDSP -x input.wav -y impulse.wav -o output.wav
 TaraDSP -x input.wav -o output.wav -b 24 -r 48000
 TaraDSP -x input.wav -y ir.wav -o output.wav -f 50 -t -60 --min</pre>
     </div>
 
-    <h3>Options</h3>
+    <h3>Opções</h3>
     <table>
       <thead>
-        <tr><th>Option</th><th>Long form</th><th>Value</th><th>Description</th></tr>
+        <tr><th>Opção</th><th>Forma longa</th><th>Valor</th><th>Descrição</th></tr>
       </thead>
       <tbody>
         <tr>
           <td><code>-x</code></td>
           <td><code>--in1</code></td>
-          <td><code>&lt;file&gt;</code></td>
-          <td>Input WAV file (the audio signal to process)</td>
+          <td><code>&lt;arquivo&gt;</code></td>
+          <td>Arquivo WAV de entrada (o sinal de áudio a processar)</td>
         </tr>
         <tr>
           <td><code>-y</code></td>
           <td><code>--in2</code></td>
-          <td><code>&lt;file&gt;</code></td>
-          <td>Impulse response WAV file (optional — if omitted, a unit impulse is used, producing a pass-through with mastering)</td>
+          <td><code>&lt;arquivo&gt;</code></td>
+          <td>Arquivo WAV de resposta ao impulso (opcional — se omitido, um impulso unitário é usado, produzindo uma passagem direta com masterização)</td>
         </tr>
         <tr>
           <td><code>-o</code></td>
           <td><code>--output</code></td>
-          <td><code>&lt;file&gt;</code></td>
-          <td>Output WAV file</td>
+          <td><code>&lt;arquivo&gt;</code></td>
+          <td>Arquivo WAV de saída</td>
         </tr>
         <tr>
           <td><code>-b</code></td>
           <td><code>--bits</code></td>
           <td><code>16|24|32</code></td>
-          <td>Output bit depth (default: 24)</td>
+          <td>Profundidade de bits de saída (padrão: 24)</td>
         </tr>
         <tr>
           <td><code>-r</code></td>
           <td><code>--rate</code></td>
           <td><code>&lt;Hz&gt;</code></td>
-          <td>Target sample rate (e.g. 44100, 48000, 96000). If set, both input and IR are resampled to this rate.</td>
+          <td>Taxa de amostragem alvo (ex. 44100, 48000, 96000). Se definida, tanto a entrada quanto o IR são reamostrados para esta taxa.</td>
         </tr>
         <tr>
           <td><code>-l</code></td>
           <td><code>--length</code></td>
-          <td><code>&lt;samples&gt;</code></td>
-          <td>Truncate output to this many samples (0 = no truncation)</td>
+          <td><code>&lt;amostras&gt;</code></td>
+          <td>Truncar a saída para este número de amostras (0 = sem truncamento)</td>
         </tr>
         <tr>
           <td><code>-t</code></td>
           <td><code>--trim</code></td>
           <td><code>&lt;dB&gt;</code></td>
-          <td>Trim silence below this threshold (e.g. -60). Applied to the IR before convolution.</td>
+          <td>Cortar o silêncio abaixo deste limiar (ex. -60). Aplicado ao IR antes da convolução.</td>
         </tr>
         <tr>
           <td><code>-f</code></td>
           <td><code>--fade</code></td>
           <td><code>&lt;ms&gt;</code></td>
-          <td>Apply fade-out of this duration in milliseconds to the IR. A 1ms fade-in is always applied.</td>
+          <td>Aplicar um fade-out desta duração em milissegundos ao IR. Um fade-in de 1ms é sempre aplicado.</td>
         </tr>
         <tr>
           <td><code>-m</code></td>
           <td><code>--mono</code></td>
           <td>(flag)</td>
-          <td>Force mono output (downmix to single channel)</td>
+          <td>Forçar saída mono (mixar para um único canal)</td>
         </tr>
         <tr>
           <td></td>
           <td><code>--min</code></td>
           <td>(flag)</td>
-          <td>Convert the convolved output to minimum phase</td>
+          <td>Converter a saída convoluída para fase mínima</td>
         </tr>
         <tr>
           <td><code>-h</code></td>
           <td><code>--help</code></td>
           <td>(flag)</td>
-          <td>Show help and usage information</td>
+          <td>Mostrar ajuda e informações de uso</td>
         </tr>
       </tbody>
     </table>
 
-    <h3>Examples</h3>
+    <h3>Exemplos</h3>
 
-    <h4>Basic convolution</h4>
-    <p>Convolve a guitar signal with a cabinet impulse response:</p>
+    <h4>Convolução básica</h4>
+    <p>Convoluir um sinal de guitarra com uma resposta ao impulso de cabinet:</p>
     <div class="command-block">
       <span class="option">TaraDSP</span> -x guitar.wav -y cab_ir.wav -o guitar_amped.wav
     </div>
 
-    <h4>Mastering with dithering</h4>
-    <p>Apply mastering to a mix without convolution (no IR), output 16-bit with dithering:</p>
+    <h4>Masterização com dithering</h4>
+    <p>Aplicar masterização a uma mixagem sem convolução (sem IR), saída de 16 bits com dithering:</p>
     <div class="command-block">
       <span class="option">TaraDSP</span> -x mix.wav -o master.wav -b 16
     </div>
 
-    <h4>Resampling</h4>
-    <p>Convert a 44.1kHz file to 48kHz with convolution:</p>
+    <h4>Remostragem</h4>
+    <p>Converter um arquivo de 44.1kHz para 48kHz com convolução:</p>
     <div class="command-block">
       <span class="option">TaraDSP</span> -x input.wav -y ir.wav -o output.wav -r 48000
     </div>
 
-    <h4>Minimum phase conversion</h4>
-    <p>Convert a linear-phase IR to minimum phase for lower latency:</p>
+    <h4>Conversão para fase mínima</h4>
+    <p>Converter um IR de fase linear para fase mínima para menor latência:</p>
     <div class="command-block">
       <span class="option">TaraDSP</span> -x input.wav -y linear_ir.wav -o output.wav --min
     </div>
 
-    <h4>Trim silence and apply fade</h4>
-    <p>Trim silence below -60dB from the IR, apply a 50ms fade-out:</p>
+    <h4>Cortar silêncio e aplicar fade</h4>
+    <p>Cortar o silêncio abaixo de -60dB do IR, aplicar um fade-out de 50ms:</p>
     <div class="command-block">
       <span class="option">TaraDSP</span> -x input.wav -y ir.wav -o output.wav -t -60 -f 50
     </div>
 
-    <h4>Mono output</h4>
-    <p>Downmix stereo to mono:</p>
+    <h4>Saída mono</h4>
+    <p>Mixar estéreo para mono:</p>
     <div class="command-block">
       <span class="option">TaraDSP</span> -x stereo.wav -y ir.wav -o mono.wav -m
     </div>
 
-    <h4>Truncate for modelers</h4>
-    <p>Truncate to 1024 samples (for guitar modelers like GP-200):</p>
+    <h4>Truncar para modeladores</h4>
+    <p>Truncar para 1024 amostras (para modeladores de guitarra como GP-200):</p>
     <div class="command-block">
       <span class="option">TaraDSP</span> -x input.wav -y ir.wav -o output.wav -l 1024
     </div>
 
-    <h3>Input Formats</h3>
+    <h3>Formatos de Entrada</h3>
     <table>
       <thead>
-        <tr><th>Format</th><th>Bit Depth</th><th>Channels</th><th>Notes</th></tr>
+        <tr><th>Formato</th><th>Profundidade de Bits</th><th>Canais</th><th>Notas</th></tr>
       </thead>
       <tbody>
-        <tr><td>WAV (PCM)</td><td>8, 16, 24, 32-bit</td><td>Mono, Stereo, Multichannel</td><td>All standard WAV formats supported</td></tr>
-        <tr><td>WAV (IEEE Float)</td><td>32-bit float</td><td>Mono, Stereo</td><td>Full dynamic range, no clipping</td></tr>
+        <tr><td>WAV (PCM)</td><td>8, 16, 24, 32 bits</td><td>Mono, Estéreo, Multicanal</td><td>Todos os formatos WAV padrão suportados</td></tr>
+        <tr><td>WAV (IEEE Float)</td><td>32 bits float</td><td>Mono, Estéreo</td><td>Faixa dinâmica completa, sem clipping</td></tr>
       </tbody>
     </table>
 
-    <h3>Output Formats</h3>
+    <h3>Formatos de Saída</h3>
     <table>
       <thead>
-        <tr><th>Bit Depth</th><th>Format</th><th>Dithering</th><th>Notes</th></tr>
+        <tr><th>Profundidade de Bits</th><th>Formato</th><th>Dithering</th><th>Notas</th></tr>
       </thead>
       <tbody>
-        <tr><td>16-bit</td><td>WAV (PCM)</td><td>TPDF with error feedback</td><td>CD quality, universally compatible</td></tr>
-        <tr><td>24-bit</td><td>WAV (PCM)</td><td>None (native resolution)</td><td>Studio quality, recommended</td></tr>
-        <tr><td>32-bit</td><td>WAV (IEEE Float)</td><td>None</td><td>Maximum dynamic range, for further processing</td></tr>
+        <tr><td>16 bits</td><td>WAV (PCM)</td><td>TPDF com realimentação de erro</td><td>Qualidade de CD, universalmente compatível</td></tr>
+        <tr><td>24 bits</td><td>WAV (PCM)</td><td>Nenhum (resolução nativa)</td><td>Qualidade de estúdio, recomendado</td></tr>
+        <tr><td>32 bits</td><td>WAV (IEEE Float)</td><td>Nenhum</td><td>Faixa dinâmica máxima, para processamento adicional</td></tr>
       </tbody>
     </table>
 
     <div class="note">
-      <strong>Tip:</strong> For the best results, use 24-bit output. It provides
-      more headroom than 16-bit and is smaller than 32-bit float. The mastering
-      dither is only applied for 16-bit output.
+      <strong>Dica:</strong> Para melhores resultados, use saída de 24 bits.
+      Ela oferece mais margem que 16 bits e é menor que 32 bits float. O dither
+      de masterização só é aplicado para saída de 16 bits.
     </div>
 
-    <h3>Configuration File</h3>
-    <p>TaraDSP reads a <code>settings.ini</code> file from the same directory
-    as the executable (or the current working directory). This file can set
-    default values for artist metadata, bit depth, dither amount, and more.</p>
+    <h3>Arquivo de Configuração</h3>
+    <p>O TaraDSP lê um arquivo <code>settings.ini</code> do mesmo diretório
+    que o executável (ou do diretório de trabalho atual). Este arquivo pode definir
+    valores padrão para metadados de artista, profundidade de bits, quantidade de dither e mais.</p>
     <pre>; settings.ini
 [Metadata]
 Artist=Your Studio Name
@@ -246,8 +246,8 @@ TruncateLen=0</pre>
 
 <footer>
   <div class="container">
-    <p>TaraDSP — Released under the BSD-3-Clause License.</p>
-    <p><a href="https://github.com/smallbutfine/TaraDSP">GitHub Repository</a></p>
+    <p>TaraDSP — Lançado sob a Licença BSD-3-Clause.</p>
+    <p><a href="https://github.com/smallbutfine/TaraDSP">Repositório GitHub</a></p>
   </div>
 </footer>
 

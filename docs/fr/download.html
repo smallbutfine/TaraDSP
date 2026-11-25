@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TaraDSP — Download</title>
+<title>TaraDSP — Télécharger</title>
 <link rel="stylesheet" href="../style.css">
   <style>
 .crossbar {
@@ -51,88 +51,88 @@
       <a href="index.html">Accueil</a>
       <a href="concepts.html">Concepts</a>
       <a href="cli.html">Référence CLI</a>
-      <a href="gui.html">IUG</a>
+      <a href="gui.html">GUI</a>
       <a href="docs.html">Documentation</a>
       <a href="manual.html">Manuel</a>
       <a href="download.html">Télécharger</a>
-      <a href="de/index.html">DE</a>
-      <a href="es/index.html">ES</a>
-      <a href="fr/index.html">FR</a>
-      <a href="pt/index.html">PT</a>
-      <a href="ru/index.html">RU</a>
-      <a href="zh/index.html">ZH</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/de/">DE</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/es/">ES</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/fr/">FR</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/pt/">PT</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/ru/">RU</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/zh/">ZH</a>
     </nav>
   </div>
 </header>
 
 <section>
   <div class="container">
-    <h2>Downloads</h2>
-    <p>Prebuilt binaries are attached to every
-    <a href="https://github.com/smallbutfine/TaraDSP/releases">GitHub Release</a>:</p>
+    <h2>Téléchargements</h2>
+    <p>Les binaires précompilés sont joints à chaque
+    <a href="https://github.com/smallbutfine/TaraDSP/releases">Release GitHub</a> :</p>
 
     <table class="download-table">
       <thead>
-        <tr><th>Platform</th><th>Artifact</th><th>Notes</th></tr>
+        <tr><th>Plateforme</th><th>Artefact</th><th>Notes</th></tr>
       </thead>
       <tbody>
         <tr>
-          <td>Windows 64-bit</td>
+          <td>Windows 64 bits</td>
           <td><code>TaraDSP_&lt;version&gt;_Setup.exe</code></td>
-          <td>Inno Setup installer. Includes GUI, CLI, libpffft.dll, and config.</td>
+          <td>Installateur Inno Setup. Inclut la GUI, la CLI, libpffft.dll et la config.</td>
         </tr>
         <tr>
           <td>macOS Intel</td>
           <td><code>TaraDSP_gui&lt;version&gt;-macos-intel.zip</code></td>
-          <td>Universal app bundle. Unzip and drag to /Applications.</td>
+          <td>Bundle d'app universel. Décompressez et glissez vers /Applications.</td>
         </tr>
         <tr>
           <td>macOS Apple Silicon</td>
           <td><code>TaraDSP_gui&lt;version&gt;-macos-aarch64.zip</code></td>
-          <td>Universal app bundle. Unzip and drag to /Applications.</td>
+          <td>Bundle d'app universel. Décompressez et glissez vers /Applications.</td>
         </tr>
         <tr>
           <td>Linux x86_64</td>
           <td><code>TaraDSP&lt;version&gt;-linux-x64.tar.gz</code></td>
-          <td>Extract and run. Includes libpffft.so.</td>
+          <td>Extrayez et lancez. Inclut libpffft.so.</td>
         </tr>
         <tr>
           <td>Linux ARM</td>
           <td><code>TaraDSP&lt;version&gt;-linux-arm.tar.gz</code></td>
-          <td>Extract and run. Includes libpffft.so.</td>
+          <td>Extrayez et lancez. Inclut libpffft.so.</td>
         </tr>
       </tbody>
     </table>
 
     <div class="note">
-      <strong>macOS:</strong> The app is not code-signed. On first launch,
-      use <strong>right-click → Open</strong> (or
-      <code>xattr -dr com.apple.quarantine</code> in Terminal).
+      <strong>macOS :</strong> L'app n'est pas signée. Au premier lancement,
+      utilisez <strong>clic droit → Ouvrir</strong> (ou
+      <code>xattr -dr com.apple.quarantine</code> dans le Terminal).
     </div>
 
     <div class="note">
-      <strong>Linux:</strong> The tarball includes the
-      <code>libpffft.so</code> shared library. Make sure it sits next to
-      the <code>TaraDSP</code> executable, or set
-      <code>LD_LIBRARY_PATH</code> accordingly.
+      <strong>Linux :</strong> L'archive inclut la
+      bibliothèque partagée <code>libpffft.so</code>. Assurez-vous qu'elle se trouve à côté
+      de l'exécutable <code>TaraDSP</code>, ou définissez
+      <code>LD_LIBRARY_PATH</code> en conséquence.
     </div>
 
-    <h3>Building from Source</h3>
-    <p>See the <a href="docs.html#building">Documentation</a> for build
-    instructions. In short:</p>
-    <pre>./build_all.bat            # all 5 targets + packages into Deploy/
-./build_all.bat --check    # verify the toolchain only</pre>
+    <h3>Compilation depuis les Sources</h3>
+    <p>Voir la <a href="docs.html#building">Documentation</a> pour les instructions
+    de compilation. En bref :</p>
+    <pre>./build_all.bat            # les 5 cibles + paquets dans Deploy/
+./build_all.bat --check    # vérifier la chaîne d'outils uniquement</pre>
 
-    <h3>System Requirements</h3>
+    <h3>Configuration Requise</h3>
     <table>
       <thead>
-        <tr><th>Component</th><th>Requirement</th></tr>
+        <tr><th>Composant</th><th>Exigence</th></tr>
       </thead>
       <tbody>
-        <tr><td>OS</td><td>Windows 10+, macOS 10.13+, or Linux (x86_64/ARM)</td></tr>
-        <tr><td>CPU</td><td>x86_64 or ARM (Intel/AMD/Apple Silicon)</td></tr>
-        <tr><td>RAM</td><td>1 GB minimum (4 GB recommended for long files)</td></tr>
-        <tr><td>Shared Library</td><td><code>libpffft.dll</code> / <code>libpffft.dylib</code> / <code>libpffft.so</code> (included in all releases)</td></tr>
+        <tr><td>OS</td><td>Windows 10+, macOS 10.13+, ou Linux (x86_64/ARM)</td></tr>
+        <tr><td>CPU</td><td>x86_64 ou ARM (Intel/AMD/Apple Silicon)</td></tr>
+        <tr><td>RAM</td><td>1 Go minimum (4 Go recommandé pour les longs fichiers)</td></tr>
+        <tr><td>Bibliothèque Partagée</td><td><code>libpffft.dll</code> / <code>libpffft.dylib</code> / <code>libpffft.so</code> (incluse dans tous les releases)</td></tr>
       </tbody>
     </table>
   </div>
@@ -140,8 +140,8 @@
 
 <footer>
   <div class="container">
-    <p>TaraDSP — Released under the BSD-3-Clause License.</p>
-    <p><a href="https://github.com/smallbutfine/TaraDSP">GitHub Repository</a></p>
+    <p>TaraDSP — Publié sous licence BSD-3-Clause.</p>
+    <p><a href="https://github.com/smallbutfine/TaraDSP">Dépôt GitHub</a></p>
   </div>
 </footer>
 

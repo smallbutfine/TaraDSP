@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TaraDSP — Command Line Reference</title>
+<title>TaraDSP — Справочник по командной строке</title>
 <link rel="stylesheet" href="../style.css">
   <style>
 .crossbar {
@@ -50,187 +50,187 @@
     <nav>
       <a href="index.html">Главная</a>
       <a href="concepts.html">Концепции</a>
-      <a href="cli.html">CLI-справочник</a>
+      <a href="cli.html">Справка CLI</a>
       <a href="gui.html">GUI</a>
       <a href="docs.html">Документация</a>
       <a href="manual.html">Руководство</a>
       <a href="download.html">Скачать</a>
-      <a href="de/index.html">DE</a>
-      <a href="es/index.html">ES</a>
-      <a href="fr/index.html">FR</a>
-      <a href="pt/index.html">PT</a>
-      <a href="ru/index.html">RU</a>
-      <a href="zh/index.html">ZH</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/de/">DE</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/es/">ES</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/fr/">FR</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/pt/">PT</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/ru/">RU</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/zh/">ZH</a>
     </nav>
   </div>
 </header>
 
 <section class="docs-section">
   <div class="container">
-    <h2>Command Line Reference</h2>
-    <p>The <code>TaraDSP</code> executable is a command-line audio processing
-    tool. It applies FFT convolution with impulse responses, resamples audio,
-    and applies mastering dithering and fades.</p>
+    <h2>Справочник по командной строке</h2>
+    <p>Исполняемый файл <code>TaraDSP</code> — это инструмент обработки аудио
+    из командной строки. Он применяет БПФ-конволюцию с импульсными характеристиками,
+    выполняет ресемплинг аудио и применяет мастеринг-дизеринг и фейды.</p>
 
     <div class="quick-reference">
-      <h3>Quick start</h3>
+      <h3>Быстрый старт</h3>
       <pre>TaraDSP -x input.wav -y impulse.wav -o output.wav
 TaraDSP -x input.wav -o output.wav -b 24 -r 48000
 TaraDSP -x input.wav -y ir.wav -o output.wav -f 50 -t -60 --min</pre>
     </div>
 
-    <h3>Options</h3>
+    <h3>Опции</h3>
     <table>
       <thead>
-        <tr><th>Option</th><th>Long form</th><th>Value</th><th>Description</th></tr>
+        <tr><th>Опция</th><th>Полная форма</th><th>Значение</th><th>Описание</th></tr>
       </thead>
       <tbody>
         <tr>
           <td><code>-x</code></td>
           <td><code>--in1</code></td>
-          <td><code>&lt;file&gt;</code></td>
-          <td>Input WAV file (the audio signal to process)</td>
+          <td><code>&lt;файл&gt;</code></td>
+          <td>Входной WAV-файл (аудиосигнал для обработки)</td>
         </tr>
         <tr>
           <td><code>-y</code></td>
           <td><code>--in2</code></td>
-          <td><code>&lt;file&gt;</code></td>
-          <td>Impulse response WAV file (optional — if omitted, a unit impulse is used, producing a pass-through with mastering)</td>
+          <td><code>&lt;файл&gt;</code></td>
+          <td>WAV-файл импульсной характеристики (необязательно — если опущен, используется единичный импульс, дающий сквозной проход с мастерингом)</td>
         </tr>
         <tr>
           <td><code>-o</code></td>
           <td><code>--output</code></td>
-          <td><code>&lt;file&gt;</code></td>
-          <td>Output WAV file</td>
+          <td><code>&lt;файл&gt;</code></td>
+          <td>Выходной WAV-файл</td>
         </tr>
         <tr>
           <td><code>-b</code></td>
           <td><code>--bits</code></td>
           <td><code>16|24|32</code></td>
-          <td>Output bit depth (default: 24)</td>
+          <td>Разрядность вывода (по умолчанию: 24)</td>
         </tr>
         <tr>
           <td><code>-r</code></td>
           <td><code>--rate</code></td>
-          <td><code>&lt;Hz&gt;</code></td>
-          <td>Target sample rate (e.g. 44100, 48000, 96000). If set, both input and IR are resampled to this rate.</td>
+          <td><code>&lt;Гц&gt;</code></td>
+          <td>Целевая частота дискретизации (например, 44100, 48000, 96000). Если задана, и вход, и IR ресемплируются на эту частоту.</td>
         </tr>
         <tr>
           <td><code>-l</code></td>
           <td><code>--length</code></td>
-          <td><code>&lt;samples&gt;</code></td>
-          <td>Truncate output to this many samples (0 = no truncation)</td>
+          <td><code>&lt;сэмплы&gt;</code></td>
+          <td>Обрезать вывод до этого количества сэмплов (0 = без обрезки)</td>
         </tr>
         <tr>
           <td><code>-t</code></td>
           <td><code>--trim</code></td>
-          <td><code>&lt;dB&gt;</code></td>
-          <td>Trim silence below this threshold (e.g. -60). Applied to the IR before convolution.</td>
+          <td><code>&lt;дБ&gt;</code></td>
+          <td>Обрезать тишину ниже этого порога (например, -60). Применяется к IR перед конволюцией.</td>
         </tr>
         <tr>
           <td><code>-f</code></td>
           <td><code>--fade</code></td>
-          <td><code>&lt;ms&gt;</code></td>
-          <td>Apply fade-out of this duration in milliseconds to the IR. A 1ms fade-in is always applied.</td>
+          <td><code>&lt;мс&gt;</code></td>
+          <td>Применить фейд-аут этой длительности в миллисекундах к IR. Фейд-ин 1 мс применяется всегда.</td>
         </tr>
         <tr>
           <td><code>-m</code></td>
           <td><code>--mono</code></td>
-          <td>(flag)</td>
-          <td>Force mono output (downmix to single channel)</td>
+          <td>(флаг)</td>
+          <td>Принудительный моно-вывод (сведение в один канал)</td>
         </tr>
         <tr>
           <td></td>
           <td><code>--min</code></td>
-          <td>(flag)</td>
-          <td>Convert the convolved output to minimum phase</td>
+          <td>(флаг)</td>
+          <td>Преобразовать свёрнутый вывод в минимальную фазу</td>
         </tr>
         <tr>
           <td><code>-h</code></td>
           <td><code>--help</code></td>
-          <td>(flag)</td>
-          <td>Show help and usage information</td>
+          <td>(флаг)</td>
+          <td>Показать справку и информацию об использовании</td>
         </tr>
       </tbody>
     </table>
 
-    <h3>Examples</h3>
+    <h3>Примеры</h3>
 
-    <h4>Basic convolution</h4>
-    <p>Convolve a guitar signal with a cabinet impulse response:</p>
+    <h4>Базовая конволюция</h4>
+    <p>Свернуть сигнал гитары с импульсной характеристикой кабинета:</p>
     <div class="command-block">
       <span class="option">TaraDSP</span> -x guitar.wav -y cab_ir.wav -o guitar_amped.wav
     </div>
 
-    <h4>Mastering with dithering</h4>
-    <p>Apply mastering to a mix without convolution (no IR), output 16-bit with dithering:</p>
+    <h4>Мастеринг с дизерингом</h4>
+    <p>Применить мастеринг к миксу без конволюции (без IR), вывод 16 бит с дизерингом:</p>
     <div class="command-block">
       <span class="option">TaraDSP</span> -x mix.wav -o master.wav -b 16
     </div>
 
-    <h4>Resampling</h4>
-    <p>Convert a 44.1kHz file to 48kHz with convolution:</p>
+    <h4>Ресемплинг</h4>
+    <p>Преобразовать файл 44.1 кГц в 48 кГц с конволюцией:</p>
     <div class="command-block">
       <span class="option">TaraDSP</span> -x input.wav -y ir.wav -o output.wav -r 48000
     </div>
 
-    <h4>Minimum phase conversion</h4>
-    <p>Convert a linear-phase IR to minimum phase for lower latency:</p>
+    <h4>Преобразование в минимальную фазу</h4>
+    <p>Преобразовать IR с линейной фазой в минимальную фазу для меньшей задержки:</p>
     <div class="command-block">
       <span class="option">TaraDSP</span> -x input.wav -y linear_ir.wav -o output.wav --min
     </div>
 
-    <h4>Trim silence and apply fade</h4>
-    <p>Trim silence below -60dB from the IR, apply a 50ms fade-out:</p>
+    <h4>Обрезка тишины и применение фейда</h4>
+    <p>Обрезать тишину ниже -60 дБ из IR, применить фейд-аут 50 мс:</p>
     <div class="command-block">
       <span class="option">TaraDSP</span> -x input.wav -y ir.wav -o output.wav -t -60 -f 50
     </div>
 
-    <h4>Mono output</h4>
-    <p>Downmix stereo to mono:</p>
+    <h4>Моно-вывод</h4>
+    <p>Свести стерео в моно:</p>
     <div class="command-block">
       <span class="option">TaraDSP</span> -x stereo.wav -y ir.wav -o mono.wav -m
     </div>
 
-    <h4>Truncate for modelers</h4>
-    <p>Truncate to 1024 samples (for guitar modelers like GP-200):</p>
+    <h4>Обрезка для модельеров</h4>
+    <p>Обрезать до 1024 сэмплов (для гитарных модельеров типа GP-200):</p>
     <div class="command-block">
       <span class="option">TaraDSP</span> -x input.wav -y ir.wav -o output.wav -l 1024
     </div>
 
-    <h3>Input Formats</h3>
+    <h3>Форматы входа</h3>
     <table>
       <thead>
-        <tr><th>Format</th><th>Bit Depth</th><th>Channels</th><th>Notes</th></tr>
+        <tr><th>Формат</th><th>Разрядность</th><th>Каналы</th><th>Примечания</th></tr>
       </thead>
       <tbody>
-        <tr><td>WAV (PCM)</td><td>8, 16, 24, 32-bit</td><td>Mono, Stereo, Multichannel</td><td>All standard WAV formats supported</td></tr>
-        <tr><td>WAV (IEEE Float)</td><td>32-bit float</td><td>Mono, Stereo</td><td>Full dynamic range, no clipping</td></tr>
+        <tr><td>WAV (PCM)</td><td>8, 16, 24, 32 бита</td><td>Моно, Стерео, Многоканальный</td><td>Поддерживаются все стандартные форматы WAV</td></tr>
+        <tr><td>WAV (IEEE Float)</td><td>32 бита с плавающей точкой</td><td>Моно, Стерео</td><td>Полный динамический диапазон, без клиппинга</td></tr>
       </tbody>
     </table>
 
-    <h3>Output Formats</h3>
+    <h3>Форматы выхода</h3>
     <table>
       <thead>
-        <tr><th>Bit Depth</th><th>Format</th><th>Dithering</th><th>Notes</th></tr>
+        <tr><th>Разрядность</th><th>Формат</th><th>Дизеринг</th><th>Примечания</th></tr>
       </thead>
       <tbody>
-        <tr><td>16-bit</td><td>WAV (PCM)</td><td>TPDF with error feedback</td><td>CD quality, universally compatible</td></tr>
-        <tr><td>24-bit</td><td>WAV (PCM)</td><td>None (native resolution)</td><td>Studio quality, recommended</td></tr>
-        <tr><td>32-bit</td><td>WAV (IEEE Float)</td><td>None</td><td>Maximum dynamic range, for further processing</td></tr>
+        <tr><td>16 бит</td><td>WAV (PCM)</td><td>TPDF с обратной связью по ошибке</td><td>Качество CD, универсальная совместимость</td></tr>
+        <tr><td>24 бита</td><td>WAV (PCM)</td><td>Нет (нативное разрешение)</td><td>Студийное качество, рекомендуется</td></tr>
+        <tr><td>32 бита</td><td>WAV (IEEE Float)</td><td>Нет</td><td>Максимальный динамический диапазон, для дальнейшей обработки</td></tr>
       </tbody>
     </table>
 
     <div class="note">
-      <strong>Tip:</strong> For the best results, use 24-bit output. It provides
-      more headroom than 16-bit and is smaller than 32-bit float. The mastering
-      dither is only applied for 16-bit output.
+      <strong>Совет:</strong> Для лучших результатов используйте вывод 24 бита.
+      Он даёт больше запаса, чем 16 бит, и меньше, чем 32-битный float. Мастеринг-дизеринг
+      применяется только для вывода 16 бит.
     </div>
 
-    <h3>Configuration File</h3>
-    <p>TaraDSP reads a <code>settings.ini</code> file from the same directory
-    as the executable (or the current working directory). This file can set
-    default values for artist metadata, bit depth, dither amount, and more.</p>
+    <h3>Файл конфигурации</h3>
+    <p>TaraDSP читает файл <code>settings.ini</code> из того же каталога,
+    что и исполняемый файл (или из текущего рабочего каталога). Этот файл может задавать
+    значения по умолчанию для метаданных исполнителя, разрядности, величины дизеринга и многого другого.</p>
     <pre>; settings.ini
 [Metadata]
 Artist=Your Studio Name
@@ -246,8 +246,8 @@ TruncateLen=0</pre>
 
 <footer>
   <div class="container">
-    <p>TaraDSP — Released under the BSD-3-Clause License.</p>
-    <p><a href="https://github.com/smallbutfine/TaraDSP">GitHub Repository</a></p>
+    <p>TaraDSP — Выпущено под лицензией BSD-3-Clause.</p>
+    <p><a href="https://github.com/smallbutfine/TaraDSP">Репозиторий GitHub</a></p>
   </div>
 </footer>
 

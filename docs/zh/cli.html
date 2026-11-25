@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TaraDSP — Command Line Reference</title>
+<title>TaraDSP — 命令行参考</title>
 <link rel="stylesheet" href="../style.css">
   <style>
 .crossbar {
@@ -50,187 +50,186 @@
     <nav>
       <a href="index.html">首页</a>
       <a href="concepts.html">概念</a>
-      <a href="cli.html">CLI参考</a>
-      <a href="gui.html">界面</a>
+      <a href="cli.html">CLI 参考</a>
+      <a href="gui.html">图形界面</a>
       <a href="docs.html">文档</a>
       <a href="manual.html">手册</a>
       <a href="download.html">下载</a>
-      <a href="de/index.html">DE</a>
-      <a href="es/index.html">ES</a>
-      <a href="fr/index.html">FR</a>
-      <a href="pt/index.html">PT</a>
-      <a href="ru/index.html">RU</a>
-      <a href="zh/index.html">ZH</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/de/">DE</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/es/">ES</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/fr/">FR</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/pt/">PT</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/ru/">RU</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/zh/">ZH</a>
     </nav>
   </div>
 </header>
 
 <section class="docs-section">
   <div class="container">
-    <h2>Command Line Reference</h2>
-    <p>The <code>TaraDSP</code> executable is a command-line audio processing
-    tool. It applies FFT convolution with impulse responses, resamples audio,
-    and applies mastering dithering and fades.</p>
+    <h2>命令行参考</h2>
+    <p><code>TaraDSP</code> 可执行文件是一款命令行音频处理工具。
+    它采用脉冲响应进行 FFT 卷积，对音频进行重采样，并应用母带抖动和淡入淡出。</p>
 
     <div class="quick-reference">
-      <h3>Quick start</h3>
+      <h3>快速开始</h3>
       <pre>TaraDSP -x input.wav -y impulse.wav -o output.wav
 TaraDSP -x input.wav -o output.wav -b 24 -r 48000
 TaraDSP -x input.wav -y ir.wav -o output.wav -f 50 -t -60 --min</pre>
     </div>
 
-    <h3>Options</h3>
+    <h3>选项</h3>
     <table>
       <thead>
-        <tr><th>Option</th><th>Long form</th><th>Value</th><th>Description</th></tr>
+        <tr><th>选项</th><th>长格式</th><th>值</th><th>说明</th></tr>
       </thead>
       <tbody>
         <tr>
           <td><code>-x</code></td>
           <td><code>--in1</code></td>
-          <td><code>&lt;file&gt;</code></td>
-          <td>Input WAV file (the audio signal to process)</td>
+          <td><code>&lt;文件&gt;</code></td>
+          <td>输入 WAV 文件（要处理的音频信号）</td>
         </tr>
         <tr>
           <td><code>-y</code></td>
           <td><code>--in2</code></td>
-          <td><code>&lt;file&gt;</code></td>
-          <td>Impulse response WAV file (optional — if omitted, a unit impulse is used, producing a pass-through with mastering)</td>
+          <td><code>&lt;文件&gt;</code></td>
+          <td>脉冲响应 WAV 文件（可选 — 如果省略，则使用单位脉冲，产生带母带处理的直通）</td>
         </tr>
         <tr>
           <td><code>-o</code></td>
           <td><code>--output</code></td>
-          <td><code>&lt;file&gt;</code></td>
-          <td>Output WAV file</td>
+          <td><code>&lt;文件&gt;</code></td>
+          <td>输出 WAV 文件</td>
         </tr>
         <tr>
           <td><code>-b</code></td>
           <td><code>--bits</code></td>
           <td><code>16|24|32</code></td>
-          <td>Output bit depth (default: 24)</td>
+          <td>输出位深（默认：24）</td>
         </tr>
         <tr>
           <td><code>-r</code></td>
           <td><code>--rate</code></td>
           <td><code>&lt;Hz&gt;</code></td>
-          <td>Target sample rate (e.g. 44100, 48000, 96000). If set, both input and IR are resampled to this rate.</td>
+          <td>目标采样率（例如 44100、48000、96000）。如果设置，输入和 IR 都会重采样到此采样率。</td>
         </tr>
         <tr>
           <td><code>-l</code></td>
           <td><code>--length</code></td>
-          <td><code>&lt;samples&gt;</code></td>
-          <td>Truncate output to this many samples (0 = no truncation)</td>
+          <td><code>&lt;采样&gt;</code></td>
+          <td>将输出截断为此采样数（0 = 不截断）</td>
         </tr>
         <tr>
           <td><code>-t</code></td>
           <td><code>--trim</code></td>
           <td><code>&lt;dB&gt;</code></td>
-          <td>Trim silence below this threshold (e.g. -60). Applied to the IR before convolution.</td>
+          <td>修剪低于此阈值的静音（例如 -60）。在卷积前应用于 IR。</td>
         </tr>
         <tr>
           <td><code>-f</code></td>
           <td><code>--fade</code></td>
           <td><code>&lt;ms&gt;</code></td>
-          <td>Apply fade-out of this duration in milliseconds to the IR. A 1ms fade-in is always applied.</td>
+          <td>对此持续时长（毫秒）的 IR 应用淡出。始终会应用 1ms 的淡入。</td>
         </tr>
         <tr>
           <td><code>-m</code></td>
           <td><code>--mono</code></td>
-          <td>(flag)</td>
-          <td>Force mono output (downmix to single channel)</td>
+          <td>(标志)</td>
+          <td>强制单声道输出（下混为单声道）</td>
         </tr>
         <tr>
           <td></td>
           <td><code>--min</code></td>
-          <td>(flag)</td>
-          <td>Convert the convolved output to minimum phase</td>
+          <td>(标志)</td>
+          <td>将卷积输出转换为最小相位</td>
         </tr>
         <tr>
           <td><code>-h</code></td>
           <td><code>--help</code></td>
-          <td>(flag)</td>
-          <td>Show help and usage information</td>
+          <td>(标志)</td>
+          <td>显示帮助和使用信息</td>
         </tr>
       </tbody>
     </table>
 
-    <h3>Examples</h3>
+    <h3>示例</h3>
 
-    <h4>Basic convolution</h4>
-    <p>Convolve a guitar signal with a cabinet impulse response:</p>
+    <h4>基本卷积</h4>
+    <p>将吉他信号与箱体脉冲响应进行卷积：</p>
     <div class="command-block">
       <span class="option">TaraDSP</span> -x guitar.wav -y cab_ir.wav -o guitar_amped.wav
     </div>
 
-    <h4>Mastering with dithering</h4>
-    <p>Apply mastering to a mix without convolution (no IR), output 16-bit with dithering:</p>
+    <h4>带抖动的母带处理</h4>
+    <p>对混音应用母带处理而不进行卷积（无 IR），输出 16 位并带抖动：</p>
     <div class="command-block">
       <span class="option">TaraDSP</span> -x mix.wav -o master.wav -b 16
     </div>
 
-    <h4>Resampling</h4>
-    <p>Convert a 44.1kHz file to 48kHz with convolution:</p>
+    <h4>重采样</h4>
+    <p>将 44.1kHz 文件转换为 48kHz 并进行卷积：</p>
     <div class="command-block">
       <span class="option">TaraDSP</span> -x input.wav -y ir.wav -o output.wav -r 48000
     </div>
 
-    <h4>Minimum phase conversion</h4>
-    <p>Convert a linear-phase IR to minimum phase for lower latency:</p>
+    <h4>最小相位转换</h4>
+    <p>将线性相位 IR 转换为最小相位以实现更低延迟：</p>
     <div class="command-block">
       <span class="option">TaraDSP</span> -x input.wav -y linear_ir.wav -o output.wav --min
     </div>
 
-    <h4>Trim silence and apply fade</h4>
-    <p>Trim silence below -60dB from the IR, apply a 50ms fade-out:</p>
+    <h4>修剪静音并应用淡出</h4>
+    <p>从 IR 中修剪低于 -60dB 的静音，应用 50ms 的淡出：</p>
     <div class="command-block">
       <span class="option">TaraDSP</span> -x input.wav -y ir.wav -o output.wav -t -60 -f 50
     </div>
 
-    <h4>Mono output</h4>
-    <p>Downmix stereo to mono:</p>
+    <h4>单声道输出</h4>
+    <p>将立体声下混为单声道：</p>
     <div class="command-block">
       <span class="option">TaraDSP</span> -x stereo.wav -y ir.wav -o mono.wav -m
     </div>
 
-    <h4>Truncate for modelers</h4>
-    <p>Truncate to 1024 samples (for guitar modelers like GP-200):</p>
+    <h4>为建模器截断</h4>
+    <p>截断为 1024 个采样（用于 GP-200 等吉他建模器）：</p>
     <div class="command-block">
       <span class="option">TaraDSP</span> -x input.wav -y ir.wav -o output.wav -l 1024
     </div>
 
-    <h3>Input Formats</h3>
+    <h3>输入格式</h3>
     <table>
       <thead>
-        <tr><th>Format</th><th>Bit Depth</th><th>Channels</th><th>Notes</th></tr>
+        <tr><th>格式</th><th>位深</th><th>声道</th><th>备注</th></tr>
       </thead>
       <tbody>
-        <tr><td>WAV (PCM)</td><td>8, 16, 24, 32-bit</td><td>Mono, Stereo, Multichannel</td><td>All standard WAV formats supported</td></tr>
-        <tr><td>WAV (IEEE Float)</td><td>32-bit float</td><td>Mono, Stereo</td><td>Full dynamic range, no clipping</td></tr>
+        <tr><td>WAV（PCM）</td><td>8、16、24、32 位</td><td>单声道、立体声、多声道</td><td>支持所有标准 WAV 格式</td></tr>
+        <tr><td>WAV（IEEE 浮点）</td><td>32 位浮点</td><td>单声道、立体声</td><td>完整动态范围，无削波</td></tr>
       </tbody>
     </table>
 
-    <h3>Output Formats</h3>
+    <h3>输出格式</h3>
     <table>
       <thead>
-        <tr><th>Bit Depth</th><th>Format</th><th>Dithering</th><th>Notes</th></tr>
+        <tr><th>位深</th><th>格式</th><th>抖动</th><th>备注</th></tr>
       </thead>
       <tbody>
-        <tr><td>16-bit</td><td>WAV (PCM)</td><td>TPDF with error feedback</td><td>CD quality, universally compatible</td></tr>
-        <tr><td>24-bit</td><td>WAV (PCM)</td><td>None (native resolution)</td><td>Studio quality, recommended</td></tr>
-        <tr><td>32-bit</td><td>WAV (IEEE Float)</td><td>None</td><td>Maximum dynamic range, for further processing</td></tr>
+        <tr><td>16 位</td><td>WAV（PCM）</td><td>带误差反馈的 TPDF</td><td>CD 品质，通用兼容</td></tr>
+        <tr><td>24 位</td><td>WAV（PCM）</td><td>无（原生分辨率）</td><td>录音室品质，推荐</td></tr>
+        <tr><td>32 位</td><td>WAV（IEEE 浮点）</td><td>无</td><td>最大动态范围，用于进一步处理</td></tr>
       </tbody>
     </table>
 
     <div class="note">
-      <strong>Tip:</strong> For the best results, use 24-bit output. It provides
-      more headroom than 16-bit and is smaller than 32-bit float. The mastering
-      dither is only applied for 16-bit output.
+      <strong>提示：</strong> 为获得最佳结果，请使用 24 位输出。
+      它比 16 位提供更多余量，且比 32 位浮点更小。母带
+      抖动仅适用于 16 位输出。
     </div>
 
-    <h3>Configuration File</h3>
-    <p>TaraDSP reads a <code>settings.ini</code> file from the same directory
-    as the executable (or the current working directory). This file can set
-    default values for artist metadata, bit depth, dither amount, and more.</p>
+    <h3>配置文件</h3>
+    <p>TaraDSP 从可执行文件所在目录（或当前工作目录）读取
+    <code>settings.ini</code> 文件。此文件可为艺术家元数据、位深、
+    抖动量等设置默认值。</p>
     <pre>; settings.ini
 [Metadata]
 Artist=Your Studio Name
@@ -246,8 +245,8 @@ TruncateLen=0</pre>
 
 <footer>
   <div class="container">
-    <p>TaraDSP — Released under the BSD-3-Clause License.</p>
-    <p><a href="https://github.com/smallbutfine/TaraDSP">GitHub Repository</a></p>
+    <p>TaraDSP — 根据 BSD-3-Clause 许可证发布。</p>
+    <p><a href="https://github.com/smallbutfine/TaraDSP">GitHub 仓库</a></p>
   </div>
 </footer>
 

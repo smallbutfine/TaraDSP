@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TaraDSP — GUI Reference</title>
+<title>TaraDSP — Référence de la GUI</title>
 <link rel="stylesheet" href="../style.css">
   <style>
 .crossbar {
@@ -51,143 +51,143 @@
       <a href="index.html">Accueil</a>
       <a href="concepts.html">Concepts</a>
       <a href="cli.html">Référence CLI</a>
-      <a href="gui.html">IUG</a>
+      <a href="gui.html">GUI</a>
       <a href="docs.html">Documentation</a>
       <a href="manual.html">Manuel</a>
       <a href="download.html">Télécharger</a>
-      <a href="de/index.html">DE</a>
-      <a href="es/index.html">ES</a>
-      <a href="fr/index.html">FR</a>
-      <a href="pt/index.html">PT</a>
-      <a href="ru/index.html">RU</a>
-      <a href="zh/index.html">ZH</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/de/">DE</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/es/">ES</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/fr/">FR</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/pt/">PT</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/ru/">RU</a>
+      <a href="https://smallbutfine.github.io/TaraDSP/zh/">ZH</a>
     </nav>
   </div>
 </header>
 
 <section>
   <div class="container">
-    <h2>Graphical User Interface</h2>
-    <p>The TaraDSP GUI provides the same professional audio processing as the
-    CLI in an easy-to-use window. It is the recommended way to process files
-    interactively.</p>
+    <h2>Interface Graphique Utilisateur</h2>
+    <p>La GUI de TaraDSP fournit le même traitement audio professionnel que la
+    CLI dans une fenêtre facile à utiliser. C'est la façon recommandée de traiter
+    les fichiers de manière interactive.</p>
 
-    <h3>Controls</h3>
+    <h3>Contrôles</h3>
     <table>
       <thead>
-        <tr><th>Control</th><th>Type</th><th>Description</th></tr>
+        <tr><th>Contrôle</th><th>Type</th><th>Description</th></tr>
       </thead>
       <tbody>
         <tr>
-          <td>Source File</td>
-          <td>File picker</td>
-          <td>The input WAV file to process. Click to browse for a file.</td>
+          <td>Fichier Source</td>
+          <td>Sélecteur de fichier</td>
+          <td>Le fichier WAV d'entrée à traiter. Cliquez pour parcourir un fichier.</td>
         </tr>
         <tr>
-          <td>Impulse Response</td>
-          <td>File picker</td>
-          <td>The IR WAV file to convolve with. Leave empty for passthrough
-          mode (mastering only: dither, normalize, fades).</td>
+          <td>Réponse Impulsionnelle</td>
+          <td>Sélecteur de fichier</td>
+          <td>Le fichier WAV IR avec lequel convoluer. Laissez vide pour le mode
+          passage direct (mastering seulement : dither, normaliser, fondus).</td>
         </tr>
         <tr>
-          <td>Output File</td>
-          <td>Text + browse</td>
-          <td>The output WAV file path. Click "..." to browse for a location.</td>
+          <td>Fichier de Sortie</td>
+          <td>Texte + parcourir</td>
+          <td>Le chemin du fichier WAV de sortie. Cliquez sur « ... » pour parcourir un emplacement.</td>
         </tr>
         <tr>
-          <td>Bit Depth</td>
-          <td>Combo: 16 / 24 / 32</td>
-          <td>Output bit depth. 24 is recommended for studio quality.
-          16 applies TPDF dithering. 32 outputs IEEE float.</td>
+          <td>Profondeur de Bits</td>
+          <td>Combo : 16 / 24 / 32</td>
+          <td>Profondeur de bits de sortie. 24 est recommandé pour la qualité studio.
+          16 applique un dithering TPDF. 32 sort en IEEE float.</td>
         </tr>
         <tr>
-          <td>Sample Rate</td>
+          <td>Fréquence d'Échantillonnage</td>
           <td>Combo</td>
-          <td>Target sample rate: 0 (keep original), 44100, 48000, 88200,
-          96000, 176400, 192000. Both input and IR are resampled if needed.</td>
+          <td>Fréquence d'échantillonnage cible : 0 (garder l'original), 44100, 48000, 88200,
+          96000, 176400, 192000. L'entrée et l'IR sont rééchantillonnées si nécessaire.</td>
         </tr>
         <tr>
-          <td>Truncate Length</td>
+          <td>Longueur de Troncature</td>
           <td>Spin edit</td>
-          <td>Maximum output samples. 0 = no limit. Useful for guitar modelers
-          (e.g. 1024 for GP-200). A short fade-out is applied at the truncation
-          point to prevent clicks.</td>
+          <td>Échantillons de sortie maximum. 0 = pas de limite. Utile pour les modéliseurs de
+          guitare (p. ex. 1024 pour GP-200). Un fondu de sortie court est appliqué au point
+          de troncature pour éviter les clics.</td>
         </tr>
         <tr>
-          <td>Fade-Out</td>
+          <td>Fondu de Sortie</td>
           <td>Spin edit (ms)</td>
-          <td>Duration of fade-out applied to the IR before convolution.
-          A 1ms fade-in is always applied to prevent start clicks.</td>
+          <td>Durée du fondu de sortie appliqué à l'IR avant la convolution.
+          Un fondu d'entrée de 1ms est toujours appliqué pour éviter les clics de début.</td>
         </tr>
         <tr>
-          <td>Trim Silence</td>
+          <td>Couper le Silence</td>
           <td>Spin edit (dB)</td>
-          <td>Threshold below which samples are considered silence and removed
-          from the IR. Set to 0 to disable. Typical: -60 to -80.</td>
+          <td>Seuil en dessous duquel les échantillons sont considérés comme du silence et
+          supprimés de l'IR. Mettez 0 pour désactiver. Typique : -60 à -80.</td>
         </tr>
         <tr>
-          <td>Mono Output</td>
-          <td>Checkbox</td>
-          <td>Downmix the output to a single channel.</td>
+          <td>Sortie Mono</td>
+          <td>Case à cocher</td>
+          <td>Mixer la sortie vers un seul canal.</td>
         </tr>
         <tr>
-          <td>Minimum Phase</td>
-          <td>Checkbox</td>
-          <td>Convert the convolved output to minimum phase. Removes pre-ringing
-          and reduces latency.</td>
+          <td>Phase Minimale</td>
+          <td>Case à cocher</td>
+          <td>Convertir la sortie convoluée en phase minimale. Supprime le pre-ringing
+          et réduit la latence.</td>
         </tr>
         <tr>
           <td>PROCESS</td>
-          <td>Button</td>
-          <td>Run the processing pipeline. Progress is shown in the log.</td>
+          <td>Bouton</td>
+          <td>Exécuter le pipeline de traitement. La progression est affichée dans le journal.</td>
         </tr>
         <tr>
-          <td>Log</td>
-          <td>Read-only memo</td>
-          <td>Shows per-step progress: loading, resampling, convolving,
-          normalizing, saving. Errors are shown in red text.</td>
+          <td>Journal</td>
+          <td>Memo en lecture seule</td>
+          <td>Affiche la progression par étape : chargement, rééchantillonnage, convolution,
+          normalisation, sauvegarde. Les erreurs sont affichées en texte rouge.</td>
         </tr>
       </tbody>
     </table>
 
-    <h3>Processing Pipeline</h3>
-    <p>When you click PROCESS, the GUI runs the following steps in order:</p>
+    <h3>Pipeline de Traitement</h3>
+    <p>Lorsque vous cliquez sur PROCESS, la GUI exécute les étapes suivantes dans l'ordre :</p>
     <ol>
-      <li><strong>Load input</strong> — Read the source WAV file (8/16/24/32-bit PCM or float)</li>
-      <li><strong>Load IR</strong> — Read the impulse response (if specified)</li>
-      <li><strong>Trim silence</strong> — Remove silence below threshold from IR (if set)</li>
-      <li><strong>Apply fade</strong> — Apply fade-out to IR (if set)</li>
-      <li><strong>Resample</strong> — Resample input and IR to target rate (if set)</li>
-      <li><strong>Convolve</strong> — FFT convolution per channel</li>
-      <li><strong>Minimum phase</strong> — Convert to minimum phase (if checked)</li>
-      <li><strong>Normalize</strong> — Peak normalize to 1.0</li>
-      <li><strong>Truncate</strong> — Truncate to max length (if set)</li>
-      <li><strong>Save</strong> — Write output WAV with dithering (16-bit) or float (32-bit)</li>
+      <li><strong>Charger l'entrée</strong> — Lire le fichier WAV source (PCM ou float 8/16/24/32 bits)</li>
+      <li><strong>Charger l'IR</strong> — Lire la réponse impulsionnelle (si spécifiée)</li>
+      <li><strong>Couper le silence</strong> — Supprimer le silence sous le seuil de l'IR (si défini)</li>
+      <li><strong>Appliquer le fondu</strong> — Appliquer un fondu de sortie à l'IR (si défini)</li>
+      <li><strong>Rééchantillonner</strong> — Rééchantillonner l'entrée et l'IR à la fréquence cible (si définie)</li>
+      <li><strong>Convoluer</strong> — Convolution FFT par canal</li>
+      <li><strong>Phase minimale</strong> — Convertir en phase minimale (si coché)</li>
+      <li><strong>Normaliser</strong> — Normaliser le pic à 1.0</li>
+      <li><strong>Tronquer</strong> — Tronquer à la longueur max (si définie)</li>
+      <li><strong>Sauver</strong> — Écrire le WAV de sortie avec dithering (16 bits) ou float (32 bits)</li>
     </ol>
 
-    <h3>Tips</h3>
+    <h3>Astuces</h3>
     <div class="note">
-      <strong>Tip 1:</strong> Leave the IR field empty to use the GUI as a
-      mastering tool — it will apply dither, normalize, and fades without
-      convolution.
+      <strong>Astuce 1 :</strong> Laissez le champ IR vide pour utiliser la GUI comme un
+      outil de mastering — elle appliquera le dither, normalisera et appliquera des fondus
+      sans convolution.
     </div>
     <div class="note">
-      <strong>Tip 2:</strong> For guitar cabinet simulation, set the truncate
-      length to 1024 or 2048 samples and enable minimum phase for the tightest,
-      lowest-latency sound.
+      <strong>Astuce 2 :</strong> Pour la simulation de haut-parleur de guitare, réglez la
+      longueur de troncature à 1024 ou 2048 échantillons et activez la phase minimale pour
+      le son le plus serré et à la plus faible latence.
     </div>
     <div class="note">
-      <strong>Tip 3:</strong> Use 24-bit output for the best balance of quality
-      and file size. 16-bit is only needed for CD compatibility.
+      <strong>Astuce 3 :</strong> Utilisez une sortie 24 bits pour le meilleur équilibre
+      entre qualité et taille de fichier. Le 16 bits n'est nécessaire que pour la compatibilité CD.
     </div>
     <div class="note">
-      <strong>Tip 4:</strong> The GUI reads <code>settings.ini</code> from the
-      same directory as the executable for default values (artist name, bit depth,
-      dither amount, truncate length).
+      <strong>Astuce 4 :</strong> La GUI lit <code>settings.ini</code> du
+      même répertoire que l'exécutable pour les valeurs par défaut (nom d'artiste,
+      profondeur de bits, quantité de dither, longueur de troncature).
     </div>
 
-    <h3>Configuration File</h3>
-    <p>The GUI reads a <code>settings.ini</code> file for default values:</p>
+    <h3>Fichier de Configuration</h3>
+    <p>La GUI lit un fichier <code>settings.ini</code> pour les valeurs par défaut :</p>
     <pre>; settings.ini
 [Metadata]
 Artist=Your Studio Name
@@ -203,8 +203,8 @@ TruncateLen=0</pre>
 
 <footer>
   <div class="container">
-    <p>TaraDSP — Released under the BSD-3-Clause License.</p>
-    <p><a href="https://github.com/smallbutfine/TaraDSP">GitHub Repository</a></p>
+    <p>TaraDSP — Publié sous licence BSD-3-Clause.</p>
+    <p><a href="https://github.com/smallbutfine/TaraDSP">Dépôt GitHub</a></p>
   </div>
 </footer>
 
