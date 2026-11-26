@@ -12,8 +12,8 @@ body {
   color: #e0e0e0;
   background-color: #0a0a0a;
   background-image:
-    linear-gradient(rgba(255, 100, 50, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 100, 50, 0.03) 1px, transparent 1px);
+    linear-gradient(rgba(255, 183, 77, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 183, 77, 0.03) 1px, transparent 1px);
   background-size: 40px 40px;
   position: relative;
 }
@@ -25,7 +25,7 @@ body::before {
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at center, rgba(255, 100, 50, 0.08) 0%, transparent 70%);
+  background: radial-gradient(circle at center, rgba(255, 183, 77, 0.08) 0%, transparent 70%);
   pointer-events: none;
   z-index: -1;
 }
@@ -40,38 +40,38 @@ body::before {
 
 header {
   background: linear-gradient(135deg, #1a0f0a 0%, #2e1a1a 100%);
-  color: #ff6432;
+  color: #ffb74d;
   padding: 30px 0;
-  border-bottom: 2px solid #ff6432;
-  box-shadow: 0 4px 20px rgba(255, 100, 50, 0.3);
+  border-bottom: 2px solid #ffb74d;
+  box-shadow: 0 4px 20px rgba(255, 183, 77, 0.3);
 }
 
 header h1 {
   margin-bottom: 10px;
   font-size: 3em;
   font-weight: bold;
-  text-shadow: 0 0 20px rgba(255, 100, 50, 0.8);
+  text-shadow: 0 0 20px rgba(255, 183, 77, 0.8);
   letter-spacing: 3px;
 }
 
 header .logo {
-  color: #ff6432;
+  color: #ffb74d;
 }
 
 header .accent {
-  color: #ffaa44;
+  color: #ffcc80;
 }
 
 header .subtitle {
   font-size: 1.2em;
-  color: #cc8844;
+  color: #b26a00;
   margin-bottom: 20px;
   font-style: italic;
 }
 
 header .tagline {
   font-size: 1em;
-  color: #aa6644;
+  color: #8b5a00;
   margin-bottom: 20px;
 }
 
@@ -83,10 +83,10 @@ nav {
 }
 
 nav a {
-  color: #ff6432;
+  color: #ffb74d;
   text-decoration: none;
   padding: 10px 20px;
-  border: 1px solid #ff6432;
+  border: 1px solid #ffb74d;
   border-radius: 0;
   transition: all 0.3s;
   text-transform: uppercase;
@@ -94,8 +94,8 @@ nav a {
 }
 
 nav a:hover {
-  background: rgba(255, 100, 50, 0.2);
-  box-shadow: 0 0 10px rgba(255, 100, 50, 0.5);
+  background: rgba(255, 183, 77, 0.2);
+  box-shadow: 0 0 10px rgba(255, 183, 77, 0.5);
 }
 
 section {
@@ -103,15 +103,15 @@ section {
 }
 
 h2 {
-  color: #ff6432;
+  color: #ffb74d;
   font-size: 2em;
   margin-bottom: 20px;
-  border-bottom: 1px solid #ff6432;
+  border-bottom: 1px solid #ffb74d;
   padding-bottom: 10px;
 }
 
 h3 {
-  color: #ffaa44;
+  color: #ffcc80;
   font-size: 1.4em;
   margin-top: 25px;
   margin-bottom: 15px;
@@ -123,7 +123,7 @@ p {
 
 code {
   background: #1a1a1a;
-  color: #ffaa44;
+  color: #ffcc80;
   padding: 2px 6px;
   border-radius: 3px;
   font-family: 'Consolas', 'Courier New', monospace;
@@ -134,7 +134,7 @@ pre {
   color: #e0e0e0;
   padding: 15px;
   border-radius: 5px;
-  border-left: 3px solid #ff6432;
+  border-left: 3px solid #ffb74d;
   overflow-x: auto;
   margin: 15px 0;
   font-family: 'Consolas', 'Courier New', monospace;
@@ -155,12 +155,12 @@ th, td {
 
 th {
   background: #1a0f0a;
-  color: #ff6432;
+  color: #ffb74d;
   font-weight: bold;
 }
 
 tr:nth-child(even) {
-  background: rgba(255, 100, 50, 0.03);
+  background: rgba(255, 183, 77, 0.03);
 }
 
 .feature-grid {
@@ -173,14 +173,14 @@ tr:nth-child(even) {
 .feature-card {
   background: #1a1a1a;
   border: 1px solid #333;
-  border-top: 3px solid #ff6432;
+  border-top: 3px solid #ffb74d;
   padding: 20px;
   transition: all 0.3s;
 }
 
 .feature-card:hover {
-  border-color: #ff6432;
-  box-shadow: 0 0 15px rgba(255, 100, 50, 0.3);
+  border-color: #ffb74d;
+  box-shadow: 0 0 15px rgba(255, 183, 77, 0.3);
 }
 
 .feature-card h3 {
@@ -195,17 +195,17 @@ tr:nth-child(even) {
 
 .download-table th {
   background: #1a0f0a;
-  color: #ff6432;
+  color: #ffb74d;
 }
 
 .download-table td:first-child {
   font-weight: bold;
-  color: #ffaa44;
+  color: #ffcc80;
 }
 
 .note {
-  background: rgba(255, 170, 68, 0.1);
-  border-left: 3px solid #ffaa44;
+  background: rgba(255, 204, 128, 0.1);
+  border-left: 3px solid #ffcc80;
   padding: 15px 20px;
   margin: 20px 0;
 }
@@ -219,22 +219,22 @@ tr:nth-child(even) {
 
 footer {
   background: #1a0f0a;
-  color: #aa6644;
+  color: #8b5a00;
   text-align: center;
   padding: 20px 0;
-  border-top: 1px solid #ff6432;
+  border-top: 1px solid #ffb74d;
   margin-top: 40px;
 }
 
 footer a {
-  color: #ff6432;
+  color: #ffb74d;
   text-decoration: none;
 }
 
 .command-block {
   background: #1a1a1a;
   border: 1px solid #333;
-  border-left: 3px solid #ff6432;
+  border-left: 3px solid #ffb74d;
   padding: 15px 20px;
   margin: 15px 0;
   font-family: 'Consolas', 'Courier New', monospace;
@@ -247,7 +247,7 @@ footer a {
 }
 
 .command-block .option {
-  color: #ffaa44;
+  color: #ffcc80;
 }
 
 .command-block .value {
