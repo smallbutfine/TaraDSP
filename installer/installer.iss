@@ -19,6 +19,9 @@ SolidCompression=yes
 LicenseFile=..\LICENSE
 WizardStyle=modern
 
+[Tasks]
+Name: "clean"; Description: "Clean install (remove the previous version first)"
+
 [Files]
 ; TEMPLATE: Adjust the source paths to match your project's executables and assets.
 Source: "..\{#MyAppName}.exe"; DestDir: "{app}"; Flags: ignoreversion
@@ -37,14 +40,12 @@ Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppName}.exe"
 Filename: "{app}\README.md"; Description: "View README"; Flags: postinstall shellexec skipifsilent unchecked
 
 [Code]
-{ Uninstall any previous version (same AppId) before installing. }
-function InitializeSetup(): Boolean;
+procedure UninstallPrevious();
 var
   RegKey: String;
   UninstallPath: String;
   ResultCode: Integer;
 begin
-  Result := True;
   RegKey := 'Software\Microsoft\Windows\CurrentVersion\Uninstall\' + ExpandConstant('{#SetupSetting("AppId")}') + '_is1';
   if not RegQueryStringValue(HKEY_LOCAL_MACHINE, RegKey, 'UninstallString', UninstallPath) then
     RegQueryStringValue(HKEY_CURRENT_USER, RegKey, 'UninstallString', UninstallPath);
@@ -55,12 +56,15 @@ begin
     Sleep(1000);
   end;
 end;
+
 procedure CurStepChanged(CurStep: TSetupStep);
 var
   ReadmeLines: TArrayOfString;
   ReadmeText: String;
   I: Integer;
 begin
+  if (CurStep = ssInstall) and WizardIsTaskSelected('clean') then UninstallPrevious;
+
   if CurStep = ssPostInstall then
   begin
     SetArrayLength(ReadmeLines, 14);
