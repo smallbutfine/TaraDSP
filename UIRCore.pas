@@ -44,7 +44,7 @@ procedure ApplyFades(var Data: TAudioData; SR: Integer; InMS, OutMS: Single);
 procedure TrimSilence(var Data: TAudioData; ThresholdDB: Single);
 function  ResampleLinear(const Channel: TFloatBuffer; InSR, OutSR: Integer): TFloatBuffer;
 procedure ResetMasteringEngine(Channels: Integer);
-function  ApplyMasteringDither(Sample: Single; Chan: Integer; Amount: Single): Single;
+function  ApplyMasteringDither(Sample: Single; Chan: Integer; Amount: Single; Scale: Single): Single;
 
 implementation
 
@@ -120,16 +120,16 @@ begin
   for c := 0 to High(FErrorMem) do FErrorMem[c] := 0.0;
 end;
 
-function ApplyMasteringDither(Sample: Single; Chan: Integer; Amount: Single): Single;
+function ApplyMasteringDither(Sample: Single; Chan: Integer; Amount: Single; Scale: Single): Single;
 var Dither, ResVal, Error, LSB: Single; Idx: Integer;
 begin
-  LSB := 1.0 / 32767.0;
+  LSB := 1.0 / Scale;
   Dither := ((Random - 0.5) + (Random - 0.5)) * LSB * Amount;
   if Abs(Sample) < (LSB * 2) then Dither := Dither * 0.7;
   Idx := Chan * 2;
   ResVal := Sample + Dither + (FErrorMem[Idx] * 1.5) - (FErrorMem[Idx + 1] * 0.5);
   ResVal := EnsureRange(ResVal, -1.0, 1.0);
-  ResVal := Round(ResVal * 32767) / 32767.0;
+  ResVal := Round(ResVal * Scale) / Scale;
   Error := Sample - ResVal;
   FErrorMem[Idx + 1] := FErrorMem[Idx]; FErrorMem[Idx] := Error;
   Result := ResVal;
@@ -327,9 +327,9 @@ begin
     FS.Write(H, SizeOf(H));
     for i := 0 to High(Data[0]) do for c := 0 to OutChans - 1 do begin
       case Bits of
-        16: begin s16 := Round(ApplyMasteringDither(Data[c][i], c, CoreConfig.DitherAmount) * 32767); FS.Write(s16, 2); end;
+        16: begin s16 := Round(ApplyMasteringDither(Data[c][i], c, CoreConfig.DitherAmount, 32767) * 32767); FS.Write(s16, 2); end;
         24: begin
-          s32 := Round(EnsureRange(Data[c][i], -1.0, 1.0) * 8388607);
+          s32 := Round(ApplyMasteringDither(Data[c][i], c, CoreConfig.DitherAmount, 8388607) * 8388607);
           b24[0] := s32 and $FF; b24[1] := (s32 shr 8) and $FF; b24[2] := (s32 shr 16) and $FF;
           FS.Write(b24, 3);
         end;
